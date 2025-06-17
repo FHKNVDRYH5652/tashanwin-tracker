@@ -3,111 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gojo AI Color Predictor</title>
+  <title>Gojo Animated AI Predictor</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background: linear-gradient(to bottom right, #0f0f0f, #1a1a2e);
+      color: #fff;
       margin: 0;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden;
     }
     h1 {
-      color: #58a6ff;
+      color: #00ffff;
+      font-size: 2rem;
+      animation: glow 2s infinite alternate;
       margin-bottom: 10px;
     }
+    @keyframes glow {
+      from { text-shadow: 0 0 5px #00ffff; }
+      to { text-shadow: 0 0 20px #00ffff; }
+    }
     .gojo {
-      width: 180px;
+      width: 200px;
       border-radius: 12px;
-      margin: 10px;
-      animation: float 3s ease-in-out infinite;
+      animation: float 4s ease-in-out infinite;
+      margin-bottom: 20px;
     }
     @keyframes float {
       0%, 100% {
-        transform: translateY(0px);
+        transform: translateY(0);
       }
       50% {
         transform: translateY(-15px);
       }
     }
-    textarea {
+    .box {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid #333;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
       width: 100%;
-      max-width: 500px;
-      height: 120px;
+      text-align: center;
+      box-shadow: 0 0 10px #00ffff40;
+    }
+    input[type="number"] {
+      width: 80px;
       padding: 10px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      border-radius: 10px;
-      margin-top: 15px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      background: #222;
+      color: #0ff;
+      outline: none;
     }
     button {
       padding: 10px 20px;
-      margin-top: 10px;
-      background-color: #238636;
-      color: white;
+      background: #00ffff;
+      color: #000;
+      font-weight: bold;
       border: none;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 1rem;
+      margin-top: 10px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #2ea043;
+      background: #0ff;
+      box-shadow: 0 0 10px #0ff;
     }
     #output {
       margin-top: 20px;
-      font-size: 20px;
-      color: #ffa657;
-      background-color: #161b22;
-      padding: 15px;
-      border-radius: 10px;
-      max-width: 90%;
-      text-align: center;
+      font-size: 1.2rem;
+      color: #ff69b4;
     }
   </style>
 </head>
 <body>
-  <h1>Gojo AI 🔮 Prediction</h1>
-  <img src="https://i.pinimg.com/originals/b9/27/31/b92731bfae505b0ea94e10b8cf8b0f4b.gif" alt="Gojo Animation" class="gojo" />
-  <p>Enter last 10 results with period (e.g. 101:Big, 102:Small, ...):</p>
-  <textarea id="history" placeholder="101:Big, 102:Small, 103:Big, ..."></textarea>
-  <button onclick="predict()">Predict</button>
-  <div id="output"></div>
+  <h1>Gojo AI 🔮 Predictor</h1>
+  <img class="gojo" src="https://i.pinimg.com/originals/b9/27/31/b92731bfae505b0ea94e10b8cf8b0f4b.gif" alt="Gojo" />
+
+  <div class="box">
+    <p>Type how many times Big/Small appeared:</p>
+    <input type="number" id="big" placeholder="Big Count" min="0">
+    <input type="number" id="small" placeholder="Small Count" min="0">
+    <br>
+    <button onclick="predict()">Predict Next</button>
+    <div id="output"></div>
+  </div>
 
   <script>
     function predict() {
-      const input = document.getElementById("history").value.trim();
-      if (!input) {
-        document.getElementById("output").innerText = "❌ Please enter the last 10 results.";
+      const big = parseInt(document.getElementById("big").value);
+      const small = parseInt(document.getElementById("small").value);
+
+      if (isNaN(big) || isNaN(small)) {
+        document.getElementById("output").innerText = "❌ Enter both values correctly.";
         return;
       }
 
-      const entries = input.split(',').map(r => r.trim());
-      if (entries.length !== 10) {
-        document.getElementById("output").innerText = "❌ Please enter exactly 10 results.";
-        return;
-      }
+      let result = "";
+      if (big > small) result = "SMALL";
+      else if (small > big) result = "BIG";
+      else result = Math.random() > 0.5 ? "BIG" : "SMALL";
 
-      let big = 0, small = 0;
-      entries.forEach(entry => {
-        const parts = entry.split(":");
-        if (parts.length === 2) {
-          const value = parts[1].toLowerCase();
-          if (value === 'big') big++;
-          else if (value === 'small') small++;
-        }
-      });
-
-      // Simple AI prediction logic
-      let predicted = "";
-      if (big > small) predicted = "SMALL";
-      else if (small > big) predicted = "BIG";
-      else predicted = Math.random() > 0.5 ? "BIG" : "SMALL"; // random if equal
-
-      document.getElementById("output").innerText = `🤖 AI Predicts Next: ${predicted}`;
+      document.getElementById("output").innerText = `🤖 Prediction: ${result}`;
     }
   </script>
 </body>
