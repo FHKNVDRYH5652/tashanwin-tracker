@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Big/Small Prediction</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #58a6ff;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 400px;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      background-color: #161b22;
+      color: #c9d1d9;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #238636;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #2ea043;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #ffa657;
+      background-color: #161b22;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 90%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔮 Big/Small Predictor</h1>
+  <p>Enter last 5 results (Big/Small):</p>
+  <input type="text" id="history" placeholder="e.g. Big,Small,Big,Big,Small" />
+  <button onclick="predict()">Predict</button>
+
+  <div id="output"></div>
+
+  <script>
+    function predict() {
+      const input = document.getElementById('history').value.trim();
+      const results = input.split(',').map(r => r.trim().toLowerCase());
+      const valid = ['big', 'small'];
+
+      if (results.length !== 5 || !results.every(r => valid.includes(r))) {
+        document.getElementById('output').innerText = "❌ Please enter exactly 5 values: Big or Small";
+        return;
+      }
+
+      const count = { big: 0, small: 0 };
+      results.forEach(r => count[r]++);
+
+      let prediction = count.big > count.small ? "SMALL" : "BIG";
+      document.getElementById('output').innerText = `✅ Predicted Next: ${prediction}`;
+    }
+  </script>
+</body>
+</html>
