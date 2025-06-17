@@ -1,135 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mr perfect AI Prediction</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINGO 1 Min Prediction</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url('https://images.unsplash.com/photo-1605935030674-d2c2522db745?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #0ff;
-      animation: glow 2s infinite alternate;
-      margin-bottom: 10px;
-    }
-    @keyframes glow {
-      from { text-shadow: 0 0 5px #00ffff; }
-      to { text-shadow: 0 0 20px #00ffff; }
-    }
-    .gojo {
-      width: 180px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      animation: float 4s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-    .box {
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid #444;
-      border-radius: 15px;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 15px #0ff4;
-      text-align: center;
-    }
-    .row {
+      background: black;
+      color: white;
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin-top: 15px;
+      align-items: center;
+      min-height: 100vh;
     }
-    input[type="number"] {
-      width: 100px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      background: #222;
-      color: #0ff;
+    .container {
+      background: #111;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #444;
+      width: 350px;
+      box-shadow: 0 0 10px #0ff;
+    }
+    .logo {
       text-align: center;
+      margin-bottom: 15px;
+    }
+    .logo img {
+      width: 100px;
+      border-radius: 50%;
+    }
+    .title {
+      text-align: center;
+      font-size: 24px;
+      color: cyan;
+      margin-bottom: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+    }
+    input {
+      background: #222;
+      color: #fff;
+    }
+    select {
+      background: #333;
+      color: #fff;
     }
     button {
-      margin-top: 15px;
-      padding: 10px 25px;
-      background: #00ffff;
+      background: #00f2ff;
       color: #000;
       font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
       cursor: pointer;
+      transition: 0.3s;
     }
     button:hover {
-      background: #0ff;
-      box-shadow: 0 0 12px #0ff;
+      background: #00c8d1;
     }
-    #output {
-      margin-top: 15px;
-      font-size: 1.3rem;
-      color: #ff69b4;
-    }
-    #period {
-      margin-bottom: 10px;
-      font-size: 1.2rem;
-      color: #ffd700;
-      font-weight: bold;
+    .note {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: lime;
     }
   </style>
 </head>
 <body>
-  <h1>Gojo AI 🔮 Prediction</h1>
-  <img class="gojo" src="https://i.pinimg.com/originals/b9/27/31/b92731bfae505b0ea94e10b8cf8b0f4b.gif" alt="Gojo" />
-
-  <div class="box">
-    <div id="period">⏳ Period: Loading...</div>
-    <div class="row">
-      <input type="number" id="big" placeholder="Big Count" min="0">
-      <input type="number" id="small" placeholder="Small Count" min="0">
+  <div class="container">
+    <div class="logo">
+      <img src="https://via.placeholder.com/100x100.png?text=Logo" alt="Logo">
     </div>
-    <button onclick="predict()">Predict</button>
-    <div id="output"></div>
+    <div class="title">WINGO PREDICTION</div>
+    <input type="text" placeholder="Game Version (e.g., 2024###)">
+    <input type="text" placeholder="Game Name (e.g., WINGO)">
+    <select>
+      <option value="safe">SAFE {100% Accuracy}</option>
+      <option value="risky">RISKY {Random Prediction}</option>
+    </select>
+    <input type="text" placeholder="License Key">
+    <button onclick="generatePrediction()">GET PREDICTION</button>
+    <div class="note" id="prediction"></div>
   </div>
 
   <script>
-    // Live period simulator (random number for now)
-    function updatePeriod() {
-      const now = new Date();
-      const min = now.getMinutes();
-      const sec = now.getSeconds();
-      const fakePeriod = 1000 + min * 10 + Math.floor(sec / 6);
-      document.getElementById("period").innerText = `⏳ Period: ${fakePeriod}`;
-    }
-    setInterval(updatePeriod, 1000);
-    updatePeriod();
-
-    function predict() {
-      const big = parseInt(document.getElementById("big").value);
-      const small = parseInt(document.getElementById("small").value);
-
-      if (isNaN(big) || isNaN(small)) {
-        document.getElementById("output").innerText = "❌ Enter both values correctly.";
-        return;
-      }
-
-      let result = "";
-      if (big > small) result = "SMALL";
-      else if (small > big) result = "BIG";
-      else result = Math.random() > 0.5 ? "BIG" : "SMALL";
-
-      document.getElementById("output").innerText = `🤖 Prediction: ${result}`;
+    function generatePrediction() {
+      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
+      document.getElementById("prediction").innerText = `Prediction: ${result}`;
     }
   </script>
 </body>
