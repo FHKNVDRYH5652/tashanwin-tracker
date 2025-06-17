@@ -3,22 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gojo Animated AI Predictor</title>
+  <title>mr perfect AI Prediction</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #0f0f0f, #1a1a2e);
-      color: #fff;
       margin: 0;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://images.unsplash.com/photo-1605935030674-d2c2522db745?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: hidden;
+      padding: 20px;
     }
     h1 {
-      color: #00ffff;
-      font-size: 2rem;
+      color: #0ff;
       animation: glow 2s infinite alternate;
       margin-bottom: 10px;
     }
@@ -27,77 +26,95 @@
       to { text-shadow: 0 0 20px #00ffff; }
     }
     .gojo {
-      width: 200px;
-      border-radius: 12px;
+      width: 180px;
+      border-radius: 10px;
+      margin-bottom: 15px;
       animation: float 4s ease-in-out infinite;
-      margin-bottom: 20px;
     }
     @keyframes float {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-15px);
-      }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
     }
     .box {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid #333;
-      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #444;
       border-radius: 15px;
+      padding: 20px;
+      width: 90%;
       max-width: 400px;
-      width: 100%;
+      box-shadow: 0 0 15px #0ff4;
       text-align: center;
-      box-shadow: 0 0 10px #00ffff40;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
     }
     input[type="number"] {
-      width: 80px;
+      width: 100px;
       padding: 10px;
-      margin: 10px;
       border-radius: 8px;
       border: none;
       font-size: 1rem;
       background: #222;
       color: #0ff;
-      outline: none;
+      text-align: center;
     }
     button {
-      padding: 10px 20px;
+      margin-top: 15px;
+      padding: 10px 25px;
       background: #00ffff;
       color: #000;
       font-weight: bold;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      margin-top: 10px;
       cursor: pointer;
     }
     button:hover {
       background: #0ff;
-      box-shadow: 0 0 10px #0ff;
+      box-shadow: 0 0 12px #0ff;
     }
     #output {
-      margin-top: 20px;
-      font-size: 1.2rem;
+      margin-top: 15px;
+      font-size: 1.3rem;
       color: #ff69b4;
+    }
+    #period {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      color: #ffd700;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>Gojo AI 🔮 Predictor</h1>
+  <h1>Gojo AI 🔮 Prediction</h1>
   <img class="gojo" src="https://i.pinimg.com/originals/b9/27/31/b92731bfae505b0ea94e10b8cf8b0f4b.gif" alt="Gojo" />
 
   <div class="box">
-    <p>Type how many times Big/Small appeared:</p>
-    <input type="number" id="big" placeholder="Big Count" min="0">
-    <input type="number" id="small" placeholder="Small Count" min="0">
-    <br>
-    <button onclick="predict()">Predict Next</button>
+    <div id="period">⏳ Period: Loading...</div>
+    <div class="row">
+      <input type="number" id="big" placeholder="Big Count" min="0">
+      <input type="number" id="small" placeholder="Small Count" min="0">
+    </div>
+    <button onclick="predict()">Predict</button>
     <div id="output"></div>
   </div>
 
   <script>
+    // Live period simulator (random number for now)
+    function updatePeriod() {
+      const now = new Date();
+      const min = now.getMinutes();
+      const sec = now.getSeconds();
+      const fakePeriod = 1000 + min * 10 + Math.floor(sec / 6);
+      document.getElementById("period").innerText = `⏳ Period: ${fakePeriod}`;
+    }
+    setInterval(updatePeriod, 1000);
+    updatePeriod();
+
     function predict() {
       const big = parseInt(document.getElementById("big").value);
       const small = parseInt(document.getElementById("small").value);
