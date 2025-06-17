@@ -1,97 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WINGO 1 Min Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIGA GSX PRO</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: black;
+      background: #0a0f2c;
       color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: #111;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
       padding: 20px;
-      border-radius: 15px;
-      border: 1px solid #444;
-      width: 350px;
-      box-shadow: 0 0 10px #0ff;
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 15px;
+
+    .header {
+      font-size: 2em;
+      font-weight: bold;
+      background: linear-gradient(to right, #00ffe0, #ff00e0, #ffc800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.2em;
     }
-    .logo img {
-      width: 100px;
-      border-radius: 50%;
+
+    .subtitle {
+      color: #c9c9ff;
+      margin-bottom: 2em;
     }
-    .title {
-      text-align: center;
-      font-size: 24px;
-      color: cyan;
+
+    .card {
+      background-color: #11152f;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 10px #2a2a80;
+    }
+
+    .card h3 {
       margin-bottom: 10px;
     }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
+
+    .green {
+      color: #00ff90;
+    }
+
+    .red {
+      color: #ff4b4b;
+    }
+
+    .yellow {
+      color: #ffd700;
+    }
+
+    .purple {
+      color: #e97cff;
+    }
+
+    .blue {
+      color: #57d1ff;
+    }
+
+    .telegram-button {
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+      padding: 15px 30px;
+      font-size: 1em;
       border: none;
-      border-radius: 8px;
-    }
-    input {
-      background: #222;
-      color: #fff;
-    }
-    select {
-      background: #333;
-      color: #fff;
-    }
-    button {
-      background: #00f2ff;
-      color: #000;
-      font-weight: bold;
+      border-radius: 50px;
       cursor: pointer;
-      transition: 0.3s;
+      margin-top: 20px;
+      box-shadow: 0 0 10px #0072ff;
     }
-    button:hover {
-      background: #00c8d1;
-    }
-    .note {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 12px;
-      color: lime;
+
+    .telegram-button:hover {
+      opacity: 0.9;
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="logo">
-      <img src="https://via.placeholder.com/100x100.png?text=Logo" alt="Logo">
-    </div>
-    <div class="title">WINGO PREDICTION</div>
-    <input type="text" placeholder="Game Version (e.g., 2024###)">
-    <input type="text" placeholder="Game Name (e.g., WINGO)">
-    <select>
-      <option value="safe">SAFE {100% Accuracy}</option>
-      <option value="risky">RISKY {Random Prediction}</option>
-    </select>
-    <input type="text" placeholder="License Key">
-    <button onclick="generatePrediction()">GET PREDICTION</button>
-    <div class="note" id="prediction"></div>
+  <div class="header">GIGA GSX PRO</div>
+  <div class="subtitle">AI Powered • Futuristic Predictor</div>
+
+  <div class="card">
+    <h3 class="green">STATS</h3>
+    <p>Wins: <span class="green">0</span> Losses: <span class="red">0</span> Accuracy: <span class="yellow">0.00%</span></p>
   </div>
 
-  <script>
-    function generatePrediction() {
-      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
-      document.getElementById("prediction").innerText = `Prediction: ${result}`;
-    }
-  </script>
+  <div class="card">
+    <h3 class="blue">CURRENT PREDICTION</h3>
+    <p>Period: <span class="purple">20250511100010723</span></p>
+    <p>Prediction: <span class="yellow">BIG</span></p>
+  </div>
+
+  <div class="card">
+    <h3 class="purple">PREDICTION HISTORY</h3>
+    <p>Period: 20250511100010723 | Prediction: <span class="yellow">BIG</span> | <span class="yellow">Pending</span></p>
+  </div>
+
+  <button class="telegram-button">Join Telegram Channel</button>
 </body>
+
 </html>
