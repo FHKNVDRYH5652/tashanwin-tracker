@@ -1,106 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GIGA GSX PRO</title>
   <style>
     body {
-      background: #0a0f2c;
+      background-color: #0b0c2a;
       color: white;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
+      margin: 0;
       padding: 20px;
     }
-
-    .header {
-      font-size: 2em;
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 20px;
+      background: #101235;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+    .title {
+      font-size: 28px;
       font-weight: bold;
-      background: linear-gradient(to right, #00ffe0, #ff00e0, #ffc800);
+      background: linear-gradient(to right, #00e5ff, #ff00ff, #ffd700);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 0.2em;
     }
-
     .subtitle {
-      color: #c9c9ff;
-      margin-bottom: 2em;
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 20px;
     }
-
     .card {
-      background-color: #11152f;
-      border-radius: 20px;
-      padding: 20px;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 10px #2a2a80;
+      background: #15173c;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #222;
     }
-
-    .card h3 {
-      margin-bottom: 10px;
+    .card p {
+      margin: 5px;
     }
-
-    .green {
-      color: #00ff90;
-    }
-
-    .red {
-      color: #ff4b4b;
-    }
-
-    .yellow {
-      color: #ffd700;
-    }
-
-    .purple {
-      color: #e97cff;
-    }
-
-    .blue {
-      color: #57d1ff;
-    }
-
-    .telegram-button {
-      background: linear-gradient(to right, #00c6ff, #0072ff);
-      color: white;
-      padding: 15px 30px;
-      font-size: 1em;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
+    .green { color: #00ff9d; }
+    .red { color: #ff4f4f; }
+    .yellow { color: #ffd700; }
+    .blue { color: #00e5ff; }
+    .pink { color: #ff77ff; }
+    .telegram-btn {
       margin-top: 20px;
-      box-shadow: 0 0 10px #0072ff;
-    }
-
-    .telegram-button:hover {
-      opacity: 0.9;
+      padding: 12px 20px;
+      border-radius: 25px;
+      background: linear-gradient(to right, #00e5ff, #4e00ff);
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-block;
     }
   </style>
 </head>
-
 <body>
-  <div class="header">GIGA GSX PRO</div>
-  <div class="subtitle">AI Powered • Futuristic Predictor</div>
+  <div class="container">
+    <div class="title">GIGA GSX PRO</div>
+    <div class="subtitle">AI Powered • Futuristic Predictor</div>
 
-  <div class="card">
-    <h3 class="green">STATS</h3>
-    <p>Wins: <span class="green">0</span> Losses: <span class="red">0</span> Accuracy: <span class="yellow">0.00%</span></p>
+    <div class="card">
+      <h3 class="green">STATS</h3>
+      <p>Wins: <span id="wins">0</span> Losses: <span id="losses">0</span> Accuracy: <span id="accuracy">0%</span></p>
+    </div>
+
+    <div class="card">
+      <h3 class="blue">CURRENT PREDICTION</h3>
+      <p>Period: <span id="period">--</span></p>
+      <p>Prediction: <span id="prediction" class="yellow">Pending</span></p>
+    </div>
+
+    <div class="card">
+      <h3 class="pink">PREDICTION HISTORY</h3>
+      <div id="history"></div>
+    </div>
+
+    <a href="#" class="telegram-btn">Join Telegram Channel</a>
   </div>
 
-  <div class="card">
-    <h3 class="blue">CURRENT PREDICTION</h3>
-    <p>Period: <span class="purple">20250511100010723</span></p>
-    <p>Prediction: <span class="yellow">BIG</span></p>
-  </div>
+  <script>
+    let period = Date.now();
+    let wins = 0, losses = 0;
+    let history = [];
 
-  <div class="card">
-    <h3 class="purple">PREDICTION HISTORY</h3>
-    <p>Period: 20250511100010723 | Prediction: <span class="yellow">BIG</span> | <span class="yellow">Pending</span></p>
-  </div>
+    function getRandomPrediction() {
+      return Math.random() > 0.5 ? "BIG" : "SMALL";
+    }
 
-  <button class="telegram-button">Join Telegram Channel</button>
+    function updatePrediction() {
+      const prediction = getRandomPrediction();
+      document.getElementById("period").textContent = period;
+      document.getElementById("prediction").textContent = prediction;
+      document.getElementById("prediction").className = prediction === 'BIG' ? 'yellow' : 'red';
+
+      // Simulate result = prediction (for now)
+      const result = prediction;
+      if (result === prediction) wins++; else losses++;
+
+      // Update Stats
+      const total = wins + losses;
+      const accuracy = total > 0 ? ((wins / total) * 100).toFixed(2) + '%' : '0%';
+      document.getElementById("wins").textContent = wins;
+      document.getElementById("losses").textContent = losses;
+      document.getElementById("accuracy").textContent = accuracy;
+
+      // Add to history
+      history.unshift({ period, prediction });
+      updateHistory();
+
+      period += 60000; // Simulate next 1 minute period
+    }
+
+    function updateHistory() {
+      const container = document.getElementById("history");
+      container.innerHTML = history.slice(0, 5).map(item =>
+        `<p>Period: ${item.period} | Prediction: ${item.prediction}</p>`
+      ).join('');
+    }
+
+    updatePrediction();
+    setInterval(updatePrediction, 60000); // every 1 minute
+  </script>
 </body>
-
 </html>
