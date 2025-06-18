@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MrPerfect Pro Prediction</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
@@ -118,6 +118,14 @@
       background-color: #111a;
       border-radius: 10px;
     }
+    .win {
+      color: #00ff00;
+      font-weight: bold;
+    }
+    .loss {
+      color: #ff0033;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -129,14 +137,14 @@
     </div>
   </div>
 
-  <header>
-    MrPerfect Pro Prediction System
-  </header>
+  <header>MrPerfect Pro Prediction System</header>
+
   <div class="menu">
     <button onclick="selectMode('bigsmall')">Big/Small</button>
     <button onclick="selectMode('color')">Color</button>
     <button onclick="selectMode('number')">Number</button>
   </div>
+
   <div class="container">
     <h2>Enter Last 10 Results</h2>
     <div class="number-inputs" id="numberGrid"></div>
@@ -145,6 +153,9 @@
     <div id="result"></div>
     <div id="analysisBox"></div>
   </div>
+
+  <audio id="winSound" src="win.mp3"></audio>
+  <audio id="failSound" src="fail.mp3"></audio>
 
   <script>
     const selectedNumbers = [];
@@ -167,7 +178,7 @@
       const key = document.getElementById('accessKey').value;
       if (key === 'Mrperfect456') {
         document.getElementById('accessOverlay').style.display = 'none';
-        setTimeout(() => alert('📢 Join our Telegram Channel @MrPerfectPro'), 200);
+        setTimeout(() => alert('📢 Join our Telegram Channel @MrPerfectPro'), 300);
       } else {
         alert('❌ Wrong key. Try again.');
       }
@@ -213,8 +224,13 @@
       const final = bigCount > smallCount ? 'BIG' : 'SMALL';
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
-      document.getElementById('result').innerHTML = `
+      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL'; // Fake result for demo
+      const isWin = actual === final;
+
+      const resultBox = document.getElementById('result');
+      resultBox.innerHTML = `
         🔮 Final Prediction: <strong>${final}</strong><br>
+        🎯 Actual: <span class="${isWin ? 'win' : 'loss'}">${actual}</span><br>
         📊 Confidence: ${confidence}%
       `;
 
@@ -223,6 +239,14 @@
         analysisHTML += `${a.method}: ${a.predicted}<br>`;
       });
       document.getElementById('analysisBox').innerHTML = analysisHTML;
+
+      if (isWin) {
+        document.getElementById('winSound').play();
+        alert("✅ Prediction WIN!");
+      } else {
+        document.getElementById('failSound').play();
+        alert("❌ Prediction LOST!");
+      }
     }
 
     setupGrid();
