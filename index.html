@@ -138,6 +138,19 @@
       background-color: #111a;
       border-radius: 10px;
     }
+    #feedbackArea {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #feedbackArea button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #00ffcc;
+    }
   </style>
 </head>
 <body>
@@ -164,6 +177,11 @@
     <div id="selectedList"></div>
     <button id="predictBtn" onclick="predictResult()">🔮 Predict</button>
     <div id="analysisBox"></div>
+    <div id="feedbackArea" style="display:none;">
+      <h3>Was the prediction correct?</h3>
+      <button onclick="userFeedback(true)">✅ Win</button>
+      <button onclick="userFeedback(false)">❌ Loss</button>
+    </div>
   </div>
 
   <audio id="winSound" src="win.mp3"></audio>
@@ -214,6 +232,8 @@
       document.getElementById('selectedList').innerText = `Selected: ${selectedNumbers.join(', ')}`;
     }
 
+    let currentFinal = '';
+
     function predictResult() {
       if (locked || selectedNumbers.length !== 10) return alert("Please select 10 numbers first.");
       locked = true;
@@ -228,13 +248,10 @@
       const final = bigCount > smallCount ? 'BIG' : 'SMALL';
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
-      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL';
-      const isWin = actual === final;
+      currentFinal = final;
 
       document.getElementById('finalResult').innerHTML = `🔮 Final Prediction: <span style="color:#fff">${final}</span><br>📊 Confidence: ${confidence}%`;
-      document.getElementById('statusLine').innerHTML = isWin 
-        ? '<span class="winStatus">✅ Prediction Result: WIN</span>' 
-        : '<span class="lossStatus">❌ Prediction Result: LOSS</span>';
+      document.getElementById('statusLine').innerHTML = '<span style="color:yellow">⏳ Waiting for result...</span>';
 
       let analysisHTML = '<h4>Prediction Breakdown:</h4>';
       analysis.forEach(a => {
@@ -242,11 +259,22 @@
       });
       document.getElementById('analysisBox').innerHTML = analysisHTML;
 
+      document.getElementById('feedbackArea').style.display = 'block';
+    }
+
+    function userFeedback(isWin) {
+      document.getElementById('statusLine').innerHTML = isWin 
+        ? '<span class="winStatus">✅ Prediction Result: WIN</span>' 
+        : '<span class="lossStatus">❌ Prediction Result: LOSS</span>';
+
       if (isWin) {
         document.getElementById('winSound').play();
       } else {
         document.getElementById('failSound').play();
+        alert("We'll adjust and improve the prediction logic based on this loss!");
       }
+
+      document.getElementById('feedbackArea').style.display = 'none';
     }
 
     setupGrid();
