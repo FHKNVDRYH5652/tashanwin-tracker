@@ -32,7 +32,7 @@
       border-radius: 10px;
       text-align: center;
     }
-    #accessBox input {
+    #accessBox input, #accessBox button {
       padding: 10px;
       font-size: 16px;
       border-radius: 5px;
@@ -40,11 +40,8 @@
       margin-right: 10px;
     }
     #accessBox button {
-      padding: 10px 20px;
-      font-weight: bold;
       background: #00ffe7;
-      border: none;
-      border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
     }
     header {
@@ -62,10 +59,10 @@
     }
     .menu button {
       padding: 10px 20px;
-      border: none;
       border-radius: 8px;
       background: #00ffcc;
       font-weight: bold;
+      border: none;
       cursor: pointer;
     }
     .container {
@@ -224,11 +221,10 @@
       const final = bigCount > smallCount ? 'BIG' : 'SMALL';
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
-      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL'; // Fake result for demo
+      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL'; // Simulated result
       const isWin = actual === final;
 
-      const resultBox = document.getElementById('result');
-      resultBox.innerHTML = `
+      document.getElementById('result').innerHTML = `
         🔮 Final Prediction: <strong>${final}</strong><br>
         🎯 Actual: <span class="${isWin ? 'win' : 'loss'}">${actual}</span><br>
         📊 Confidence: ${confidence}%
@@ -242,10 +238,10 @@
 
       if (isWin) {
         document.getElementById('winSound').play();
-        alert("✅ Prediction WIN!");
+        setTimeout(() => alert("💥 You are Genius! MrPerfect prediction is accurate!"), 500);
       } else {
         document.getElementById('failSound').play();
-        alert("❌ Prediction LOST!");
+        setTimeout(() => alert("😓 Don't worry! MrPerfect is improving. Try again!"), 500);
       }
     }
 
