@@ -1,131 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GIGA GSX PRO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINGO Prediction</title>
   <style>
     body {
-      background-color: #0b0c2a;
-      color: white;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #10152b;
+      color: #fff;
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin: 0;
       padding: 20px;
-    }
-    .container {
-      max-width: 400px;
-      margin: auto;
-      padding: 20px;
-      border-radius: 20px;
-      background: #101235;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-    }
-    .title {
-      font-size: 28px;
-      font-weight: bold;
-      background: linear-gradient(to right, #00e5ff, #ff00ff, #ffd700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: #aaa;
-      margin-bottom: 20px;
     }
     .card {
-      background: #15173c;
-      margin: 15px 0;
-      padding: 15px;
+      background: #1b203d;
       border-radius: 15px;
-      box-shadow: 0 0 10px #222;
+      padding: 20px;
+      margin: 15px auto;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
     }
-    .card p {
-      margin: 5px;
+    .title {
+      font-size: 24px;
+      margin-bottom: 10px;
     }
-    .green { color: #00ff9d; }
-    .red { color: #ff4f4f; }
-    .yellow { color: #ffd700; }
-    .blue { color: #00e5ff; }
-    .pink { color: #ff77ff; }
-    .telegram-btn {
-      margin-top: 20px;
-      padding: 12px 20px;
-      border-radius: 25px;
-      background: linear-gradient(to right, #00e5ff, #4e00ff);
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      display: inline-block;
+    .big { color: #00ff00; }
+    .small { color: #ff5555; }
+    .timer {
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ffd700;
+    }
+    .history {
+      text-align: left;
+      margin-top: 10px;
+    }
+    .history-item {
+      border-bottom: 1px solid #444;
+      padding: 5px 0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">GIGA GSX PRO</div>
-    <div class="subtitle">AI Powered • Futuristic Predictor</div>
+  <div class="card">
+    <div class="title">WINGO Prediction</div>
+    <div>Period: <span id="period">--</span></div>
+    <div>Prediction: <span id="prediction">--</span></div>
+    <div class="timer">Next in: <span id="countdown">60</span>s</div>
+  </div>
 
-    <div class="card">
-      <h3 class="green">STATS</h3>
-      <p>Wins: <span id="wins">0</span> Losses: <span id="losses">0</span> Accuracy: <span id="accuracy">0%</span></p>
-    </div>
-
-    <div class="card">
-      <h3 class="blue">CURRENT PREDICTION</h3>
-      <p>Period: <span id="period">--</span></p>
-      <p>Prediction: <span id="prediction" class="yellow">Pending</span></p>
-    </div>
-
-    <div class="card">
-      <h3 class="pink">PREDICTION HISTORY</h3>
-      <div id="history"></div>
-    </div>
-
-    <a href="#" class="telegram-btn">Join Telegram Channel</a>
+  <div class="card">
+    <div class="title">History</div>
+    <div class="history" id="history"></div>
   </div>
 
   <script>
-    let period = Date.now();
-    let wins = 0, losses = 0;
+    const periodBase = 1000000000;
+    const startTime = new Date("2025-06-01T00:00:00Z").getTime();
     let history = [];
+
+    function getCurrentPeriod() {
+      const now = Date.now();
+      const minutesPassed = Math.floor((now - startTime) / 60000);
+      return periodBase + minutesPassed;
+    }
 
     function getRandomPrediction() {
       return Math.random() > 0.5 ? "BIG" : "SMALL";
     }
 
     function updatePrediction() {
+      const period = getCurrentPeriod();
       const prediction = getRandomPrediction();
+
       document.getElementById("period").textContent = period;
-      document.getElementById("prediction").textContent = prediction;
-      document.getElementById("prediction").className = prediction === 'BIG' ? 'yellow' : 'red';
+      const predElem = document.getElementById("prediction");
+      predElem.textContent = prediction;
+      predElem.className = prediction.toLowerCase();
 
-      // Simulate result = prediction (for now)
-      const result = prediction;
-      if (result === prediction) wins++; else losses++;
-
-      // Update Stats
-      const total = wins + losses;
-      const accuracy = total > 0 ? ((wins / total) * 100).toFixed(2) + '%' : '0%';
-      document.getElementById("wins").textContent = wins;
-      document.getElementById("losses").textContent = losses;
-      document.getElementById("accuracy").textContent = accuracy;
-
-      // Add to history
       history.unshift({ period, prediction });
-      updateHistory();
-
-      period += 60000; // Simulate next 1 minute period
+      renderHistory();
     }
 
-    function updateHistory() {
+    function renderHistory() {
       const container = document.getElementById("history");
-      container.innerHTML = history.slice(0, 5).map(item =>
-        `<p>Period: ${item.period} | Prediction: ${item.prediction}</p>`
+      container.innerHTML = history.slice(0, 10).map(h =>
+        `<div class="history-item">Period: ${h.period} — <span class="${h.prediction.toLowerCase()}">${h.prediction}</span></div>`
       ).join('');
     }
 
+    function startCountdown() {
+      let time = 60;
+      document.getElementById("countdown").textContent = time;
+      const interval = setInterval(() => {
+        time--;
+        document.getElementById("countdown").textContent = time;
+        if (time === 0) {
+          updatePrediction();
+          time = 60;
+        }
+      }, 1000);
+    }
+
     updatePrediction();
-    setInterval(updatePrediction, 60000); // every 1 minute
+    startCountdown();
   </script>
 </body>
 </html>
