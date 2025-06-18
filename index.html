@@ -16,7 +16,8 @@
       align-items: center;
       min-height: 100vh;
     }
-    .container {
+    .hidden { display: none; }
+    .container, .key-container, .telegram-popup {
       background: #111;
       padding: 30px;
       border-radius: 20px;
@@ -82,10 +83,38 @@
       flex: 1;
       font-size: 13px;
     }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+      margin-bottom: 10px;
+      background: #222;
+      color: #00ffe7;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+
+  <!-- Key Entry Popup -->
+  <div class="key-container" id="keyPopup">
+    <h1>🔐 Enter Access Key</h1>
+    <input type="text" id="accessKey" placeholder="Enter Key...">
+    <button onclick="checkKey()">Unlock</button>
+  </div>
+
+  <!-- Telegram Popup -->
+  <div class="telegram-popup hidden" id="telegramPopup">
+    <h1>📲 Join Telegram Channel</h1>
+    <p>Click the button below to join MrPerfect's channel for updates!</p>
+    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
+      <button>Join Now</button>
+    </a>
+    <button onclick="closeTelegramPopup()">Skip</button>
+  </div>
+
+  <div class="container hidden" id="mainApp">
     <h1>🔮 MrPerfect AI WINGO Prediction</h1>
 
     <div class="counter-boxes">
@@ -107,26 +136,66 @@
   <audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
 
   <script>
+    const correctKey = "Mrperfect456";
+
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("keyPopup").classList.add("hidden");
+        document.getElementById("telegramPopup").classList.remove("hidden");
+      } else {
+        alert("Incorrect key! Please try again.");
+      }
+    }
+
+    function closeTelegramPopup() {
+      document.getElementById("telegramPopup").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+    }
+
     let bigCount = 0;
     let smallCount = 0;
 
+    function updateDisplay() {
+      document.getElementById('bigCount').innerText = bigCount;
+      document.getElementById('smallCount').innerText = smallCount;
+    }
+
     function increment(type) {
+      const total = bigCount + smallCount;
       if (type === 'BIG') {
-        bigCount++;
-        document.getElementById('bigCount').innerText = bigCount;
+        if (bigCount < 5 && total < 5) {
+          bigCount++;
+        } else if (bigCount === 5) {
+          bigCount = 0;
+        }
       } else {
-        smallCount++;
-        document.getElementById('smallCount').innerText = smallCount;
+        if (smallCount < 5 && total < 5) {
+          smallCount++;
+        } else if (smallCount === 5) {
+          smallCount = 0;
+        }
       }
+      updateDisplay();
     }
 
     function analyzeAI(big, small) {
       let reasons = [];
-      if (big > small) reasons.push("Pattern Analysis suggests BIG");
-      if (small > big) reasons.push("Trend suggests SMALL");
-      if (big === small) reasons.push("Neutral trend, psychology says alternate");
-      reasons.push("Tips: Avoid repeating past patterns");
-      const result = big > small ? "BIG" : small > big ? "SMALL" : Math.random() > 0.5 ? "BIG" : "SMALL";
+      let result = '';
+      if (big > small) {
+        result = "BIG";
+        reasons.push("BIG appeared more in last 5 rounds - trend continuation");
+        reasons.push("Human psychology suggests repeating winning pattern");
+      } else if (small > big) {
+        result = "SMALL";
+        reasons.push("SMALL dominated recent rounds - pattern continuation");
+        reasons.push("Probability favors current trend");
+      } else {
+        result = Math.random() > 0.5 ? "BIG" : "SMALL";
+        reasons.push("Equal BIG and SMALL count - AI selects based on hidden probability factors");
+        reasons.push("Psychology Trick: Players expect change, AI resists it");
+      }
+      reasons.push("Tip: Never follow emotions. Trust pattern over impulse.");
       return { result, reasons };
     }
 
@@ -137,8 +206,8 @@
 
       const { result, reasons } = analyzeAI(bigCount, smallCount);
       document.getElementById("prediction").innerHTML = `
-        🤖 AI Analyzed: <strong>${result}</strong><br><br>
-        <u>Reasons:</u><br>• ${reasons.join("<br>• ")}
+        🤖 AI Analyzed Result: <strong>${result}</strong><br><br>
+        <u>Reason for Prediction:</u><br>• ${reasons.join("<br>• ")}
       `;
       document.getElementById("feedback").style.display = "flex";
     }
@@ -153,7 +222,7 @@
         feedbackBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
       } else {
         lossSound.play();
-        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don’t worry, AI is improving the next analysis!`;
+        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don’t worry, next time AI will improve prediction.`;
       }
 
       document.getElementById("feedback").style.display = "none";
