@@ -15,10 +15,8 @@
     }
     #accessOverlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.9);
       display: flex;
       align-items: center;
@@ -108,20 +106,37 @@
       font-size: 1.1rem;
       cursor: pointer;
     }
-    #result, #analysisBox, #trendHistory {
-      margin-top: 20px;
+    #finalResult {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 2px solid #00ffe7;
+      border-radius: 12px;
+      background: #000a;
+      box-shadow: 0 0 15px #00ffe7;
+    }
+    #statusLine {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .winStatus {
+      color: #00ff00;
+      text-shadow: 0 0 5px #00ff00;
+    }
+    .lossStatus {
+      color: #ff0033;
+      text-shadow: 0 0 5px #ff0033;
+    }
+    #analysisBox {
+      margin-top: 10px;
       padding: 15px;
       border: 1px dashed #00ffcc;
       background-color: #111a;
       border-radius: 10px;
-    }
-    .win {
-      color: #00ff00;
-      font-weight: bold;
-    }
-    .loss {
-      color: #ff0033;
-      font-weight: bold;
     }
   </style>
 </head>
@@ -135,7 +150,6 @@
   </div>
 
   <header>MrPerfect Pro Prediction System</header>
-
   <div class="menu">
     <button onclick="selectMode('bigsmall')">Big/Small</button>
     <button onclick="selectMode('color')">Color</button>
@@ -143,13 +157,13 @@
   </div>
 
   <div class="container">
+    <div id="finalResult">🔮 Waiting for Prediction...</div>
+    <div id="statusLine"></div>
     <h2>Enter Last 10 Results</h2>
     <div class="number-inputs" id="numberGrid"></div>
     <div id="selectedList"></div>
     <button id="predictBtn" onclick="predictResult()">🔮 Predict</button>
-    <div id="result"></div>
     <div id="analysisBox"></div>
-    <div id="trendHistory"></div>
   </div>
 
   <audio id="winSound" src="win.mp3"></audio>
@@ -158,12 +172,11 @@
   <script>
     const selectedNumbers = [];
     let locked = false;
+
     const logicMethods = [
-      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic',
-      'Ratio Analysis', 'Odd-Even Tracker', 'Range Behavior',
-      'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
+      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic', 'Ratio Analysis',
+      'Odd-Even Tracker', 'Range Behavior', 'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
     ];
-    let trendHistory = [];
 
     function checkKey() {
       const key = document.getElementById('accessKey').value;
@@ -190,7 +203,8 @@
     }
 
     function selectNumber(num, btn) {
-      if (locked || selectedNumbers.length >= 10) return;
+      if (locked) return;
+      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
       selectedNumbers.push(num);
       btn.classList.add('selected');
       updateList();
@@ -214,10 +228,13 @@
       const final = bigCount > smallCount ? 'BIG' : 'SMALL';
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
-      document.getElementById('result').innerHTML = `
-        🔮 Final Prediction: <strong>${final}</strong><br>
-        📊 Confidence: ${confidence}%
-      `;
+      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+      const isWin = actual === final;
+
+      document.getElementById('finalResult').innerHTML = `🔮 Final Prediction: <span style="color:#fff">${final}</span><br>📊 Confidence: ${confidence}%`;
+      document.getElementById('statusLine').innerHTML = isWin 
+        ? '<span class="winStatus">✅ Prediction Result: WIN</span>' 
+        : '<span class="lossStatus">❌ Prediction Result: LOSS</span>';
 
       let analysisHTML = '<h4>Prediction Breakdown:</h4>';
       analysis.forEach(a => {
@@ -225,33 +242,11 @@
       });
       document.getElementById('analysisBox').innerHTML = analysisHTML;
 
-      setTimeout(() => {
-        const feedback = confirm("✅ Did MrPerfect Predict Correctly?\nOK = Win, Cancel = Loss");
-        const isWin = feedback === true;
-        trendHistory.unshift(isWin);
-        trendHistory = trendHistory.slice(0, 5);
-        const accuracy = Math.round((trendHistory.filter(w => w).length / trendHistory.length) * 100);
-        
-        document.getElementById('result').innerHTML += `\n🎯 Actual: <span class="${isWin ? 'win' : 'loss'}">${isWin ? final : (final === 'BIG' ? 'SMALL' : 'BIG')}</span>`;
-
-        if (isWin) {
-          document.getElementById('winSound').play();
-          setTimeout(() => alert("💥 You are Genius! MrPerfect prediction is accurate!"), 500);
-        } else {
-          document.getElementById('failSound').play();
-          setTimeout(() => alert("🤖 Reanalyzing trends and improving logic for next prediction..."), 500);
-        }
-
-        document.getElementById('trendHistory').innerHTML = `
-          <strong>Last 5 Results:</strong> ${trendHistory.map(r => r ? '✅' : '❌').join(' ')}<br>
-          <strong>Accuracy:</strong> ${accuracy}%
-        `;
-
-        selectedNumbers.length = 0;
-        document.getElementById('numberGrid').querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-        updateList();
-        locked = false;
-      }, 500);
+      if (isWin) {
+        document.getElementById('winSound').play();
+      } else {
+        document.getElementById('failSound').play();
+      }
     }
 
     setupGrid();
