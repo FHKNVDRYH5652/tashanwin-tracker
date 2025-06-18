@@ -1,194 +1,218 @@
-// index.js
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import Login from './Login';
-
-const Root = () => {
-  const [access, setAccess] = useState(false);
-  const [skip, setSkip] = useState(false);
-
-  if (!access) return <Login onAccess={setAccess} />;
-
-  if (!skip)
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
-        <h2 className="text-xl mb-4">Join Our Telegram</h2>
-        <a
-          href="https://t.me/+hzN8Ci0F7aYzMmY9"
-          className="mb-4 px-4 py-2 bg-green-600 rounded hover:bg-green-800"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Join Now
-        </a>
-        <button
-          onClick={() => setSkip(true)}
-          className="text-blue-400 underline"
-        >
-          Skip
-        </button>
-      </div>
-    );
-
-  return <App />;
-};
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Root />);
-
-
-// Login.js
-import React, { useState } from 'react';
-
-export default function Login({ onAccess }) {
-  const [key, setKey] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (key === 'Mrperfect456') {
-      onAccess(true);
-    } else {
-      alert('❌ Invalid key');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MrPerfect WINGO AI Prediction</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #000000, #1a1a1a);
+      color: #00ffe7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-  };
+    .hidden { display: none; }
+    .container, .key-container, .telegram-popup {
+      background: #111;
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid #00ffe7;
+      width: 440px;
+      box-shadow: 0 0 40px #00ffe766;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #00ffcc;
+    }
+    .number-boxes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .number-box {
+      background: #222;
+      border: 1px solid #00ffcc;
+      padding: 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.2s;
+    }
+    .number-box:hover {
+      background: #00ffe733;
+    }
+    .selected {
+      background: #00ffcc !important;
+      color: #000;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffcc;
+      color: #000;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00c8aa;
+    }
+    .result-box {
+      background: #000;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 12px;
+      border: 1px dashed #00ffcc;
+    }
+    .feedback-box {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .feedback-box button {
+      flex: 1;
+      font-size: 13px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+      margin-bottom: 10px;
+      background: #222;
+      color: #00ffe7;
+    }
+  </style>
+</head>
+<body>
+  <div class="key-container" id="keyPopup">
+    <h1>🔐 Enter Access Key</h1>
+    <input type="text" id="accessKey" placeholder="Enter Key...">
+    <button onclick="checkKey()">Unlock</button>
+  </div>
 
-  return (
-    <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
-      <h1 className="text-2xl mb-4">🔐 Enter Access Key</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="password"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-          placeholder="Enter key"
-          className="p-2 rounded bg-gray-800 border border-gray-600"
-        />
-        <button type="submit" className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-800">
-          Enter
-        </button>
-      </form>
+  <div class="telegram-popup hidden" id="telegramPopup">
+    <h1>📲 Join Telegram Channel</h1>
+    <p>Click below to join MrPerfect's channel!</p>
+    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
+      <button>Join Now</button>
+    </a>
+    <button onclick="closeTelegramPopup()">Skip</button>
+  </div>
+
+  <div class="container hidden" id="mainApp">
+    <h1>🔢 Tap Last 5 Numbers</h1>
+    <div class="number-boxes" id="numberGrid"></div>
+    <button onclick="makePrediction()">🔮 Predict</button>
+    <div class="result-box" id="prediction"></div>
+    <div class="feedback-box" id="feedback" style="display: none;">
+      <button onclick="userFeedback(true)">✅ Win</button>
+      <button onclick="userFeedback(false)">❌ Loss</button>
     </div>
-  );
-}
+  </div>
 
+  <audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+  <audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
 
-// App.js
-import React, { useState } from 'react';
+  <script>
+    const correctKey = "Mrperfect456";
+    const selectedNumbers = [];
 
-const numberCategories = {
-  big: [5, 6, 7, 8, 9],
-  small: [0, 1, 2, 3, 4],
-};
-
-const getCategory = (num) => (numberCategories.big.includes(num) ? 'Big' : 'Small');
-
-const getPrediction = (pastResults) => {
-  const trend = { big: 0, small: 0 };
-  pastResults.forEach((n) => {
-    const category = getCategory(n);
-    trend[category.toLowerCase()]++;
-  });
-
-  const prediction = trend.big > trend.small ? 'Small' : 'Big';
-  const confidence = Math.min(99, Math.max(55, 60 + Math.abs(trend.big - trend.small) * 5));
-  const predictionNumbers = prediction === 'Big' ? numberCategories.big : numberCategories.small;
-  const reason = `Trend shows more '${trend.big > trend.small ? 'Big' : 'Small'}' numbers recently. Applying trader's mindset expecting a reversal/trend continuation.`;
-
-  return { prediction, confidence, predictionNumbers, reason };
-};
-
-export default function PredictionApp() {
-  const [inputNumbers, setInputNumbers] = useState([]);
-  const [result, setResult] = useState(null);
-  const [feedback, setFeedback] = useState(null);
-
-  const handleNumberClick = (n) => {
-    if (inputNumbers.length < 5) {
-      setInputNumbers([...inputNumbers, n]);
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("keyPopup").classList.add("hidden");
+        document.getElementById("telegramPopup").classList.remove("hidden");
+      } else {
+        alert("Incorrect key! Please try again.");
+      }
     }
-  };
 
-  const resetInputs = () => {
-    setInputNumbers([]);
-    setResult(null);
-    setFeedback(null);
-  };
-
-  const runPrediction = () => {
-    const { prediction, confidence, predictionNumbers, reason } = getPrediction(inputNumbers);
-    setResult({ prediction, confidence, predictionNumbers, reason });
-  };
-
-  const handleFeedback = (type) => {
-    setFeedback(type);
-    if (type === 'loss') {
-      alert("Don't worry! Improving prediction using trader's mindset...");
-    } else {
-      alert("🎉 Jalwa hai Mr Perfect ka! 🎉");
+    function closeTelegramPopup() {
+      document.getElementById("telegramPopup").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
     }
-  };
 
-  return (
-    <div className="p-4 max-w-lg mx-auto text-white bg-black rounded-xl shadow-xl space-y-4">
-      <h1 className="text-2xl font-bold">🎯 AI Prediction Portal</h1>
+    function setupNumberGrid() {
+      const grid = document.getElementById("numberGrid");
+      for (let i = 0; i <= 9; i++) {
+        const div = document.createElement("div");
+        div.className = "number-box";
+        div.innerText = i;
+        div.onclick = () => toggleNumber(div, i);
+        grid.appendChild(div);
+      }
+    }
 
-      <p>Select last 5 results:</p>
-      <div className="grid grid-cols-5 gap-2">
-        {[...Array(10).keys()].map((n) => (
-          <button
-            key={n}
-            onClick={() => handleNumberClick(n)}
-            disabled={inputNumbers.length >= 5}
-            className="bg-gray-700 p-2 rounded hover:bg-gray-500"
-          >
-            {n}
-          </button>
-        ))}
-      </div>
+    function toggleNumber(div, number) {
+      if (selectedNumbers.length >= 5) return alert("Only 5 numbers allowed!");
+      div.classList.add("selected");
+      selectedNumbers.push(number);
+    }
 
-      <div>
-        <p>Selected: {inputNumbers.join(', ')}</p>
-        {inputNumbers.length === 5 && (
-          <button
-            onClick={runPrediction}
-            className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-800 rounded"
-          >
-            Predict
-          </button>
-        )}
-      </div>
+    function makePrediction() {
+      if (selectedNumbers.length !== 5) {
+        return alert("Select 5 past numbers!");
+      }
 
-      {result && (
-        <div className="mt-4 p-4 bg-gray-800 rounded">
-          <h2 className="text-xl font-bold">Prediction: {result.prediction}</h2>
-          <p>Confidence: {result.confidence}%</p>
-          <p>Likely Numbers: {result.predictionNumbers.join(', ')}</p>
-          <p className="text-sm text-gray-400">Reason: {result.reason}</p>
+      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
 
-          <div className="flex gap-4 mt-4">
-            <button
-              onClick={() => handleFeedback('win')}
-              className="bg-green-600 px-4 py-2 rounded"
-            >
-              ✅ Win
-            </button>
-            <button
-              onClick={() => handleFeedback('loss')}
-              className="bg-red-600 px-4 py-2 rounded"
-            >
-              ❌ Loss
-            </button>
-          </div>
-        </div>
-      )}
+      let predictedType = '';
+      let reasons = [];
 
-      <button
-        onClick={resetInputs}
-        className="mt-4 text-sm underline text-blue-400"
-      >
-        Reset
-      </button>
-    </div>
-  );
-}
+      // Basic trend reversal prediction
+      const lastTrend = bigSmallPattern[4];
+      predictedType = lastTrend === 'BIG' ? 'SMALL' : 'BIG';
+      reasons.push(`Last result was ${lastTrend}, applying human psychology: reverse logic`);
+
+      // Count frequency
+      const freq = Array(10).fill(0);
+      selectedNumbers.forEach(n => freq[n]++);
+
+      // Predict 2 possible next numbers using lowest frequency
+      let minFreq = Math.min(...freq);
+      let predictionNumbers = freq.map((f, i) => f === minFreq ? i : -1).filter(i => i !== -1).slice(0, 2);
+
+      reasons.push("Selected based on least frequent numbers (AI trick)");
+      reasons.push("Combined logic: trend analysis, pattern reversal, psychology");
+
+      document.getElementById("prediction").innerHTML = `
+        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
+        🔢 Suggested Numbers: <strong>${predictionNumbers.join(", ")}</strong><br><br>
+        <u>Reason:</u><br>• ${reasons.join("<br>• ")}`;
+
+      document.getElementById("feedback").style.display = "flex";
+    }
+
+    function userFeedback(win) {
+      const predictionBox = document.getElementById("prediction");
+      if (win) {
+        document.getElementById("winSound").play();
+        predictionBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
+      } else {
+        document.getElementById("lossSound").play();
+        predictionBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don't worry, AI will improve next time.`;
+      }
+      selectedNumbers.length = 0;
+      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
+      document.getElementById("feedback").style.display = "none";
+    }
+
+    setupNumberGrid();
+  </script>
+</body>
+</html>
