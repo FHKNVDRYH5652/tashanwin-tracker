@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MrPerfect WINGO AI Prediction</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url('https://i.imgur.com/EuN1O9w.jpg') no-repeat center center fixed;
+      background: url('anime-bg.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #00ffe7;
-    }
-    .hidden { display: none; }
-    .overlay {
-      background: rgba(0, 0, 0, 0.85);
-      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
     }
-    .container, .key-container, .telegram-popup {
-      background: #111;
+
+    .hidden {
+      display: none;
+    }
+
+    .container,
+    .key-container,
+    .telegram-popup {
+      background: #111a;
       padding: 30px;
       border-radius: 20px;
       border: 2px solid #00ffe7;
@@ -30,13 +35,20 @@
       box-shadow: 0 0 40px #00ffe766;
       text-align: center;
     }
-    h1 { font-size: 24px; margin-bottom: 20px; color: #00ffcc; }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #00ffcc;
+    }
+
     .number-boxes {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 10px;
       margin-bottom: 15px;
     }
+
     .number-box {
       background: #222;
       border: 1px solid #00ffcc;
@@ -46,8 +58,16 @@
       font-size: 18px;
       transition: 0.2s;
     }
-    .number-box:hover { background: #00ffe733; }
-    .selected { background: #00ffcc !important; color: #000; }
+
+    .number-box:hover {
+      background: #00ffe733;
+    }
+
+    .selected {
+      background: #00ffcc !important;
+      color: #000;
+    }
+
     button {
       width: 100%;
       padding: 12px;
@@ -61,21 +81,31 @@
       cursor: pointer;
       transition: 0.3s;
     }
-    button:hover { background: #00c8aa; }
-    .result-box, .accuracy-box {
-      background: #000;
+
+    button:hover {
+      background: #00c8aa;
+    }
+
+    .result-box {
+      background: #000a;
       padding: 15px;
       margin-top: 15px;
       border-radius: 12px;
       border: 1px dashed #00ffcc;
     }
+
     .feedback-box {
       margin-top: 12px;
       display: flex;
       justify-content: space-between;
       gap: 10px;
     }
-    .feedback-box button { flex: 1; font-size: 13px; }
+
+    .feedback-box button {
+      flex: 1;
+      font-size: 13px;
+    }
+
     input {
       width: 100%;
       padding: 12px;
@@ -86,10 +116,17 @@
       background: #222;
       color: #00ffe7;
     }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
-<div class="overlay">
   <div class="key-container" id="keyPopup">
     <h1>🔐 Enter Access Key</h1>
     <input type="text" id="accessKey" placeholder="Enter Key...">
@@ -102,15 +139,17 @@
     <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
       <button>Join Now</button>
     </a>
-    <p style="color:#00ffcc; font-size: 12px;">Created by Mr Perfect</p>
+    <p style="margin-top: 10px; font-size: 13px;">Create by Mr Perfect</p>
     <button onclick="closeTelegramPopup()">Skip</button>
   </div>
 
   <div class="container hidden" id="mainApp">
-    <div class="accuracy-box" id="accuracyBox">
-      Wins: <span id="winCount">0</span> | Losses: <span id="lossCount">0</span> | Accuracy: <span id="accuracy">0%</span>
+    <div class="stats">
+      <div>✅ Wins: <span id="winCount">0</span></div>
+      <div>❌ Losses: <span id="lossCount">0</span></div>
+      <div>📊 Accuracy: <span id="accuracy">0%</span></div>
     </div>
-    <h1>🔢 Tap Last 20 Numbers</h1>
+    <h1>🔢 Tap Last 10 Numbers</h1>
     <div class="number-boxes" id="numberGrid"></div>
     <button onclick="makePrediction()">🔮 Predict</button>
     <div class="result-box" id="prediction"></div>
@@ -119,90 +158,92 @@
       <button onclick="userFeedback(false)">❌ Loss</button>
     </div>
   </div>
-</div>
-<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-<audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
-<script>
-  const correctKey = "Mrperfect456";
-  const selectedNumbers = [];
-  let wins = 0, losses = 0;
 
-  function checkKey() {
-    const key = document.getElementById("accessKey").value;
-    if (key === correctKey) {
-      document.getElementById("keyPopup").classList.add("hidden");
-      document.getElementById("telegramPopup").classList.remove("hidden");
-    } else {
-      alert("Incorrect key! Please try again.");
-    }
-  }
+  <audio id="winSound" src="https://audioplayer.wixmp.com/sounds/positive.mp3"></audio>
+  <audio id="lossSound" src="https://www.myinstants.com/media/sounds/sorrysorry.mp3"></audio>
+  <audio id="tapSound" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
 
-  function closeTelegramPopup() {
-    document.getElementById("telegramPopup").classList.add("hidden");
-    document.getElementById("mainApp").classList.remove("hidden");
-  }
+  <script>
+    const correctKey = "Mrperfect456";
+    const selectedNumbers = [];
+    let wins = 0;
+    let losses = 0;
 
-  function setupNumberGrid() {
-    const grid = document.getElementById("numberGrid");
-    for (let i = 0; i <= 9; i++) {
-      const div = document.createElement("div");
-      div.className = "number-box";
-      div.innerText = i;
-      div.onclick = () => toggleNumber(div, i);
-      grid.appendChild(div);
-    }
-  }
-
-  function toggleNumber(div, number) {
-    if (selectedNumbers.length >= 20) return alert("Only 20 numbers allowed!");
-    div.classList.add("selected");
-    selectedNumbers.push(number);
-    document.getElementById("clickSound").play();
-  }
-
-  function makePrediction() {
-    if (selectedNumbers.length !== 20) return alert("Select 20 past numbers!");
-
-    const pattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
-    const bigCount = pattern.filter(p => p === 'BIG').length;
-    const smallCount = 20 - bigCount;
-
-    let predicted = '';
-    if (bigCount === smallCount) {
-      predicted = Math.random() > 0.5 ? 'BIG' : 'SMALL';
-    } else {
-      predicted = bigCount > smallCount ? 'SMALL' : 'BIG';
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("keyPopup").classList.add("hidden");
+        document.getElementById("telegramPopup").classList.remove("hidden");
+      } else {
+        alert("Incorrect key! Please try again.");
+      }
     }
 
-    const confidence = Math.floor(55 + Math.random() * 44); // 55% - 99%
+    function closeTelegramPopup() {
+      document.getElementById("telegramPopup").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+    }
 
-    document.getElementById("prediction").innerHTML = `
-      🤖 AI Prediction: <strong>${predicted}</strong><br>
-      🔐 Confidence: <strong>${confidence}%</strong><br><br>
-      Logic: Based on last 20 results, trend reversal using trader's psychology.
-    `;
+    function setupNumberGrid() {
+      const grid = document.getElementById("numberGrid");
+      for (let i = 0; i <= 9; i++) {
+        const div = document.createElement("div");
+        div.className = "number-box";
+        div.innerText = i;
+        div.onclick = () => toggleNumber(div, i);
+        grid.appendChild(div);
+      }
+    }
 
-    document.getElementById("feedback").style.display = "flex";
-  }
+    function toggleNumber(div, number) {
+      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
+      document.getElementById("tapSound").play();
+      div.classList.add("selected");
+      selectedNumbers.push(number);
+    }
 
-  function userFeedback(win) {
-    const audio = win ? document.getElementById("winSound") : document.getElementById("lossSound");
-    audio.play();
-    if (win) wins++; else losses++;
-    const total = wins + losses;
-    const accuracy = total > 0 ? Math.round((wins / total) * 100) : 0;
+    function makePrediction() {
+      if (selectedNumbers.length !== 10) {
+        return alert("Select 10 past numbers!");
+      }
 
-    document.getElementById("winCount").innerText = wins;
-    document.getElementById("lossCount").innerText = losses;
-    document.getElementById("accuracy").innerText = `${accuracy}%`;
+      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
+      const bigCount = bigSmallPattern.filter(p => p === 'BIG').length;
+      const smallCount = 10 - bigCount;
+      let predictedType = bigCount > smallCount ? 'SMALL' : 'BIG';
+      const chance = Math.floor(55 + Math.random() * 44); // 55% to 99%
 
-    selectedNumbers.length = 0;
-    document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
-    document.getElementById("feedback").style.display = "none";
-  }
+      document.getElementById("prediction").innerHTML = `
+        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
+        📈 Confidence: <strong>${chance}%</strong><br>
+        <u>Based on:</u><br>• Past pattern of last 10 entries<br>• Trader mindset reversal logic<br>• AI adjusted psychology system`
+      document.getElementById("feedback").style.display = "flex";
+    }
 
-  setupNumberGrid();
-</script>
+    function userFeedback(win) {
+      if (win) {
+        document.getElementById("winSound").play();
+        wins++;
+      } else {
+        document.getElementById("lossSound").play();
+        losses++;
+      }
+      updateStats();
+      selectedNumbers.length = 0;
+      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
+      document.getElementById("feedback").style.display = "none";
+    }
+
+    function updateStats() {
+      const total = wins + losses;
+      const accuracy = total === 0 ? 0 : Math.round((wins / total) * 100);
+      document.getElementById("winCount").textContent = wins;
+      document.getElementById("lossCount").textContent = losses;
+      document.getElementById("accuracy").textContent = accuracy + "%";
+    }
+
+    setupNumberGrid();
+  </script>
 </body>
+
 </html>
