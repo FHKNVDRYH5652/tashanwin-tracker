@@ -1,5 +1,79 @@
-// Prediction website logic with trader's mindset and improved probability system
+// index.js
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import Login from './Login';
 
+const Root = () => {
+  const [access, setAccess] = useState(false);
+  const [skip, setSkip] = useState(false);
+
+  if (!access) return <Login onAccess={setAccess} />;
+
+  if (!skip)
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+        <h2 className="text-xl mb-4">Join Our Telegram</h2>
+        <a
+          href="https://t.me/+hzN8Ci0F7aYzMmY9"
+          className="mb-4 px-4 py-2 bg-green-600 rounded hover:bg-green-800"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Join Now
+        </a>
+        <button
+          onClick={() => setSkip(true)}
+          className="text-blue-400 underline"
+        >
+          Skip
+        </button>
+      </div>
+    );
+
+  return <App />;
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Root />);
+
+
+// Login.js
+import React, { useState } from 'react';
+
+export default function Login({ onAccess }) {
+  const [key, setKey] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (key === 'Mrperfect456') {
+      onAccess(true);
+    } else {
+      alert('❌ Invalid key');
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+      <h1 className="text-2xl mb-4">🔐 Enter Access Key</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="password"
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          placeholder="Enter key"
+          className="p-2 rounded bg-gray-800 border border-gray-600"
+        />
+        <button type="submit" className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-800">
+          Enter
+        </button>
+      </form>
+    </div>
+  );
+}
+
+
+// App.js
 import React, { useState } from 'react';
 
 const numberCategories = {
@@ -18,7 +92,6 @@ const getPrediction = (pastResults) => {
 
   const prediction = trend.big > trend.small ? 'Small' : 'Big';
   const confidence = Math.min(99, Math.max(55, 60 + Math.abs(trend.big - trend.small) * 5));
-
   const predictionNumbers = prediction === 'Big' ? numberCategories.big : numberCategories.small;
   const reason = `Trend shows more '${trend.big > trend.small ? 'Big' : 'Small'}' numbers recently. Applying trader's mindset expecting a reversal/trend continuation.`;
 
