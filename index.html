@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WINGO Prediction</title>
+  <title>Mr Perfect Hack - WINGO Prediction</title>
   <style>
     body {
       background-color: #10152b;
@@ -12,17 +12,22 @@
       text-align: center;
       padding: 20px;
     }
+    h1 {
+      color: #00ffff;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
     .card {
       background: #1b203d;
       border-radius: 15px;
       padding: 20px;
       margin: 15px auto;
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
     }
     .title {
-      font-size: 24px;
+      font-size: 22px;
       margin-bottom: 10px;
     }
     .big { color: #00ff00; }
@@ -32,17 +37,25 @@
       margin-top: 10px;
       color: #ffd700;
     }
-    .history {
-      text-align: left;
+    table {
+      width: 100%;
       margin-top: 10px;
+      border-collapse: collapse;
     }
-    .history-item {
+    th, td {
+      padding: 8px;
       border-bottom: 1px solid #444;
-      padding: 5px 0;
+      text-align: center;
+    }
+    .prediction-area {
+      margin-top: 15px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
+  <h1>MR PERFECT HACK</h1>
+
   <div class="card">
     <div class="title">WINGO Prediction</div>
     <div>Period: <span id="period">--</span></div>
@@ -51,8 +64,19 @@
   </div>
 
   <div class="card">
-    <div class="title">History</div>
-    <div class="history" id="history"></div>
+    <div class="title">Past 5 Results</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
+    <div class="prediction-area">
+      Next Prediction: <span id="aiPrediction">--</span>
+    </div>
   </div>
 
   <script>
@@ -70,6 +94,14 @@
       return Math.random() > 0.5 ? "BIG" : "SMALL";
     }
 
+    function aiPredict(history) {
+      if (history.length < 5) return "--";
+      const bigCount = history.slice(0, 5).filter(h => h.prediction === "BIG").length;
+      const nextPred = bigCount >= 3 ? "SMALL" : "BIG";
+      const nextPeriod = history[0].period + 1;
+      return `${nextPeriod} — ${nextPred}`;
+    }
+
     function updatePrediction() {
       const period = getCurrentPeriod();
       const prediction = getRandomPrediction();
@@ -80,14 +112,16 @@
       predElem.className = prediction.toLowerCase();
 
       history.unshift({ period, prediction });
+      if (history.length > 5) history = history.slice(0, 5);
       renderHistory();
     }
 
     function renderHistory() {
-      const container = document.getElementById("history");
-      container.innerHTML = history.slice(0, 10).map(h =>
-        `<div class="history-item">Period: ${h.period} — <span class="${h.prediction.toLowerCase()}">${h.prediction}</span></div>`
+      const table = document.getElementById("historyTable");
+      table.innerHTML = history.map(h =>
+        `<tr><td>${String(h.period).slice(-3)}</td><td class="${h.prediction.toLowerCase()}">${h.prediction}</td></tr>`
       ).join('');
+      document.getElementById("aiPrediction").textContent = aiPredict(history);
     }
 
     function startCountdown() {
