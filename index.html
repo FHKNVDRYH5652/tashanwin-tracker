@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: radial-gradient(circle, #1b1b1b, #000);
+      background: linear-gradient(135deg, #000000, #1a1a1a);
       color: #00ffe7;
       display: flex;
       justify-content: center;
@@ -21,8 +21,8 @@
       padding: 30px;
       border-radius: 20px;
       border: 2px solid #00ffe7;
-      width: 420px;
-      box-shadow: 0 0 35px #00ffe766;
+      width: 440px;
+      box-shadow: 0 0 40px #00ffe766;
       text-align: center;
     }
     h1 {
@@ -30,24 +30,35 @@
       margin-bottom: 20px;
       color: #00ffcc;
     }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 14px;
+    .counter-boxes {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
     }
-    input {
+    .counter-box {
+      flex: 1;
+      margin: 0 5px;
       background: #222;
-      color: #00ffcc;
       border: 1px solid #00ffcc;
+      padding: 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.2s;
+    }
+    .counter-box:hover {
+      background: #00ffe733;
     }
     button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
       background: #00ffcc;
       color: #000;
       font-weight: bold;
+      font-size: 14px;
       cursor: pointer;
       transition: 0.3s;
     }
@@ -76,7 +87,12 @@
 <body>
   <div class="container">
     <h1>🔮 MrPerfect AI WINGO Prediction</h1>
-    <input type="text" id="pastResults" placeholder="Enter last 5 results (BIG/SMALL)">
+
+    <div class="counter-boxes">
+      <div class="counter-box" onclick="increment('BIG')">BIG: <span id="bigCount">0</span></div>
+      <div class="counter-box" onclick="increment('SMALL')">SMALL: <span id="smallCount">0</span></div>
+    </div>
+
     <button onclick="makePrediction()">🔎 Predict Next</button>
 
     <div class="result-box" id="prediction"></div>
@@ -91,30 +107,36 @@
   <audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
 
   <script>
-    function analyzeAI(past) {
-      let bigs = past.filter(x => x === "BIG").length;
-      let smalls = past.filter(x => x === "SMALL").length;
+    let bigCount = 0;
+    let smallCount = 0;
 
+    function increment(type) {
+      if (type === 'BIG') {
+        bigCount++;
+        document.getElementById('bigCount').innerText = bigCount;
+      } else {
+        smallCount++;
+        document.getElementById('smallCount').innerText = smallCount;
+      }
+    }
+
+    function analyzeAI(big, small) {
       let reasons = [];
-      if (bigs > smalls) reasons.push("Pattern Analysis suggests BIG");
-      if (smalls > bigs) reasons.push("Trend suggests SMALL");
-      if (bigs === smalls) reasons.push("Neutral trend, human psychology says alternate");
-      reasons.push("Tips: Avoid repeating past 3 results");
-
-      let result = bigs > smalls ? "BIG" : smalls > bigs ? "SMALL" : Math.random() > 0.5 ? "BIG" : "SMALL";
+      if (big > small) reasons.push("Pattern Analysis suggests BIG");
+      if (small > big) reasons.push("Trend suggests SMALL");
+      if (big === small) reasons.push("Neutral trend, psychology says alternate");
+      reasons.push("Tips: Avoid repeating past patterns");
+      const result = big > small ? "BIG" : small > big ? "SMALL" : Math.random() > 0.5 ? "BIG" : "SMALL";
       return { result, reasons };
     }
 
     function makePrediction() {
-      const pastInput = document.getElementById("pastResults").value.trim().toUpperCase();
-      const past = pastInput.split(',').map(x => x.trim());
-      if (past.length !== 5 || !past.every(x => x === "BIG" || x === "SMALL")) {
-        return alert("Please enter exactly 5 results as BIG or SMALL");
+      if ((bigCount + smallCount) !== 5) {
+        return alert("Please tap total 5 times between BIG and SMALL!");
       }
 
-      const { result, reasons } = analyzeAI(past);
-      const predictionBox = document.getElementById("prediction");
-      predictionBox.innerHTML = `
+      const { result, reasons } = analyzeAI(bigCount, smallCount);
+      document.getElementById("prediction").innerHTML = `
         🤖 AI Analyzed: <strong>${result}</strong><br><br>
         <u>Reasons:</u><br>• ${reasons.join("<br>• ")}
       `;
@@ -131,7 +153,7 @@
         feedbackBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
       } else {
         lossSound.play();
-        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don't worry, AI is improving the next analysis!`;
+        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don’t worry, AI is improving the next analysis!`;
       }
 
       document.getElementById("feedback").style.display = "none";
