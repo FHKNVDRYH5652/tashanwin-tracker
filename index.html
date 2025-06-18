@@ -108,7 +108,7 @@
       font-size: 1.1rem;
       cursor: pointer;
     }
-    #result, #analysisBox {
+    #result, #analysisBox, #trendHistory {
       margin-top: 20px;
       padding: 15px;
       border: 1px dashed #00ffcc;
@@ -149,6 +149,7 @@
     <button id="predictBtn" onclick="predictResult()">🔮 Predict</button>
     <div id="result"></div>
     <div id="analysisBox"></div>
+    <div id="trendHistory"></div>
   </div>
 
   <audio id="winSound" src="win.mp3"></audio>
@@ -157,19 +158,12 @@
   <script>
     const selectedNumbers = [];
     let locked = false;
-
     const logicMethods = [
-      'Trend System',
-      'Pattern Match',
-      'Last Digit Logic',
-      'Reversal Logic',
-      'Ratio Analysis',
-      'Odd-Even Tracker',
-      'Range Behavior',
-      'Swing Strategy',
-      'Volume-Like Checker',
-      'Hybrid Model'
+      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic',
+      'Ratio Analysis', 'Odd-Even Tracker', 'Range Behavior',
+      'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
     ];
+    let trendHistory = [];
 
     function checkKey() {
       const key = document.getElementById('accessKey').value;
@@ -196,8 +190,7 @@
     }
 
     function selectNumber(num, btn) {
-      if (locked) return;
-      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
+      if (locked || selectedNumbers.length >= 10) return;
       selectedNumbers.push(num);
       btn.classList.add('selected');
       updateList();
@@ -221,12 +214,8 @@
       const final = bigCount > smallCount ? 'BIG' : 'SMALL';
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
-      const actual = Math.random() > 0.5 ? 'BIG' : 'SMALL'; // Simulated result
-      const isWin = actual === final;
-
       document.getElementById('result').innerHTML = `
         🔮 Final Prediction: <strong>${final}</strong><br>
-        🎯 Actual: <span class="${isWin ? 'win' : 'loss'}">${actual}</span><br>
         📊 Confidence: ${confidence}%
       `;
 
@@ -236,13 +225,33 @@
       });
       document.getElementById('analysisBox').innerHTML = analysisHTML;
 
-      if (isWin) {
-        document.getElementById('winSound').play();
-        setTimeout(() => alert("💥 You are Genius! MrPerfect prediction is accurate!"), 500);
-      } else {
-        document.getElementById('failSound').play();
-        setTimeout(() => alert("😓 Don't worry! MrPerfect is improving. Try again!"), 500);
-      }
+      setTimeout(() => {
+        const feedback = confirm("✅ Did MrPerfect Predict Correctly?\nOK = Win, Cancel = Loss");
+        const isWin = feedback === true;
+        trendHistory.unshift(isWin);
+        trendHistory = trendHistory.slice(0, 5);
+        const accuracy = Math.round((trendHistory.filter(w => w).length / trendHistory.length) * 100);
+        
+        document.getElementById('result').innerHTML += `\n🎯 Actual: <span class="${isWin ? 'win' : 'loss'}">${isWin ? final : (final === 'BIG' ? 'SMALL' : 'BIG')}</span>`;
+
+        if (isWin) {
+          document.getElementById('winSound').play();
+          setTimeout(() => alert("💥 You are Genius! MrPerfect prediction is accurate!"), 500);
+        } else {
+          document.getElementById('failSound').play();
+          setTimeout(() => alert("🤖 Reanalyzing trends and improving logic for next prediction..."), 500);
+        }
+
+        document.getElementById('trendHistory').innerHTML = `
+          <strong>Last 5 Results:</strong> ${trendHistory.map(r => r ? '✅' : '❌').join(' ')}<br>
+          <strong>Accuracy:</strong> ${accuracy}%
+        `;
+
+        selectedNumbers.length = 0;
+        document.getElementById('numberGrid').querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+        updateList();
+        locked = false;
+      }, 500);
     }
 
     setupGrid();
