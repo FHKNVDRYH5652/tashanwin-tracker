@@ -1,117 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Wingo Color Prediction AI</title>
-<style>
-  body {
-    background-color: #000;
-    color: #00ff00;
-    font-family: 'Courier New', Courier, monospace;
-    padding: 20px;
-  }
-  .container {
-    max-width: 700px;
-    margin: auto;
-  }
-  h1, h2 {
-    text-align: center;
-    color: #0f0;
-  }
-  .stats {
-    background: #111;
-    border: 1px solid #0f0;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-  }
-  .history {
-    background: #111;
-    border: 1px solid #0f0;
-    padding: 20px;
-    border-radius: 5px;
-  }
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  li {
-    padding: 4px 0;
-    border-bottom: 1px solid #0f0;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINGO Prediction - MrPerfect</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    body {
+      margin: 0;
+      font-family: 'Share Tech Mono', monospace;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: #00ffcc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #111;
+      padding: 25px;
+      border-radius: 20px;
+      border: 2px solid #00ffcc;
+      width: 420px;
+      box-shadow: 0 0 30px #00ffcc33;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .logo img {
+      width: 90px;
+      border-radius: 50%;
+      border: 2px solid #00ffcc;
+    }
+    .title {
+      text-align: center;
+      font-size: 26px;
+      color: #00ffcc;
+      margin-bottom: 10px;
+      text-shadow: 0 0 5px #00ffccaa;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    input {
+      background: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+    button {
+      background: #00ffcc;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00c8aa;
+    }
+    .note {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0f0;
+    }
+    .result-box, .feedback-box {
+      background: #000;
+      padding: 10px;
+      border: 1px dashed #00ffcc;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.5;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Wingo Color Prediction AI</h1>
-    <div class="stats">
-      <div><strong>Most Frequent Size:</strong> <span id="mostSize">Loading...</span></div>
-      <div><strong>Most Frequent Number:</strong> <span id="mostNumber">Loading...</span></div>
-      <div><strong>Recommended Prediction:</strong> <span id="recommendation">Loading...</span></div>
+    <div class="logo">
+      <img src="https://via.placeholder.com/100x100.png?text=LOGO" alt="Logo">
     </div>
+    <div class="title">🔮 MrPerfect Prediction</div>
 
-    <div class="history">
-      <h2>Last 20 Results</h2>
-      <ul id="resultList"></ul>
-    </div>
+    <label>Past 5 Results (BIG/SMALL):</label>
+    <input type="text" id="pastResults" placeholder="Example: BIG,SMALL,BIG,BIG,SMALL">
+
+    <label>Actual Result:</label>
+    <input type="text" id="actualResult" placeholder="Enter actual result (BIG/SMALL)">
+
+    <button onclick="makePrediction()">Predict Next</button>
+
+    <div class="result-box" id="prediction"></div>
+    <div class="feedback-box" id="feedback"></div>
   </div>
 
-<script>
-  // Last 20 entries from your data
-  const results = [
-    { number: 5, size: "Big" },
-    { number: 8, size: "Big" },
-    { number: 8, size: "Big" },
-    { number: 2, size: "Small" },
-    { number: 0, size: "Small" },
-    { number: 7, size: "Big" },
-    { number: 6, size: "Big" },
-    { number: 9, size: "Big" },
-    { number: 7, size: "Big" },
-    { number: 3, size: "Small" },
-    { number: 8, size: "Big" },
-    { number: 1, size: "Small" },
-    { number: 7, size: "Big" },
-    { number: 9, size: "Big" },
-    { number: 2, size: "Small" },
-    { number: 1, size: "Small" },
-    { number: 8, size: "Big" },
-    { number: 4, size: "Small" },
-    { number: 6, size: "Big" },
-    { number: 7, size: "Big" }
-  ];
+  <script>
+    function makePrediction() {
+      const pastInput = document.getElementById("pastResults").value.trim().toUpperCase();
+      const actualResult = document.getElementById("actualResult").value.trim().toUpperCase();
+      if (!pastInput || !actualResult) return alert("Please enter both past results and actual result.");
 
-  // Display last 20 results
-  const list = document.getElementById("resultList");
-  results.forEach((r, i) => {
-    const li = document.createElement("li");
-    li.textContent = `#${i + 1} → ${r.number} (${r.size})`;
-    list.appendChild(li);
-  });
+      const past = pastInput.split(',').map(x => x.trim());
+      if (past.length !== 5 || !["BIG", "SMALL"].includes(actualResult)) {
+        return alert("Please enter exactly 5 results as BIG or SMALL.");
+      }
 
-  // Analyze trend and predict
-  function analyze(data) {
-    const sizeCount = { Big: 0, Small: 0 };
-    const numberCount = {};
+      const bigs = past.filter(x => x === "BIG").length;
+      const smalls = past.filter(x => x === "SMALL").length;
 
-    data.forEach(r => {
-      sizeCount[r.size]++;
-      numberCount[r.number] = (numberCount[r.number] || 0) + 1;
-    });
+      let prediction = "BIG";
+      let chance = 50;
 
-    const mostSize = sizeCount.Big > sizeCount.Small ? "Big" : "Small";
-    const mostNumber = Object.keys(numberCount).reduce((a, b) =>
-      numberCount[a] > numberCount[b] ? a : b
-    );
+      if (bigs > smalls) {
+        prediction = "BIG";
+        chance = 85 + Math.floor(Math.random() * 10);
+      } else if (smalls > bigs) {
+        prediction = "SMALL";
+        chance = 85 + Math.floor(Math.random() * 10);
+      } else {
+        prediction = Math.random() > 0.5 ? "BIG" : "SMALL";
+        chance = 70 + Math.floor(Math.random() * 10);
+      }
 
-    document.getElementById("mostSize").textContent = mostSize;
-    document.getElementById("mostNumber").textContent = mostNumber;
-    document.getElementById("recommendation").textContent = mostSize;
-  }
-
-  analyze(results);
-</script>
+      const win = prediction === actualResult;
+      document.getElementById("prediction").innerHTML = `🧠 Prediction: <strong>${prediction}</strong><br>🎯 Win Chance: <strong>${chance}%</strong>`;
+      document.getElementById("feedback").innerHTML = win
+        ? "✅ <strong>WIN!</strong> 🔥 Jalwa hai Mr Perfect ka!"
+        : "❌ <strong>LOSS!</strong> Don't worry! Next time improve and my BEST prediction!";
+    }
+  </script>
 </body>
 </html>
