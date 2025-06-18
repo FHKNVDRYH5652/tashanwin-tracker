@@ -1,118 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MR PERFECT HACK</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINGO 1 Min Prediction</title>
   <style>
     body {
-      background-color: #050b2a;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: black;
       color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #00ffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
     .container {
-      background: #11183a;
+      background: #111;
       padding: 20px;
-      border-radius: 10px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 0 15px #00ffff44;
+      border-radius: 15px;
+      border: 1px solid #444;
+      width: 350px;
+      box-shadow: 0 0 10px #0ff;
     }
-    table {
-      width: 100%;
-      margin-top: 10px;
-      color: white;
-    }
-    input, select {
-      width: 90%;
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
+    .logo {
       text-align: center;
+      margin-bottom: 15px;
+    }
+    .logo img {
+      width: 100px;
+      border-radius: 50%;
+    }
+    .title {
+      text-align: center;
+      font-size: 24px;
+      color: cyan;
+      margin-bottom: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+    }
+    input {
+      background: #222;
+      color: #fff;
+    }
+    select {
+      background: #333;
+      color: #fff;
     }
     button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      font-weight: bold;
-      background-color: #00ffff;
-      border: none;
+      background: #00f2ff;
       color: #000;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .prediction {
-      margin-top: 20px;
-      font-size: 20px;
       font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #00c8d1;
+    }
+    .note {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: lime;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
+  <div class="container" id="auth-box">
+    <div class="logo">
+      <img src="https://via.placeholder.com/100x100.png?text=Logo" alt="Logo">
+    </div>
+    <div class="title">Enter Access Key</div>
+    <input type="password" id="accessKey" placeholder="Enter Key (e.g., Mrperfect1122)">
+    <button onclick="checkKey()">Unlock</button>
+    <div class="note" id="auth-error"></div>
+  </div>
 
-  <h1>MR PERFECT HACK</h1>
-
-  <div class="container">
-    <h2>Enter Last 5 Results</h2>
-    <table>
-      <thead>
-        <tr><th>Period</th><th>Result</th></tr>
-      </thead>
-      <tbody id="inputRows">
-        <!-- Input rows inserted here by JavaScript -->
-      </tbody>
-    </table>
-    <button onclick="predictNext()">Predict</button>
-    <div class="prediction" id="predictionOutput">Next Prediction: --</div>
+  <div class="container hidden" id="main-box">
+    <div class="title">WINGO PREDICTION</div>
+    <input type="text" placeholder="Game Version (e.g., 2024###)">
+    <input type="text" placeholder="Game Name (e.g., WINGO)">
+    <select>
+      <option value="safe">SAFE {100% Accuracy}</option>
+      <option value="risky">RISKY {Random Prediction}</option>
+    </select>
+    <button onclick="generatePrediction()">GET PREDICTION</button>
+    <div class="note" id="prediction"></div>
+    <div class="note" id="history"></div>
+    <div class="note" id="timer"></div>
   </div>
 
   <script>
-    const inputRows = document.getElementById("inputRows");
+    let history = [];
+    let correctKey = "Mrperfect1122";
 
-    for (let i = 0; i < 5; i++) {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td><input type="number" id="period${i}" placeholder="e.g. 524" /></td>
-        <td>
-          <select id="result${i}">
-            <option value="BIG">BIG</option>
-            <option value="SMALL">SMALL</option>
-          </select>
-        </td>
-      `;
-      inputRows.appendChild(row);
-    }
-
-    function predictNext() {
-      const periods = [];
-      const results = [];
-
-      for (let i = 0; i < 5; i++) {
-        const p = parseInt(document.getElementById(`period${i}`).value);
-        const r = document.getElementById(`result${i}`).value;
-        if (isNaN(p)) return alert("Enter all period numbers.");
-        periods.push(p);
-        results.push(r);
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("auth-box").classList.add("hidden");
+        document.getElementById("main-box").classList.remove("hidden");
+      } else {
+        document.getElementById("auth-error").innerText = "❌ Incorrect Key!";
       }
-
-      // Dummy AI Logic (Example: Alternate trend check)
-      const smallCount = results.filter(r => r === "SMALL").length;
-      const bigCount = results.filter(r => r === "BIG").length;
-      let nextResult = "BIG";
-      if (smallCount > bigCount) nextResult = "BIG";
-      else if (bigCount > smallCount) nextResult = "SMALL";
-      else nextResult = Math.random() > 0.5 ? "BIG" : "SMALL";
-
-      const nextPeriod = periods[4] + 1;
-      document.getElementById("predictionOutput").innerText =
-        `Next Period: ${nextPeriod} | Prediction: ${nextResult}`;
     }
-  </script>
 
+    function generatePrediction() {
+      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
+      history.unshift(result);
+      if (history.length > 10) history.pop();
+      document.getElementById("prediction").innerText = `Prediction: ${result}`;
+      document.getElementById("history").innerText = `Last Predictions: ${history.join(", ")}`;
+    }
+
+    // Countdown Timer
+    let countdown = 60;
+    setInterval(() => {
+      countdown--;
+      document.getElementById("timer").innerText = `Next update in: ${countdown}s`;
+      if (countdown <= 0) {
+        countdown = 60;
+        generatePrediction();
+      }
+    }, 1000);
+  </script>
 </body>
 </html>
