@@ -1,249 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MrPerfect WINGO AI Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mr Perfect AI Prediction</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
-
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: url('anime-bg.jpg') no-repeat center center fixed;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: url('1000003735.jpg') no-repeat center center fixed;
       background-size: cover;
-      color: #00ffe7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .container,
-    .key-container,
-    .telegram-popup {
-      background: #111a;
-      padding: 30px;
-      border-radius: 20px;
-      border: 2px solid #00ffe7;
-      width: 440px;
-      box-shadow: 0 0 40px #00ffe766;
+      color: white;
       text-align: center;
     }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #00ffcc;
+    #auth-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
     }
-
-    .number-boxes {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
+    .box {
+      margin: 10px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      display: inline-block;
+      min-width: 120px;
     }
-
-    .number-box {
-      background: #222;
-      border: 1px solid #00ffcc;
-      padding: 15px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 18px;
-      transition: 0.2s;
-    }
-
-    .number-box:hover {
-      background: #00ffe733;
-    }
-
-    .selected {
-      background: #00ffcc !important;
-      color: #000;
-    }
-
     button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 10px;
       border: none;
-      border-radius: 10px;
-      background: #00ffcc;
-      color: #000;
-      font-weight: bold;
-      font-size: 14px;
+      background-color: #00bcd4;
+      color: white;
       cursor: pointer;
-      transition: 0.3s;
     }
-
-    button:hover {
-      background: #00c8aa;
-    }
-
-    .result-box {
-      background: #000a;
-      padding: 15px;
-      margin-top: 15px;
-      border-radius: 12px;
-      border: 1px dashed #00ffcc;
-    }
-
-    .feedback-box {
-      margin-top: 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .feedback-box button {
-      flex: 1;
-      font-size: 13px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      border-radius: 10px;
-      border: 1px solid #00ffcc;
-      margin-bottom: 10px;
-      background: #222;
-      color: #00ffe7;
-    }
-
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      font-size: 14px;
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
     }
   </style>
 </head>
-
 <body>
-  <div class="key-container" id="keyPopup">
-    <h1>🔐 Enter Access Key</h1>
-    <input type="text" id="accessKey" placeholder="Enter Key...">
-    <button onclick="checkKey()">Unlock</button>
+  <div id="auth-screen">
+    <h2>Enter Access Key</h2>
+    <input type="password" id="accessKey" placeholder="Enter key...">
+    <br>
+    <button onclick="checkKey()">Submit</button>
   </div>
 
-  <div class="telegram-popup hidden" id="telegramPopup">
-    <h1>📲 Join Telegram Channel</h1>
-    <p>Click below to join MrPerfect's channel!</p>
-    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
-      <button>Join Now</button>
-    </a>
-    <p style="margin-top: 10px; font-size: 13px;">Create by Mr Perfect</p>
-    <button onclick="closeTelegramPopup()">Skip</button>
-  </div>
+  <div id="main" style="display:none;">
+    <h1>🎯 Mr Perfect AI Prediction</h1>
+    <div class="box">Wins: <span id="wins">0</span></div>
+    <div class="box">Losses: <span id="losses">0</span></div>
+    <div class="box">Accuracy: <span id="accuracy">0%</span></div>
 
-  <div class="container hidden" id="mainApp">
-    <div class="stats">
-      <div>✅ Wins: <span id="winCount">0</span></div>
-      <div>❌ Losses: <span id="lossCount">0</span></div>
-      <div>📊 Accuracy: <span id="accuracy">0%</span></div>
+    <div>
+      <button onclick="makePrediction('Big')">Big</button>
+      <button onclick="makePrediction('Small')">Small</button>
     </div>
-    <h1>🔢 Tap Last 10 Numbers</h1>
-    <div class="number-boxes" id="numberGrid"></div>
-    <button onclick="makePrediction()">🔮 Predict</button>
-    <div class="result-box" id="prediction"></div>
-    <div class="feedback-box" id="feedback" style="display: none;">
-      <button onclick="userFeedback(true)">✅ Win</button>
-      <button onclick="userFeedback(false)">❌ Loss</button>
-    </div>
+
+    <div class="result" id="predictionResult">Prediction: ---</div>
+    <div id="history"></div>
   </div>
 
-  <audio id="winSound" src="https://audioplayer.wixmp.com/sounds/positive.mp3"></audio>
-  <audio id="lossSound" src="https://www.myinstants.com/media/sounds/sorrysorry.mp3"></audio>
-  <audio id="tapSound" src="https://www.fesliyanstudios.com/play-mp3/4387"></audio>
+  <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-quick-win-video-game-notification-269.wav"></audio>
+  <audio id="winSound" src="https://actions.google.com/sounds/v1/ambiences/crowd_cheer.ogg"></audio>
+  <audio id="lossSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
   <script>
-    const correctKey = "Mrperfect456";
-    const selectedNumbers = [];
     let wins = 0;
     let losses = 0;
+    let history = [];
 
     function checkKey() {
       const key = document.getElementById("accessKey").value;
-      if (key === correctKey) {
-        document.getElementById("keyPopup").classList.add("hidden");
-        document.getElementById("telegramPopup").classList.remove("hidden");
+      if (key === "Mrperfect456") {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("main").style.display = "block";
+        alert("Join our channel!\nhttps://t.me/+hzN8Ci0F7aYzMmY9\nCreated by Mr Perfect");
       } else {
-        alert("Incorrect key! Please try again.");
+        alert("Wrong Key!");
       }
-    }
-
-    function closeTelegramPopup() {
-      document.getElementById("telegramPopup").classList.add("hidden");
-      document.getElementById("mainApp").classList.remove("hidden");
-    }
-
-    function setupNumberGrid() {
-      const grid = document.getElementById("numberGrid");
-      for (let i = 0; i <= 9; i++) {
-        const div = document.createElement("div");
-        div.className = "number-box";
-        div.innerText = i;
-        div.onclick = () => toggleNumber(div, i);
-        grid.appendChild(div);
-      }
-    }
-
-    function toggleNumber(div, number) {
-      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
-      document.getElementById("tapSound").play();
-      div.classList.add("selected");
-      selectedNumbers.push(number);
-    }
-
-    function makePrediction() {
-      if (selectedNumbers.length !== 10) {
-        return alert("Select 10 past numbers!");
-      }
-
-      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
-      const bigCount = bigSmallPattern.filter(p => p === 'BIG').length;
-      const smallCount = 10 - bigCount;
-      let predictedType = bigCount > smallCount ? 'SMALL' : 'BIG';
-      const chance = Math.floor(55 + Math.random() * 44); // 55% to 99%
-
-      document.getElementById("prediction").innerHTML = `
-        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
-        📈 Confidence: <strong>${chance}%</strong><br>
-        <u>Based on:</u><br>• Past pattern of last 10 entries<br>• Trader mindset reversal logic<br>• AI adjusted psychology system`
-      document.getElementById("feedback").style.display = "flex";
-    }
-
-    function userFeedback(win) {
-      if (win) {
-        document.getElementById("winSound").play();
-        wins++;
-      } else {
-        document.getElementById("lossSound").play();
-        losses++;
-      }
-      updateStats();
-      selectedNumbers.length = 0;
-      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
-      document.getElementById("feedback").style.display = "none";
     }
 
     function updateStats() {
+      document.getElementById("wins").textContent = wins;
+      document.getElementById("losses").textContent = losses;
       const total = wins + losses;
-      const accuracy = total === 0 ? 0 : Math.round((wins / total) * 100);
-      document.getElementById("winCount").textContent = wins;
-      document.getElementById("lossCount").textContent = losses;
+      const accuracy = total > 0 ? Math.round((wins / total) * 100) : 0;
       document.getElementById("accuracy").textContent = accuracy + "%";
     }
 
-    setupNumberGrid();
+    function makePrediction(choice) {
+      document.getElementById("clickSound").play();
+      const options = ["Big", "Small"];
+
+      let prediction = "Big";
+      const last3 = history.slice(-2);
+      const last2Loss = last3.every(r => r.result === 'Loss');
+
+      if (last2Loss) {
+        prediction = last3[1].actual === "Big" ? "Small" : "Big";
+      } else {
+        prediction = Math.random() > 0.5 ? "Big" : "Small";
+      }
+
+      const actual = Math.random() > 0.5 ? "Big" : "Small";
+      const result = prediction === actual ? 'Win' : 'Loss';
+      result === 'Win' ? wins++ : losses++;
+
+      document.getElementById("predictionResult").textContent =
+        `Prediction: ${prediction} | Actual: ${actual} → ${result}`;
+
+      history.push({ prediction, actual, result });
+      if (history.length > 10) history.shift();
+
+      const sound = result === 'Win' ? "winSound" : "lossSound";
+      document.getElementById(sound).play();
+
+      const historyHtml = history.map((h, i) =>
+        `<div>${i + 1}. Pred: ${h.prediction}, Actual: ${h.actual}, Result: ${h.result}</div>`
+      ).join("");
+
+      document.getElementById("history").innerHTML = historyHtml;
+      updateStats();
+    }
   </script>
 </body>
-
 </html>
