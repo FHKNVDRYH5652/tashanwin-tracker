@@ -31,14 +31,13 @@
       margin-bottom: 20px;
       color: #00ffcc;
     }
-    .counter-boxes {
-      display: flex;
-      justify-content: space-between;
+    .number-boxes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
       margin-bottom: 15px;
     }
-    .counter-box {
-      flex: 1;
-      margin: 0 5px;
+    .number-box {
       background: #222;
       border: 1px solid #00ffcc;
       padding: 15px;
@@ -47,8 +46,12 @@
       font-size: 18px;
       transition: 0.2s;
     }
-    .counter-box:hover {
+    .number-box:hover {
       background: #00ffe733;
+    }
+    .selected {
+      background: #00ffcc !important;
+      color: #000;
     }
     button {
       width: 100%;
@@ -96,18 +99,15 @@
   </style>
 </head>
 <body>
-
-  <!-- Key Entry Popup -->
   <div class="key-container" id="keyPopup">
     <h1>🔐 Enter Access Key</h1>
     <input type="text" id="accessKey" placeholder="Enter Key...">
     <button onclick="checkKey()">Unlock</button>
   </div>
 
-  <!-- Telegram Popup -->
   <div class="telegram-popup hidden" id="telegramPopup">
     <h1>📲 Join Telegram Channel</h1>
-    <p>Click the button below to join MrPerfect's channel for updates!</p>
+    <p>Click below to join MrPerfect's channel!</p>
     <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
       <button>Join Now</button>
     </a>
@@ -115,17 +115,10 @@
   </div>
 
   <div class="container hidden" id="mainApp">
-    <h1>🔮 MrPerfect AI WINGO Prediction</h1>
-
-    <div class="counter-boxes">
-      <div class="counter-box" onclick="increment('BIG')">BIG: <span id="bigCount">0</span></div>
-      <div class="counter-box" onclick="increment('SMALL')">SMALL: <span id="smallCount">0</span></div>
-    </div>
-
-    <button onclick="makePrediction()">🔎 Predict Next</button>
-
+    <h1>🔢 Tap Last 5 Numbers</h1>
+    <div class="number-boxes" id="numberGrid"></div>
+    <button onclick="makePrediction()">🔮 Predict</button>
     <div class="result-box" id="prediction"></div>
-
     <div class="feedback-box" id="feedback" style="display: none;">
       <button onclick="userFeedback(true)">✅ Win</button>
       <button onclick="userFeedback(false)">❌ Loss</button>
@@ -137,6 +130,7 @@
 
   <script>
     const correctKey = "Mrperfect456";
+    const selectedNumbers = [];
 
     function checkKey() {
       const key = document.getElementById("accessKey").value;
@@ -153,80 +147,68 @@
       document.getElementById("mainApp").classList.remove("hidden");
     }
 
-    let bigCount = 0;
-    let smallCount = 0;
-
-    function updateDisplay() {
-      document.getElementById('bigCount').innerText = bigCount;
-      document.getElementById('smallCount').innerText = smallCount;
+    function setupNumberGrid() {
+      const grid = document.getElementById("numberGrid");
+      for (let i = 0; i <= 9; i++) {
+        const div = document.createElement("div");
+        div.className = "number-box";
+        div.innerText = i;
+        div.onclick = () => toggleNumber(div, i);
+        grid.appendChild(div);
+      }
     }
 
-    function increment(type) {
-      const total = bigCount + smallCount;
-      if (type === 'BIG') {
-        if (bigCount < 5 && total < 5) {
-          bigCount++;
-        } else if (bigCount === 5) {
-          bigCount = 0;
-        }
-      } else {
-        if (smallCount < 5 && total < 5) {
-          smallCount++;
-        } else if (smallCount === 5) {
-          smallCount = 0;
-        }
-      }
-      updateDisplay();
-    }
-
-    function analyzeAI(big, small) {
-      let reasons = [];
-      let result = '';
-      if (big > small) {
-        result = "BIG";
-        reasons.push("BIG appeared more in last 5 rounds - trend continuation");
-        reasons.push("Human psychology suggests repeating winning pattern");
-      } else if (small > big) {
-        result = "SMALL";
-        reasons.push("SMALL dominated recent rounds - pattern continuation");
-        reasons.push("Probability favors current trend");
-      } else {
-        result = Math.random() > 0.5 ? "BIG" : "SMALL";
-        reasons.push("Equal BIG and SMALL count - AI selects based on hidden probability factors");
-        reasons.push("Psychology Trick: Players expect change, AI resists it");
-      }
-      reasons.push("Tip: Never follow emotions. Trust pattern over impulse.");
-      return { result, reasons };
+    function toggleNumber(div, number) {
+      if (selectedNumbers.length >= 5) return alert("Only 5 numbers allowed!");
+      div.classList.add("selected");
+      selectedNumbers.push(number);
     }
 
     function makePrediction() {
-      if ((bigCount + smallCount) !== 5) {
-        return alert("Please tap total 5 times between BIG and SMALL!");
+      if (selectedNumbers.length !== 5) {
+        return alert("Select 5 past numbers!");
+      }
+      const bigCount = selectedNumbers.filter(n => n >= 5).length;
+      const smallCount = 5 - bigCount;
+
+      let result = '';
+      let reasons = [];
+
+      if (bigCount > smallCount) {
+        result = 'BIG';
+        reasons.push("More BIG numbers (5-9) detected");
+      } else if (smallCount > bigCount) {
+        result = 'SMALL';
+        reasons.push("More SMALL numbers (0-4) detected");
+      } else {
+        result = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+        reasons.push("Equal BIG/SMALL count – AI decided by pattern analysis");
       }
 
-      const { result, reasons } = analyzeAI(bigCount, smallCount);
+      reasons.push("Analysis based on trend, psychology, tips & tricks");
+
       document.getElementById("prediction").innerHTML = `
-        🤖 AI Analyzed Result: <strong>${result}</strong><br><br>
-        <u>Reason for Prediction:</u><br>• ${reasons.join("<br>• ")}
-      `;
+        🤖 AI Prediction: <strong>${result}</strong><br><br>
+        <u>Reason:</u><br>• ${reasons.join("<br>• ")}`;
+
       document.getElementById("feedback").style.display = "flex";
     }
 
     function userFeedback(win) {
-      const feedbackBox = document.getElementById("prediction");
-      const winSound = document.getElementById("winSound");
-      const lossSound = document.getElementById("lossSound");
-
+      const predictionBox = document.getElementById("prediction");
       if (win) {
-        winSound.play();
-        feedbackBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
+        document.getElementById("winSound").play();
+        predictionBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
       } else {
-        lossSound.play();
-        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don’t worry, next time AI will improve prediction.`;
+        document.getElementById("lossSound").play();
+        predictionBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don't worry, AI will improve next time.`;
       }
-
+      selectedNumbers.length = 0;
+      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
       document.getElementById("feedback").style.display = "none";
     }
+
+    setupNumberGrid();
   </script>
 </body>
 </html>
