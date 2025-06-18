@@ -1,174 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MrPerfect Predictor</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0a0a0a;
-      color: #00ffcc;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .login, .container {
-      background: #111;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px #00ffcc;
-    }
-    .hidden {
-      display: none;
-    }
-    input[type="text"] {
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      outline: none;
-      width: 200px;
-    }
-    button {
-      background: #00ffcc;
-      color: black;
-      border: none;
-      padding: 10px 20px;
-      margin: 5px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 20px;
-      font-size: 1.2em;
-      color: #ffffff;
-    }
-    .feedback button {
-      background-color: #222;
-      color: #00ffcc;
-      border: 2px solid #00ffcc;
-    }
-  </style>
-</head>
-<body>
-  <div class="login" id="loginBox">
-    <h2>Enter Access Key</h2>
-    <input type="text" id="keyInput" placeholder="Enter Key" />
-    <button onclick="checkKey()">Unlock</button>
-  </div>
+// Prediction website logic with trader's mindset and improved probability system
 
-  <div class="hidden" id="telegramBox">
-    <h3>📢 Join Our Telegram!</h3>
-    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">👉 Join Channel</a><br />
-    <button onclick="skipTelegram()">Skip</button>
-  </div>
+import React, { useState } from 'react';
 
-  <div class="hidden container" id="mainApp">
-    <h1>MrPerfect AI Prediction</h1>
-    <p>Select 5 Past Results:</p>
-    <div id="numberButtons"></div>
-    <p>Selected: <span id="selected"></span></p>
-    <button onclick="makePrediction()">Predict</button>
-    <div class="result" id="predictionResult"></div>
-    <div class="feedback hidden" id="feedback">
-      <p>Did this prediction win or lose?</p>
-      <button onclick="handleFeedback(true)">Win</button>
-      <button onclick="handleFeedback(false)">Loss</button>
+const numberCategories = {
+  big: [5, 6, 7, 8, 9],
+  small: [0, 1, 2, 3, 4],
+};
+
+const getCategory = (num) => (numberCategories.big.includes(num) ? 'Big' : 'Small');
+
+const getPrediction = (pastResults) => {
+  const trend = { big: 0, small: 0 };
+  pastResults.forEach((n) => {
+    const category = getCategory(n);
+    trend[category.toLowerCase()]++;
+  });
+
+  const prediction = trend.big > trend.small ? 'Small' : 'Big';
+  const confidence = Math.min(99, Math.max(55, 60 + Math.abs(trend.big - trend.small) * 5));
+
+  const predictionNumbers = prediction === 'Big' ? numberCategories.big : numberCategories.small;
+  const reason = `Trend shows more '${trend.big > trend.small ? 'Big' : 'Small'}' numbers recently. Applying trader's mindset expecting a reversal/trend continuation.`;
+
+  return { prediction, confidence, predictionNumbers, reason };
+};
+
+export default function PredictionApp() {
+  const [inputNumbers, setInputNumbers] = useState([]);
+  const [result, setResult] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+
+  const handleNumberClick = (n) => {
+    if (inputNumbers.length < 5) {
+      setInputNumbers([...inputNumbers, n]);
+    }
+  };
+
+  const resetInputs = () => {
+    setInputNumbers([]);
+    setResult(null);
+    setFeedback(null);
+  };
+
+  const runPrediction = () => {
+    const { prediction, confidence, predictionNumbers, reason } = getPrediction(inputNumbers);
+    setResult({ prediction, confidence, predictionNumbers, reason });
+  };
+
+  const handleFeedback = (type) => {
+    setFeedback(type);
+    if (type === 'loss') {
+      alert("Don't worry! Improving prediction using trader's mindset...");
+    } else {
+      alert("🎉 Jalwa hai Mr Perfect ka! 🎉");
+    }
+  };
+
+  return (
+    <div className="p-4 max-w-lg mx-auto text-white bg-black rounded-xl shadow-xl space-y-4">
+      <h1 className="text-2xl font-bold">🎯 AI Prediction Portal</h1>
+
+      <p>Select last 5 results:</p>
+      <div className="grid grid-cols-5 gap-2">
+        {[...Array(10).keys()].map((n) => (
+          <button
+            key={n}
+            onClick={() => handleNumberClick(n)}
+            disabled={inputNumbers.length >= 5}
+            className="bg-gray-700 p-2 rounded hover:bg-gray-500"
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+
+      <div>
+        <p>Selected: {inputNumbers.join(', ')}</p>
+        {inputNumbers.length === 5 && (
+          <button
+            onClick={runPrediction}
+            className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-800 rounded"
+          >
+            Predict
+          </button>
+        )}
+      </div>
+
+      {result && (
+        <div className="mt-4 p-4 bg-gray-800 rounded">
+          <h2 className="text-xl font-bold">Prediction: {result.prediction}</h2>
+          <p>Confidence: {result.confidence}%</p>
+          <p>Likely Numbers: {result.predictionNumbers.join(', ')}</p>
+          <p className="text-sm text-gray-400">Reason: {result.reason}</p>
+
+          <div className="flex gap-4 mt-4">
+            <button
+              onClick={() => handleFeedback('win')}
+              className="bg-green-600 px-4 py-2 rounded"
+            >
+              ✅ Win
+            </button>
+            <button
+              onClick={() => handleFeedback('loss')}
+              className="bg-red-600 px-4 py-2 rounded"
+            >
+              ❌ Loss
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={resetInputs}
+        className="mt-4 text-sm underline text-blue-400"
+      >
+        Reset
+      </button>
     </div>
-  </div>
-
-  <audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
-  <audio id="loseSound" src="https://www.soundjay.com/human/sounds/sad-trombone-01.mp3"></audio>
-
-  <script>
-    const KEY = 'Mrperfect456';
-    const selected = [];
-    const numberButtons = document.getElementById('numberButtons');
-    const selectedDisplay = document.getElementById('selected');
-    const resultBox = document.getElementById('predictionResult');
-
-    for (let i = 0; i <= 9; i++) {
-      const btn = document.createElement('button');
-      btn.innerText = i;
-      btn.onclick = () => {
-        if (selected.length === 5) {
-          selected.length = 0;
-        }
-        selected.push(i);
-        selectedDisplay.innerText = selected.join(', ');
-      };
-      numberButtons.appendChild(btn);
-    }
-
-    function checkKey() {
-      const input = document.getElementById('keyInput').value;
-      if (input === KEY) {
-        document.getElementById('loginBox').classList.add('hidden');
-        document.getElementById('telegramBox').classList.remove('hidden');
-      } else {
-        alert('Incorrect Key');
-      }
-    }
-
-    function skipTelegram() {
-      document.getElementById('telegramBox').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-    }
-
-    function makePrediction() {
-      if (selected.length !== 5) {
-        alert('Please select exactly 5 numbers.');
-        return;
-      }
-
-      const big = selected.filter(n => n >= 5).length;
-      const small = selected.filter(n => n < 5).length;
-
-      let prediction = '';
-      let reason = '';
-      let confidence = 50;
-      let numbers = [...selected];
-
-      if (big > small) {
-        prediction = 'Small';
-        confidence = 60;
-        reason = 'Opposite of human pattern and trend reversal logic applied.';
-      } else if (small > big) {
-        prediction = 'Big';
-        confidence = 60;
-        reason = 'Trend and frequency suggest Big. Applying pattern logic.';
-      } else {
-        prediction = 'Small';
-        confidence = 52;
-        reason = 'Equal distribution. Small is selected due to recent loss recovery logic.';
-      }
-
-      const top2 = numbers.sort((a,b) => numbers.filter(v => v === b).length - numbers.filter(v => v === a).length).slice(0,2);
-
-      resultBox.innerHTML = `
-        🔮 Prediction: <b>${prediction}</b><br />
-        🎯 Numbers Likely: <b>${top2.join(', ')}</b><br />
-        📈 Confidence: <b>${confidence}%</b><br />
-        💡 Reason: ${reason}
-      `;
-      document.getElementById('feedback').classList.remove('hidden');
-    }
-
-    function handleFeedback(win) {
-      if (win) {
-        document.getElementById('winSound').play();
-        resultBox.innerHTML += '<br><b>🎉 Jalwa hai MrPerfect ka!</b>';
-      } else {
-        document.getElementById('loseSound').play();
-        resultBox.innerHTML += '<br><b>😔 Don’t worry, next time will be better. AI is improving.</b>';
-      }
-      selected.length = 0;
-      selectedDisplay.innerText = '';
-      document.getElementById('feedback').classList.add('hidden');
-    }
-  </script>
-</body>
-</html>
+  );
+}
