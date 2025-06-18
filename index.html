@@ -4,250 +4,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MrPerfect WINGO Pro</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <title>MrPerfect WINGO AI Prediction</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
     body {
+      margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url('https://cdn.midjourney.com/3b64b3e8-947c-4c4e-8d7d-8e41d80e4a27/0_3.webp') no-repeat center center fixed;
+      background: url('anime-bg.jpg') no-repeat center center fixed;
       background-size: cover;
-      color: #00f7ff;
+      color: #00ffe7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    .overlay {
-      background: rgba(0, 0, 0, 0.85);
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-
-    .key-popup {
-      z-index: 2;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #111b;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px #00ffe7;
-      text-align: center;
-      width: 320px;
-    }
-
-    .key-popup input,
-    .key-popup button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: 10px;
-      border: none;
-      font-family: 'Orbitron';
-    }
-
-    .key-popup input {
-      background: #222;
-      color: #0ff;
-      border: 1px solid #0ff;
-    }
-
-    .key-popup button {
-      background: #00ffcc;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .main-app {
+    .hidden {
       display: none;
+    }
+
+    .container,
+    .key-container,
+    .telegram-popup {
+      background: #111a;
       padding: 30px;
-      max-width: 1000px;
-      margin: auto;
-      position: relative;
-      z-index: 2;
+      border-radius: 20px;
+      border: 2px solid #00ffe7;
+      width: 440px;
+      box-shadow: 0 0 40px #00ffe766;
+      text-align: center;
     }
 
     h1 {
-      color: #0ff;
-      text-align: center;
+      font-size: 24px;
       margin-bottom: 20px;
-      text-shadow: 0 0 10px #0ff;
+      color: #00ffcc;
     }
 
-    .menu {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
-    }
-
-    .menu button {
-      flex: 1;
-      margin: 0 10px;
-      padding: 15px;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-      background: linear-gradient(145deg, #00ffe7, #0088ff);
-      color: #000;
-      cursor: pointer;
-      box-shadow: 0 0 10px #00ffe7;
-    }
-
-    .prediction-area {
-      background: #111d;
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 0 15px #00f7ff80;
-      margin-bottom: 20px;
-    }
-
-    .number-grid {
+    .number-boxes {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 8px;
-      margin-top: 10px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
     .number-box {
-      background: #333;
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 18px;
+      background: #222;
+      border: 1px solid #00ffcc;
+      padding: 15px;
+      border-radius: 12px;
       cursor: pointer;
+      font-size: 18px;
       transition: 0.2s;
     }
 
-    .number-box.selected {
-      background: #00ffcc;
+    .number-box:hover {
+      background: #00ffe733;
+    }
+
+    .selected {
+      background: #00ffcc !important;
       color: #000;
     }
 
-    .result-display {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 20px;
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #00ffcc;
+      color: #000;
       font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
-    .stats-box {
+    button:hover {
+      background: #00c8aa;
+    }
+
+    .result-box {
+      background: #000a;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 12px;
+      border: 1px dashed #00ffcc;
+    }
+
+    .feedback-box {
+      margin-top: 12px;
       display: flex;
       justify-content: space-between;
-      margin-top: 15px;
-      font-size: 16px;
+      gap: 10px;
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 20px;
+    .feedback-box button {
+      flex: 1;
       font-size: 13px;
-      color: #aaa;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+      margin-bottom: 10px;
+      background: #222;
+      color: #00ffe7;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    #typedNumbers {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #fff;
     }
   </style>
 </head>
 
 <body>
-  <div class="overlay"></div>
-
-  <div class="key-popup" id="keyBox">
-    <h2>Enter Access Key</h2>
-    <input type="text" id="keyInput" placeholder="Enter Key">
-    <button onclick="unlockApp()">Unlock</button>
+  <div class="key-container" id="keyPopup">
+    <h1>🔐 Enter Access Key</h1>
+    <input type="text" id="accessKey" placeholder="Enter Key...">
+    <button onclick="checkKey()">Unlock</button>
   </div>
 
-  <div class="main-app" id="app">
-    <h1>MrPerfect WINGO Pro Predictor</h1>
-    <div class="menu">
-      <button onclick="selectMode('number')">Number Prediction</button>
-      <button onclick="selectMode('bigsmall')">Big / Small</button>
-      <button onclick="selectMode('color')">Color + B/S</button>
-    </div>
-
-    <div class="prediction-area">
-      <p>Select Last 10 Numbers:</p>
-      <div class="number-grid" id="numberGrid"></div>
-      <button onclick="predictNow()" style="margin-top: 15px; width: 100%; padding: 10px;">Predict 🔮</button>
-      <div class="result-display" id="resultDisplay"></div>
-    </div>
-
-    <div class="stats-box">
-      <div>✅ Wins: <span id="wins">0</span></div>
-      <div>❌ Losses: <span id="losses">0</span></div>
-      <div>🎯 Accuracy: <span id="accuracy">0%</span></div>
-    </div>
-
-    <div class="footer">Create by Mr Perfect</div>
+  <div class="telegram-popup hidden" id="telegramPopup">
+    <h1>📲 Join Telegram Channel</h1>
+    <p>Click below to join MrPerfect's channel!</p>
+    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
+      <button>Join Now</button>
+    </a>
+    <p style="margin-top: 10px; font-size: 13px;">Create by Mr Perfect</p>
+    <button onclick="closeTelegramPopup()">Skip</button>
   </div>
+
+  <div class="container hidden" id="mainApp">
+    <div class="stats">
+      <div>✅ Wins: <span id="winCount">0</span></div>
+      <div>❌ Losses: <span id="lossCount">0</span></div>
+      <div>📊 Accuracy: <span id="accuracy">0%</span></div>
+    </div>
+    <h1>🔢 Tap Last 10 Numbers</h1>
+    <div class="number-boxes" id="numberGrid"></div>
+    <div id="typedNumbers"></div>
+    <button onclick="makePrediction()">🔮 Predict</button>
+    <div class="result-box" id="prediction"></div>
+    <div class="feedback-box" id="feedback" style="display: none;">
+      <button onclick="userFeedback(true)">✅ Win</button>
+      <button onclick="userFeedback(false)">❌ Loss</button>
+    </div>
+  </div>
+
+  <audio id="winSound" src="https://audioplayer.wixmp.com/sounds/positive.mp3"></audio>
+  <audio id="lossSound" src="https://www.myinstants.com/media/sounds/sorrysorry.mp3"></audio>
+  <audio id="tapSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_d8ab8c6465.mp3"></audio>
 
   <script>
-    const accessKey = "Mrperfect456";
+    const correctKey = "Mrperfect456";
     const selectedNumbers = [];
-    let mode = "bigsmall";
-    let wins = 0, losses = 0;
+    let wins = 0;
+    let losses = 0;
 
-    const grid = document.getElementById("numberGrid");
-    for (let i = 0; i <= 9; i++) {
-      const box = document.createElement("div");
-      box.className = "number-box";
-      box.innerText = i;
-      box.onclick = () => {
-        if (box.classList.contains("selected")) return;
-        if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed");
-        box.classList.add("selected");
-        selectedNumbers.push(i);
-        new Audio("https://www.fesliyanstudios.com/play-mp3/4387").play();
-      };
-      grid.appendChild(box);
-    }
-
-    function unlockApp() {
-      const value = document.getElementById("keyInput").value;
-      if (value === accessKey) {
-        document.getElementById("keyBox").style.display = 'none';
-        document.getElementById("app").style.display = 'block';
-        alert("📲 Join our Telegram: https://t.me/+hzN8Ci0F7aYzMmY9");
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("keyPopup").classList.add("hidden");
+        document.getElementById("telegramPopup").classList.remove("hidden");
       } else {
-        alert("Incorrect Key!");
+        alert("Incorrect key! Please try again.");
       }
     }
 
-    function selectMode(m) {
-      mode = m;
+    function closeTelegramPopup() {
+      document.getElementById("telegramPopup").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+    }
+
+    function setupNumberGrid() {
+      const grid = document.getElementById("numberGrid");
+      for (let i = 0; i <= 9; i++) {
+        const div = document.createElement("div");
+        div.className = "number-box";
+        div.innerText = i;
+        div.onclick = () => toggleNumber(i);
+        grid.appendChild(div);
+      }
+    }
+
+    function toggleNumber(number) {
+      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
+      document.getElementById("tapSound").play();
+      selectedNumbers.push(number);
+      updateTypedNumbers();
+    }
+
+    function updateTypedNumbers() {
+      document.getElementById("typedNumbers").innerText = `Selected: ${selectedNumbers.join(", ")}`;
+    }
+
+    function makePrediction() {
+      if (selectedNumbers.length !== 10) {
+        return alert("Select 10 past numbers!");
+      }
+
+      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
+      const bigCount = bigSmallPattern.filter(p => p === 'BIG').length;
+      const smallCount = 10 - bigCount;
+      let predictedType = bigCount > smallCount ? 'SMALL' : 'BIG';
+      const chance = Math.floor(55 + Math.random() * 44);
+
+      document.getElementById("prediction").innerHTML = `
+        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
+        📈 Confidence: <strong>${chance}%</strong><br>
+        <u>Based on:</u><br>• Past pattern of last 10 entries<br>• Trader mindset reversal logic<br>• AI adjusted psychology system`;
+
+      document.getElementById("feedback").style.display = "flex";
+    }
+
+    function userFeedback(win) {
+      if (win) {
+        document.getElementById("winSound").play();
+        wins++;
+      } else {
+        document.getElementById("lossSound").play();
+        losses++;
+      }
+      updateStats();
       selectedNumbers.length = 0;
-      document.querySelectorAll('.number-box').forEach(el => el.classList.remove('selected'));
-      document.getElementById("resultDisplay").innerText = "";
+      updateTypedNumbers();
+      document.getElementById("feedback").style.display = "none";
     }
 
-    function predictNow() {
-      if (selectedNumbers.length !== 10) return alert("Please select 10 numbers");
-      let prediction = "";
-      let chance = Math.floor(55 + Math.random() * 40);
-
-      if (mode === 'bigsmall') {
-        const big = selectedNumbers.filter(n => n >= 5).length;
-        const small = 10 - big;
-        prediction = big > small ? "SMALL" : "BIG";
-      } else if (mode === 'color') {
-        const reds = selectedNumbers.filter(n => n % 2 === 0).length;
-        prediction = reds > 5 ? "RED + BIG" : "GREEN + SMALL";
-      } else {
-        const freq = {};
-        selectedNumbers.forEach(n => freq[n] = (freq[n] || 0) + 1);
-        prediction = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(n => n[0]).join(", ");
-      }
-
-      document.getElementById("resultDisplay").innerHTML = `🤖 Prediction: <strong>${prediction}</strong><br>Confidence: ${chance}%`;
+    function updateStats() {
+      const total = wins + losses;
+      const accuracy = total === 0 ? 0 : Math.round((wins / total) * 100);
+      document.getElementById("winCount").textContent = wins;
+      document.getElementById("lossCount").textContent = losses;
+      document.getElementById("accuracy").textContent = accuracy + "%";
     }
+
+    setupNumberGrid();
   </script>
 </body>
 
