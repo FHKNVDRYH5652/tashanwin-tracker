@@ -1,144 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mr Perfect Hack - WINGO Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MR PERFECT HACK</title>
   <style>
     body {
-      background-color: #10152b;
-      color: #fff;
+      background-color: #050b2a;
       font-family: Arial, sans-serif;
+      color: white;
       text-align: center;
       padding: 20px;
     }
     h1 {
       color: #00ffff;
-      font-size: 28px;
-      margin-bottom: 20px;
     }
-    .card {
-      background: #1b203d;
-      border-radius: 15px;
+    .container {
+      background: #11183a;
       padding: 20px;
-      margin: 15px auto;
-      width: 90%;
+      border-radius: 10px;
       max-width: 500px;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-    }
-    .title {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-    .big { color: #00ff00; }
-    .small { color: #ff5555; }
-    .timer {
-      font-size: 18px;
-      margin-top: 10px;
-      color: #ffd700;
+      margin: auto;
+      box-shadow: 0 0 15px #00ffff44;
     }
     table {
       width: 100%;
       margin-top: 10px;
-      border-collapse: collapse;
+      color: white;
     }
-    th, td {
+    input, select {
+      width: 90%;
       padding: 8px;
-      border-bottom: 1px solid #444;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
       text-align: center;
     }
-    .prediction-area {
-      margin-top: 15px;
-      font-size: 18px;
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      font-weight: bold;
+      background-color: #00ffff;
+      border: none;
+      color: #000;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .prediction {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+
   <h1>MR PERFECT HACK</h1>
 
-  <div class="card">
-    <div class="title">WINGO Prediction</div>
-    <div>Period: <span id="period">--</span></div>
-    <div>Prediction: <span id="prediction">--</span></div>
-    <div class="timer">Next in: <span id="countdown">60</span>s</div>
-  </div>
-
-  <div class="card">
-    <div class="title">Past 5 Results</div>
+  <div class="container">
+    <h2>Enter Last 5 Results</h2>
     <table>
       <thead>
-        <tr>
-          <th>Period</th>
-          <th>Result</th>
-        </tr>
+        <tr><th>Period</th><th>Result</th></tr>
       </thead>
-      <tbody id="historyTable"></tbody>
+      <tbody id="inputRows">
+        <!-- Input rows inserted here by JavaScript -->
+      </tbody>
     </table>
-    <div class="prediction-area">
-      Next Prediction: <span id="aiPrediction">--</span>
-    </div>
+    <button onclick="predictNext()">Predict</button>
+    <div class="prediction" id="predictionOutput">Next Prediction: --</div>
   </div>
 
   <script>
-    const periodBase = 1000000000;
-    const startTime = new Date("2025-06-01T00:00:00Z").getTime();
-    let history = [];
+    const inputRows = document.getElementById("inputRows");
 
-    function getCurrentPeriod() {
-      const now = Date.now();
-      const minutesPassed = Math.floor((now - startTime) / 60000);
-      return periodBase + minutesPassed;
+    for (let i = 0; i < 5; i++) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="number" id="period${i}" placeholder="e.g. 524" /></td>
+        <td>
+          <select id="result${i}">
+            <option value="BIG">BIG</option>
+            <option value="SMALL">SMALL</option>
+          </select>
+        </td>
+      `;
+      inputRows.appendChild(row);
     }
 
-    function getRandomPrediction() {
-      return Math.random() > 0.5 ? "BIG" : "SMALL";
+    function predictNext() {
+      const periods = [];
+      const results = [];
+
+      for (let i = 0; i < 5; i++) {
+        const p = parseInt(document.getElementById(`period${i}`).value);
+        const r = document.getElementById(`result${i}`).value;
+        if (isNaN(p)) return alert("Enter all period numbers.");
+        periods.push(p);
+        results.push(r);
+      }
+
+      // Dummy AI Logic (Example: Alternate trend check)
+      const smallCount = results.filter(r => r === "SMALL").length;
+      const bigCount = results.filter(r => r === "BIG").length;
+      let nextResult = "BIG";
+      if (smallCount > bigCount) nextResult = "BIG";
+      else if (bigCount > smallCount) nextResult = "SMALL";
+      else nextResult = Math.random() > 0.5 ? "BIG" : "SMALL";
+
+      const nextPeriod = periods[4] + 1;
+      document.getElementById("predictionOutput").innerText =
+        `Next Period: ${nextPeriod} | Prediction: ${nextResult}`;
     }
-
-    function aiPredict(history) {
-      if (history.length < 5) return "--";
-      const bigCount = history.slice(0, 5).filter(h => h.prediction === "BIG").length;
-      const nextPred = bigCount >= 3 ? "SMALL" : "BIG";
-      const nextPeriod = history[0].period + 1;
-      return `${nextPeriod} — ${nextPred}`;
-    }
-
-    function updatePrediction() {
-      const period = getCurrentPeriod();
-      const prediction = getRandomPrediction();
-
-      document.getElementById("period").textContent = period;
-      const predElem = document.getElementById("prediction");
-      predElem.textContent = prediction;
-      predElem.className = prediction.toLowerCase();
-
-      history.unshift({ period, prediction });
-      if (history.length > 5) history = history.slice(0, 5);
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const table = document.getElementById("historyTable");
-      table.innerHTML = history.map(h =>
-        `<tr><td>${String(h.period).slice(-3)}</td><td class="${h.prediction.toLowerCase()}">${h.prediction}</td></tr>`
-      ).join('');
-      document.getElementById("aiPrediction").textContent = aiPredict(history);
-    }
-
-    function startCountdown() {
-      let time = 60;
-      document.getElementById("countdown").textContent = time;
-      const interval = setInterval(() => {
-        time--;
-        document.getElementById("countdown").textContent = time;
-        if (time === 0) {
-          updatePrediction();
-          time = 60;
-        }
-      }, 1000);
-    }
-
-    updatePrediction();
-    startCountdown();
   </script>
+
 </body>
 </html>
