@@ -168,27 +168,31 @@
       if (selectedNumbers.length !== 5) {
         return alert("Select 5 past numbers!");
       }
-      const bigCount = selectedNumbers.filter(n => n >= 5).length;
-      const smallCount = 5 - bigCount;
 
-      let result = '';
+      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
+
+      let predictedType = '';
       let reasons = [];
 
-      if (bigCount > smallCount) {
-        result = 'BIG';
-        reasons.push("More BIG numbers (5-9) detected");
-      } else if (smallCount > bigCount) {
-        result = 'SMALL';
-        reasons.push("More SMALL numbers (0-4) detected");
-      } else {
-        result = Math.random() > 0.5 ? 'BIG' : 'SMALL';
-        reasons.push("Equal BIG/SMALL count – AI decided by pattern analysis");
-      }
+      // Basic trend reversal prediction
+      const lastTrend = bigSmallPattern[4];
+      predictedType = lastTrend === 'BIG' ? 'SMALL' : 'BIG';
+      reasons.push(`Last result was ${lastTrend}, applying human psychology: reverse logic`);
 
-      reasons.push("Analysis based on trend, psychology, tips & tricks");
+      // Count frequency
+      const freq = Array(10).fill(0);
+      selectedNumbers.forEach(n => freq[n]++);
+
+      // Predict 2 possible next numbers using lowest frequency
+      let minFreq = Math.min(...freq);
+      let predictionNumbers = freq.map((f, i) => f === minFreq ? i : -1).filter(i => i !== -1).slice(0, 2);
+
+      reasons.push("Selected based on least frequent numbers (AI trick)");
+      reasons.push("Combined logic: trend analysis, pattern reversal, psychology");
 
       document.getElementById("prediction").innerHTML = `
-        🤖 AI Prediction: <strong>${result}</strong><br><br>
+        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
+        🔢 Suggested Numbers: <strong>${predictionNumbers.join(", ")}</strong><br><br>
         <u>Reason:</u><br>• ${reasons.join("<br>• ")}`;
 
       document.getElementById("feedback").style.display = "flex";
