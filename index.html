@@ -131,6 +131,8 @@
   <script>
     const correctKey = "Mrperfect456";
     const selectedNumbers = [];
+    const bigNumbers = [5, 6, 7, 8, 9];
+    const smallNumbers = [0, 1, 2, 3, 4];
 
     function checkKey() {
       const key = document.getElementById("accessKey").value;
@@ -169,31 +171,25 @@
         return alert("Select 5 past numbers!");
       }
 
-      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
+      const trend = { big: 0, small: 0 };
+      selectedNumbers.forEach(n => {
+        if (bigNumbers.includes(n)) trend.big++;
+        else trend.small++;
+      });
 
-      let predictedType = '';
-      let reasons = [];
+      const prediction = trend.big > trend.small ? 'Small' : 'Big';
+      const predictionNumbers = prediction === 'Big' ? bigNumbers : smallNumbers;
 
-      // Basic trend reversal prediction
-      const lastTrend = bigSmallPattern[4];
-      predictedType = lastTrend === 'BIG' ? 'SMALL' : 'BIG';
-      reasons.push(`Last result was ${lastTrend}, applying human psychology: reverse logic`);
+      const diff = Math.abs(trend.big - trend.small);
+      const confidence = Math.min(99, Math.max(55, 60 + diff * 5));
 
-      // Count frequency
-      const freq = Array(10).fill(0);
-      selectedNumbers.forEach(n => freq[n]++);
-
-      // Predict 2 possible next numbers using lowest frequency
-      let minFreq = Math.min(...freq);
-      let predictionNumbers = freq.map((f, i) => f === minFreq ? i : -1).filter(i => i !== -1).slice(0, 2);
-
-      reasons.push("Selected based on least frequent numbers (AI trick)");
-      reasons.push("Combined logic: trend analysis, pattern reversal, psychology");
+      const reason = `Based on recent number types (Big: ${trend.big}, Small: ${trend.small}) and trader's mindset, AI predicts reversal/continuation.`;
 
       document.getElementById("prediction").innerHTML = `
-        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
+        🤖 Prediction Type: <strong>${prediction}</strong><br><br>
         🔢 Suggested Numbers: <strong>${predictionNumbers.join(", ")}</strong><br><br>
-        <u>Reason:</u><br>• ${reasons.join("<br>• ")}`;
+        ✨ Winning Chance: <strong>${confidence}%</strong><br><br>
+        <u>Reason:</u><br>${reason}`;
 
       document.getElementById("feedback").style.display = "flex";
     }
