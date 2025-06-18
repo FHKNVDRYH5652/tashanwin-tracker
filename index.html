@@ -1,151 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MrPerfect WINGO AI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MrPerfect WINGO AI Prediction</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
     body {
-      font-family: 'Orbitron', sans-serif;
-      background: #0a0a0a;
-      color: #00ffe7;
       margin: 0;
-      padding: 20px;
-      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #000000, #1a1a1a);
+      color: #00ffe7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-    .container {
-      max-width: 500px;
-      margin: auto;
+    .hidden { display: none; }
+    .container, .key-container, .telegram-popup {
       background: #111;
       padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 30px #00ffe766;
+      border-radius: 20px;
       border: 2px solid #00ffe7;
+      width: 440px;
+      box-shadow: 0 0 40px #00ffe766;
+      text-align: center;
     }
-    .number-grid {
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #00ffcc;
+    }
+    .number-boxes {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 10px;
-      margin: 20px 0;
+      margin-bottom: 15px;
     }
-    .number-btn {
-      padding: 15px;
-      font-size: 18px;
+    .number-box {
       background: #222;
-      border: 1px solid #00ffe7;
-      border-radius: 10px;
-      color: #00ffe7;
+      border: 1px solid #00ffcc;
+      padding: 15px;
+      border-radius: 12px;
       cursor: pointer;
+      font-size: 18px;
+      transition: 0.2s;
     }
-    .number-btn.selected {
-      background: #00ffe7;
+    .number-box:hover {
+      background: #00ffe733;
+    }
+    .selected {
+      background: #00ffcc !important;
       color: #000;
     }
     button {
-      padding: 12px 25px;
-      background: #00ffe7;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
       border: none;
       border-radius: 10px;
+      background: #00ffcc;
       color: #000;
       font-weight: bold;
+      font-size: 14px;
       cursor: pointer;
-      margin-top: 10px;
+      transition: 0.3s;
     }
-    .result {
+    button:hover {
+      background: #00c8aa;
+    }
+    .result-box {
       background: #000;
-      padding: 20px;
+      padding: 15px;
+      margin-top: 15px;
       border-radius: 12px;
-      margin-top: 20px;
-      border: 1px dashed #00ffe7;
+      border: 1px dashed #00ffcc;
     }
-    .stats {
+    .feedback-box {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .feedback-box button {
+      flex: 1;
+      font-size: 13px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
       margin-bottom: 10px;
-      color: #ccc;
+      background: #222;
+      color: #00ffe7;
+    }
+    .accuracy {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #00ffcc;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🎯 MrPerfect AI Prediction</h2>
-    <div class="stats" id="accuracyStats">Accuracy: 0%</div>
+  <div class="key-container" id="keyPopup">
+    <h1>🔐 Enter Access Key</h1>
+    <input type="text" id="accessKey" placeholder="Enter Key...">
+    <button onclick="checkKey()">Unlock</button>
+  </div>
 
-    <div class="number-grid" id="numberGrid"></div>
+  <div class="telegram-popup hidden" id="telegramPopup">
+    <h1>📲 Join Telegram Channel</h1>
+    <p>Click below to join MrPerfect's channel!</p>
+    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
+      <button>Join Now</button>
+    </a>
+    <p style="margin-top: 10px; color: #ccc; font-size: 12px;">Created by Mr Perfect</p>
+    <button onclick="closeTelegramPopup()">Continue</button>
+  </div>
 
-    <button onclick="predict()">🔮 Predict</button>
-
-    <div class="result" id="resultBox" style="display:none"></div>
+  <div class="container hidden" id="mainApp">
+    <h1>🔢 Tap Last 5 Numbers</h1>
+    <div class="number-boxes" id="numberGrid"></div>
+    <button onclick="makePrediction()">🔮 Predict</button>
+    <div class="result-box" id="prediction"></div>
+    <div class="accuracy" id="accuracyText">Accuracy: 0%</div>
+    <div class="feedback-box" id="feedback" style="display: none;">
+      <button onclick="userFeedback(true)">✅ Win</button>
+      <button onclick="userFeedback(false)">❌ Loss</button>
+    </div>
   </div>
 
   <script>
-    let selected = [];
-    let total = 0, win = 0;
+    const correctKey = "Mrperfect456";
+    const selectedNumbers = [];
+    let totalPredictions = 0;
+    let totalWins = 0;
 
-    function renderGrid() {
+    function checkKey() {
+      const key = document.getElementById("accessKey").value;
+      if (key === correctKey) {
+        document.getElementById("keyPopup").classList.add("hidden");
+        document.getElementById("telegramPopup").classList.remove("hidden");
+      } else {
+        alert("Incorrect key! Please try again.");
+      }
+    }
+
+    function closeTelegramPopup() {
+      document.getElementById("telegramPopup").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+    }
+
+    function setupNumberGrid() {
       const grid = document.getElementById("numberGrid");
       for (let i = 0; i <= 9; i++) {
-        const btn = document.createElement("button");
-        btn.innerText = i;
-        btn.className = "number-btn";
-        btn.onclick = () => {
-          if (selected.length < 5) {
-            selected.push(i);
-            btn.classList.add("selected");
-          }
-        };
-        grid.appendChild(btn);
+        const div = document.createElement("div");
+        div.className = "number-box";
+        div.innerText = i;
+        div.onclick = () => toggleNumber(div, i);
+        grid.appendChild(div);
       }
     }
 
-    function predict() {
-      if (selected.length < 5) {
-        alert("Select 5 numbers");
-        return;
+    function toggleNumber(div, number) {
+      if (selectedNumbers.length >= 5) return alert("Only 5 numbers allowed!");
+      div.classList.add("selected");
+      selectedNumbers.push(number);
+    }
+
+    function makePrediction() {
+      if (selectedNumbers.length !== 5) {
+        return alert("Select 5 past numbers!");
       }
 
-      const bigCount = selected.filter(n => n >= 5).length;
-      const smallCount = selected.filter(n => n < 5).length;
+      const bigCount = selectedNumbers.filter(n => n >= 5).length;
+      const smallCount = 5 - bigCount;
+      const lastNum = selectedNumbers[selectedNumbers.length - 1];
 
-      // Reverse psychology + trader mindset
+      // Trader-style logic: Predict reversal if same trend is high
       let prediction = '';
-      if (bigCount > smallCount) {
-        prediction = Math.random() > 0.4 ? 'Small' : 'Big';
-      } else if (smallCount > bigCount) {
-        prediction = Math.random() > 0.4 ? 'Big' : 'Small';
+      if (bigCount >= 4) {
+        prediction = 'SMALL';
+      } else if (smallCount >= 4) {
+        prediction = 'BIG';
       } else {
-        prediction = Math.random() > 0.5 ? 'Big' : 'Small';
+        prediction = lastNum >= 5 ? 'SMALL' : 'BIG';
       }
 
-      // Randomized win chance
-      const confidence = Math.floor(Math.random() * 44) + 55; // 55% to 99%
+      const confidence = Math.floor(Math.random() * 45) + 55; // 55% to 99%
 
-      const resultBox = document.getElementById("resultBox");
-      resultBox.style.display = "block";
-      resultBox.innerHTML = `
-        <h3>📊 Prediction: <span style="color:#00ffcc">${prediction}</span></h3>
-        <p>📈 Winning Chances: <strong>${confidence}%</strong></p>
-        <p>🧠 Based on trader's mindset: Trend reversal + pattern psychology</p>
-        <div>
-          <button onclick="feedback(true)">✅ Win</button>
-          <button onclick="feedback(false)">❌ Loss</button>
-        </div>
-      `;
+      document.getElementById("prediction").innerHTML = `
+        🤖 AI Prediction: <strong>${prediction}</strong><br><br>
+        📊 Winning Chances: <strong>${confidence}%</strong>`;
+
+      document.getElementById("feedback").style.display = "flex";
     }
 
-    function feedback(isWin) {
-      total++;
-      if (isWin) win++;
-      const acc = Math.round((win / total) * 100);
-      document.getElementById("accuracyStats").innerText = `Accuracy: ${acc}% (${win}/${total})`;
+    function userFeedback(win) {
+      totalPredictions++;
+      if (win) totalWins++;
+      const accuracy = Math.round((totalWins / totalPredictions) * 100);
+      document.getElementById("accuracyText").innerText = `Accuracy: ${accuracy}%`;
 
-      // Reset
-      selected = [];
-      document.getElementById("numberGrid").innerHTML = "";
-      renderGrid();
-      document.getElementById("resultBox").style.display = "none";
+      selectedNumbers.length = 0;
+      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
+      document.getElementById("feedback").style.display = "none";
     }
 
-    renderGrid();
+    setupNumberGrid();
   </script>
 </body>
 </html>
