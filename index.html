@@ -186,6 +186,7 @@
 
   <audio id="winSound" src="win.mp3"></audio>
   <audio id="failSound" src="fail.mp3"></audio>
+  <audio id="tapSound" src="tap.mp3"></audio>
 
   <script>
     const selectedNumbers = [];
@@ -220,12 +221,17 @@
       }
     }
 
+    function playTapSound() {
+      document.getElementById('tapSound').play();
+    }
+
     function selectNumber(num, btn) {
       if (locked) return;
       if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
       selectedNumbers.push(num);
       btn.classList.add('selected');
       updateList();
+      playTapSound();
     }
 
     function updateList() {
@@ -275,6 +281,14 @@
       }
 
       document.getElementById('feedbackArea').style.display = 'none';
+      clearAll();
+    }
+
+    function clearAll() {
+      selectedNumbers.length = 0;
+      updateList();
+      document.querySelectorAll('.number-inputs button').forEach(btn => btn.classList.remove('selected'));
+      locked = false;
     }
 
     setupGrid();
