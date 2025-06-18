@@ -2,134 +2,173 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WINGO 1 Min Prediction</title>
+  <title>Mr. Perfect Hack</title>
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: black;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background-color: #0f0f0f;
+      color: #00ffcc;
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+      padding: 50px;
     }
-    .container {
+
+    #access {
       background: #111;
       padding: 20px;
-      border-radius: 15px;
-      border: 1px solid #444;
-      width: 350px;
-      box-shadow: 0 0 10px #0ff;
+      border: 1px solid #00ffcc;
+      border-radius: 10px;
+      display: inline-block;
     }
-    .logo {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .logo img {
-      width: 100px;
-      border-radius: 50%;
-    }
-    .title {
-      text-align: center;
-      font-size: 24px;
-      color: cyan;
-      margin-bottom: 10px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 8px;
-    }
-    input {
-      background: #222;
-      color: #fff;
-    }
-    select {
-      background: #333;
-      color: #fff;
-    }
-    button {
-      background: #00f2ff;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #00c8d1;
-    }
-    .note {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 12px;
-      color: lime;
-    }
-    .hidden {
+
+    #dashboard {
+      margin-top: 40px;
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 10px;
+      border: 2px solid #00ffcc;
       display: none;
+    }
+
+    .input-section, .trend-section {
+      margin: 20px 0;
+    }
+
+    select, input[type="password"], input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      background: #222;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
+      border-radius: 5px;
+      margin: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #00ffcc;
+      color: #000;
+      border: none;
+      font-weight: bold;
+      margin-left: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #222;
+      margin: 5px auto;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .prediction {
+      font-size: 24px;
+      margin-top: 20px;
+      color: #ffeb3b;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="auth-box">
-    <div class="logo">
-      <img src="https://via.placeholder.com/100x100.png?text=Logo" alt="Logo">
-    </div>
-    <div class="title">Enter Access Key</div>
-    <input type="password" id="accessKey" placeholder="Enter Key (e.g., Mrperfect1122)">
-    <button onclick="checkKey()">Unlock</button>
-    <div class="note" id="auth-error"></div>
+  <div id="access">
+    <h2>Enter Access Key</h2>
+    <input type="password" id="accessKey" placeholder="Enter Key">
+    <button onclick="checkKey()">Enter</button>
+    <p id="error" style="color:red;"></p>
   </div>
 
-  <div class="container hidden" id="main-box">
-    <div class="title">WINGO PREDICTION</div>
-    <input type="text" placeholder="Game Version (e.g., 2024###)">
-    <input type="text" placeholder="Game Name (e.g., WINGO)">
-    <select>
-      <option value="safe">SAFE {100% Accuracy}</option>
-      <option value="risky">RISKY {Random Prediction}</option>
-    </select>
-    <button onclick="generatePrediction()">GET PREDICTION</button>
-    <div class="note" id="prediction"></div>
-    <div class="note" id="history"></div>
-    <div class="note" id="timer"></div>
+  <div id="dashboard">
+    <h1>🎯 Mr. Perfect Dashboard</h1>
+    <p>Reverse Psychology Based Color Trend Predictor</p>
+
+    <div class="trend-section">
+      <h3>🧠 Enter Last 10 Results (Big / Small)</h3>
+      <div id="inputs">
+        <!-- 10 Inputs -->
+        <input type="text" class="result" maxlength="5" placeholder="1">
+        <input type="text" class="result" maxlength="5" placeholder="2">
+        <input type="text" class="result" maxlength="5" placeholder="3">
+        <input type="text" class="result" maxlength="5" placeholder="4">
+        <input type="text" class="result" maxlength="5" placeholder="5">
+        <input type="text" class="result" maxlength="5" placeholder="6">
+        <input type="text" class="result" maxlength="5" placeholder="7">
+        <input type="text" class="result" maxlength="5" placeholder="8">
+        <input type="text" class="result" maxlength="5" placeholder="9">
+        <input type="text" class="result" maxlength="5" placeholder="10">
+      </div>
+      <br>
+      <button onclick="generatePrediction()">Generate Prediction</button>
+      <div class="prediction" id="predictionResult">Prediction: ?</div>
+    </div>
+
+    <hr style="margin: 40px 0; border-color: #333;">
+
+    <div class="input-section">
+      <label for="colorInput">🎨 Enter Your Color Guess:</label>
+      <select id="colorInput">
+        <option value="Red">🔴 Red</option>
+        <option value="Green">🟢 Green</option>
+        <option value="Violet">🟣 Violet</option>
+      </select>
+      <button onclick="submitGuess()">Submit</button>
+    </div>
+
+    <div id="history">
+      <h3>📜 Color Guess History</h3>
+      <ul id="trendList"></ul>
+    </div>
   </div>
 
   <script>
-    let history = [];
-    let correctKey = "Mrperfect1122";
+    const key = "Mrperfect456";
 
     function checkKey() {
-      const key = document.getElementById("accessKey").value;
-      if (key === correctKey) {
-        document.getElementById("auth-box").classList.add("hidden");
-        document.getElementById("main-box").classList.remove("hidden");
+      const input = document.getElementById("accessKey").value;
+      if (input === key) {
+        document.getElementById("access").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
       } else {
-        document.getElementById("auth-error").innerText = "❌ Incorrect Key!";
+        document.getElementById("error").textContent = "Incorrect Key!";
       }
+    }
+
+    function simulateColor() {
+      const colors = ["Red", "Green", "Violet"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function submitGuess() {
+      const guess = document.getElementById("colorInput").value;
+      const result = simulateColor();
+      const trendList = document.getElementById("trendList");
+
+      const entry = document.createElement("li");
+      entry.textContent = `You guessed: ${guess} | Result: ${result} | ${guess === result ? "✅ Correct" : "❌ Wrong"}`;
+      trendList.prepend(entry);
     }
 
     function generatePrediction() {
-      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
-      history.unshift(result);
-      if (history.length > 10) history.pop();
-      document.getElementById("prediction").innerText = `Prediction: ${result}`;
-      document.getElementById("history").innerText = `Last Predictions: ${history.join(", ")}`;
-    }
+      const inputs = document.querySelectorAll('.result');
+      const values = Array.from(inputs).map(input => input.value.trim().toLowerCase());
 
-    // Countdown Timer
-    let countdown = 60;
-    setInterval(() => {
-      countdown--;
-      document.getElementById("timer").innerText = `Next update in: ${countdown}s`;
-      if (countdown <= 0) {
-        countdown = 60;
-        generatePrediction();
+      if (values.length !== 10 || values.some(val => val !== "big" && val !== "small")) {
+        alert("Please enter exactly 10 values using only 'Big' or 'Small'");
+        return;
       }
-    }, 1000);
+
+      const bigCount = values.filter(val => val === "big").length;
+      const smallCount = values.filter(val => val === "small").length;
+
+      // Human psychology assumption: they think repeating = change expected
+      // Our hack: go opposite
+      let prediction = bigCount > smallCount ? "SMALL" : "BIG";
+
+      document.getElementById("predictionResult").textContent = `Prediction: ${prediction}`;
+    }
   </script>
 </body>
 </html>
