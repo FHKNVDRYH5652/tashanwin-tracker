@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WINGO Prediction - MrPerfect</title>
+  <title>MrPerfect WINGO AI Prediction</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
     body {
       margin: 0;
-      font-family: 'Share Tech Mono', monospace;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-      color: #00ffcc;
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(circle, #1b1b1b, #000);
+      color: #00ffe7;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -18,41 +18,31 @@
     }
     .container {
       background: #111;
-      padding: 25px;
+      padding: 30px;
       border-radius: 20px;
-      border: 2px solid #00ffcc;
+      border: 2px solid #00ffe7;
       width: 420px;
-      box-shadow: 0 0 30px #00ffcc33;
-    }
-    .logo {
+      box-shadow: 0 0 35px #00ffe766;
       text-align: center;
-      margin-bottom: 15px;
     }
-    .logo img {
-      width: 90px;
-      border-radius: 50%;
-      border: 2px solid #00ffcc;
-    }
-    .title {
-      text-align: center;
-      font-size: 26px;
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
       color: #00ffcc;
-      margin-bottom: 10px;
-      text-shadow: 0 0 5px #00ffccaa;
     }
-    input, select, button {
+    input, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 8px 0;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-family: inherit;
       font-size: 14px;
     }
     input {
       background: #222;
-      color: #0f0;
-      border: 1px solid #0f0;
+      color: #00ffcc;
+      border: 1px solid #00ffcc;
     }
     button {
       background: #00ffcc;
@@ -64,76 +54,87 @@
     button:hover {
       background: #00c8aa;
     }
-    .note {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
-      color: #0f0;
-    }
-    .result-box, .feedback-box {
+    .result-box {
       background: #000;
-      padding: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 12px;
       border: 1px dashed #00ffcc;
-      margin-top: 10px;
+    }
+    .feedback-box {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .feedback-box button {
+      flex: 1;
       font-size: 13px;
-      color: #ccc;
-      line-height: 1.5;
-      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">
-      <img src="https://via.placeholder.com/100x100.png?text=LOGO" alt="Logo">
-    </div>
-    <div class="title">🔮 MrPerfect Prediction</div>
-
-    <label>Past 5 Results (BIG/SMALL):</label>
-    <input type="text" id="pastResults" placeholder="Example: BIG,SMALL,BIG,BIG,SMALL">
-
-    <label>Actual Result:</label>
-    <input type="text" id="actualResult" placeholder="Enter actual result (BIG/SMALL)">
-
-    <button onclick="makePrediction()">Predict Next</button>
+    <h1>🔮 MrPerfect AI WINGO Prediction</h1>
+    <input type="text" id="pastResults" placeholder="Enter last 5 results (BIG/SMALL)">
+    <button onclick="makePrediction()">🔎 Predict Next</button>
 
     <div class="result-box" id="prediction"></div>
-    <div class="feedback-box" id="feedback"></div>
+
+    <div class="feedback-box" id="feedback" style="display: none;">
+      <button onclick="userFeedback(true)">✅ Win</button>
+      <button onclick="userFeedback(false)">❌ Loss</button>
+    </div>
   </div>
 
+  <audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+  <audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
   <script>
+    function analyzeAI(past) {
+      let bigs = past.filter(x => x === "BIG").length;
+      let smalls = past.filter(x => x === "SMALL").length;
+
+      let reasons = [];
+      if (bigs > smalls) reasons.push("Pattern Analysis suggests BIG");
+      if (smalls > bigs) reasons.push("Trend suggests SMALL");
+      if (bigs === smalls) reasons.push("Neutral trend, human psychology says alternate");
+      reasons.push("Tips: Avoid repeating past 3 results");
+
+      let result = bigs > smalls ? "BIG" : smalls > bigs ? "SMALL" : Math.random() > 0.5 ? "BIG" : "SMALL";
+      return { result, reasons };
+    }
+
     function makePrediction() {
       const pastInput = document.getElementById("pastResults").value.trim().toUpperCase();
-      const actualResult = document.getElementById("actualResult").value.trim().toUpperCase();
-      if (!pastInput || !actualResult) return alert("Please enter both past results and actual result.");
-
       const past = pastInput.split(',').map(x => x.trim());
-      if (past.length !== 5 || !["BIG", "SMALL"].includes(actualResult)) {
-        return alert("Please enter exactly 5 results as BIG or SMALL.");
+      if (past.length !== 5 || !past.every(x => x === "BIG" || x === "SMALL")) {
+        return alert("Please enter exactly 5 results as BIG or SMALL");
       }
 
-      const bigs = past.filter(x => x === "BIG").length;
-      const smalls = past.filter(x => x === "SMALL").length;
+      const { result, reasons } = analyzeAI(past);
+      const predictionBox = document.getElementById("prediction");
+      predictionBox.innerHTML = `
+        🤖 AI Analyzed: <strong>${result}</strong><br><br>
+        <u>Reasons:</u><br>• ${reasons.join("<br>• ")}
+      `;
+      document.getElementById("feedback").style.display = "flex";
+    }
 
-      let prediction = "BIG";
-      let chance = 50;
+    function userFeedback(win) {
+      const feedbackBox = document.getElementById("prediction");
+      const winSound = document.getElementById("winSound");
+      const lossSound = document.getElementById("lossSound");
 
-      if (bigs > smalls) {
-        prediction = "BIG";
-        chance = 85 + Math.floor(Math.random() * 10);
-      } else if (smalls > bigs) {
-        prediction = "SMALL";
-        chance = 85 + Math.floor(Math.random() * 10);
+      if (win) {
+        winSound.play();
+        feedbackBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
       } else {
-        prediction = Math.random() > 0.5 ? "BIG" : "SMALL";
-        chance = 70 + Math.floor(Math.random() * 10);
+        lossSound.play();
+        feedbackBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don't worry, AI is improving the next analysis!`;
       }
 
-      const win = prediction === actualResult;
-      document.getElementById("prediction").innerHTML = `🧠 Prediction: <strong>${prediction}</strong><br>🎯 Win Chance: <strong>${chance}%</strong>`;
-      document.getElementById("feedback").innerHTML = win
-        ? "✅ <strong>WIN!</strong> 🔥 Jalwa hai Mr Perfect ka!"
-        : "❌ <strong>LOSS!</strong> Don't worry! Next time improve and my BEST prediction!";
+      document.getElementById("feedback").style.display = "none";
     }
   </script>
 </body>
