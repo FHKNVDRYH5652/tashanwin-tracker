@@ -1,218 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MrPerfect WINGO AI Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MrPerfect Predictor</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #000000, #1a1a1a);
-      color: #00ffe7;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a0a0a;
+      color: #00ffcc;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
     }
-    .hidden { display: none; }
-    .container, .key-container, .telegram-popup {
+    .login, .container {
       background: #111;
-      padding: 30px;
-      border-radius: 20px;
-      border: 2px solid #00ffe7;
-      width: 440px;
-      box-shadow: 0 0 40px #00ffe766;
-      text-align: center;
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #00ffcc;
-    }
-    .number-boxes {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .number-box {
-      background: #222;
-      border: 1px solid #00ffcc;
-      padding: 15px;
+      padding: 20px;
       border-radius: 12px;
-      cursor: pointer;
-      font-size: 18px;
-      transition: 0.2s;
+      box-shadow: 0 0 10px #00ffcc;
     }
-    .number-box:hover {
-      background: #00ffe733;
+    .hidden {
+      display: none;
     }
-    .selected {
-      background: #00ffcc !important;
-      color: #000;
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+      width: 200px;
     }
     button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 10px;
       background: #00ffcc;
-      color: #000;
-      font-weight: bold;
-      font-size: 14px;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: 0.3s;
     }
-    button:hover {
-      background: #00c8aa;
+    .result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #ffffff;
     }
-    .result-box {
-      background: #000;
-      padding: 15px;
-      margin-top: 15px;
-      border-radius: 12px;
-      border: 1px dashed #00ffcc;
-    }
-    .feedback-box {
-      margin-top: 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .feedback-box button {
-      flex: 1;
-      font-size: 13px;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      border-radius: 10px;
-      border: 1px solid #00ffcc;
-      margin-bottom: 10px;
-      background: #222;
-      color: #00ffe7;
+    .feedback button {
+      background-color: #222;
+      color: #00ffcc;
+      border: 2px solid #00ffcc;
     }
   </style>
 </head>
 <body>
-  <div class="key-container" id="keyPopup">
-    <h1>🔐 Enter Access Key</h1>
-    <input type="text" id="accessKey" placeholder="Enter Key...">
+  <div class="login" id="loginBox">
+    <h2>Enter Access Key</h2>
+    <input type="text" id="keyInput" placeholder="Enter Key" />
     <button onclick="checkKey()">Unlock</button>
   </div>
 
-  <div class="telegram-popup hidden" id="telegramPopup">
-    <h1>📲 Join Telegram Channel</h1>
-    <p>Click below to join MrPerfect's channel!</p>
-    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">
-      <button>Join Now</button>
-    </a>
-    <button onclick="closeTelegramPopup()">Skip</button>
+  <div class="hidden" id="telegramBox">
+    <h3>📢 Join Our Telegram!</h3>
+    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">👉 Join Channel</a><br />
+    <button onclick="skipTelegram()">Skip</button>
   </div>
 
-  <div class="container hidden" id="mainApp">
-    <h1>🔢 Tap Last 5 Numbers</h1>
-    <div class="number-boxes" id="numberGrid"></div>
-    <button onclick="makePrediction()">🔮 Predict</button>
-    <div class="result-box" id="prediction"></div>
-    <div class="feedback-box" id="feedback" style="display: none;">
-      <button onclick="userFeedback(true)">✅ Win</button>
-      <button onclick="userFeedback(false)">❌ Loss</button>
+  <div class="hidden container" id="mainApp">
+    <h1>MrPerfect AI Prediction</h1>
+    <p>Select 5 Past Results:</p>
+    <div id="numberButtons"></div>
+    <p>Selected: <span id="selected"></span></p>
+    <button onclick="makePrediction()">Predict</button>
+    <div class="result" id="predictionResult"></div>
+    <div class="feedback hidden" id="feedback">
+      <p>Did this prediction win or lose?</p>
+      <button onclick="handleFeedback(true)">Win</button>
+      <button onclick="handleFeedback(false)">Loss</button>
     </div>
   </div>
 
-  <audio id="winSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-  <audio id="lossSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+  <audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+  <audio id="loseSound" src="https://www.soundjay.com/human/sounds/sad-trombone-01.mp3"></audio>
 
   <script>
-    const correctKey = "Mrperfect456";
-    const selectedNumbers = [];
+    const KEY = 'Mrperfect456';
+    const selected = [];
+    const numberButtons = document.getElementById('numberButtons');
+    const selectedDisplay = document.getElementById('selected');
+    const resultBox = document.getElementById('predictionResult');
+
+    for (let i = 0; i <= 9; i++) {
+      const btn = document.createElement('button');
+      btn.innerText = i;
+      btn.onclick = () => {
+        if (selected.length === 5) {
+          selected.length = 0;
+        }
+        selected.push(i);
+        selectedDisplay.innerText = selected.join(', ');
+      };
+      numberButtons.appendChild(btn);
+    }
 
     function checkKey() {
-      const key = document.getElementById("accessKey").value;
-      if (key === correctKey) {
-        document.getElementById("keyPopup").classList.add("hidden");
-        document.getElementById("telegramPopup").classList.remove("hidden");
+      const input = document.getElementById('keyInput').value;
+      if (input === KEY) {
+        document.getElementById('loginBox').classList.add('hidden');
+        document.getElementById('telegramBox').classList.remove('hidden');
       } else {
-        alert("Incorrect key! Please try again.");
+        alert('Incorrect Key');
       }
     }
 
-    function closeTelegramPopup() {
-      document.getElementById("telegramPopup").classList.add("hidden");
-      document.getElementById("mainApp").classList.remove("hidden");
-    }
-
-    function setupNumberGrid() {
-      const grid = document.getElementById("numberGrid");
-      for (let i = 0; i <= 9; i++) {
-        const div = document.createElement("div");
-        div.className = "number-box";
-        div.innerText = i;
-        div.onclick = () => toggleNumber(div, i);
-        grid.appendChild(div);
-      }
-    }
-
-    function toggleNumber(div, number) {
-      if (selectedNumbers.length >= 5) return alert("Only 5 numbers allowed!");
-      div.classList.add("selected");
-      selectedNumbers.push(number);
+    function skipTelegram() {
+      document.getElementById('telegramBox').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
     }
 
     function makePrediction() {
-      if (selectedNumbers.length !== 5) {
-        return alert("Select 5 past numbers!");
+      if (selected.length !== 5) {
+        alert('Please select exactly 5 numbers.');
+        return;
       }
 
-      const bigSmallPattern = selectedNumbers.map(n => n >= 5 ? 'BIG' : 'SMALL');
+      const big = selected.filter(n => n >= 5).length;
+      const small = selected.filter(n => n < 5).length;
 
-      let predictedType = '';
-      let reasons = [];
+      let prediction = '';
+      let reason = '';
+      let confidence = 50;
+      let numbers = [...selected];
 
-      // Basic trend reversal prediction
-      const lastTrend = bigSmallPattern[4];
-      predictedType = lastTrend === 'BIG' ? 'SMALL' : 'BIG';
-      reasons.push(`Last result was ${lastTrend}, applying human psychology: reverse logic`);
-
-      // Count frequency
-      const freq = Array(10).fill(0);
-      selectedNumbers.forEach(n => freq[n]++);
-
-      // Predict 2 possible next numbers using lowest frequency
-      let minFreq = Math.min(...freq);
-      let predictionNumbers = freq.map((f, i) => f === minFreq ? i : -1).filter(i => i !== -1).slice(0, 2);
-
-      reasons.push("Selected based on least frequent numbers (AI trick)");
-      reasons.push("Combined logic: trend analysis, pattern reversal, psychology");
-
-      document.getElementById("prediction").innerHTML = `
-        🤖 AI Prediction: <strong>${predictedType}</strong><br><br>
-        🔢 Suggested Numbers: <strong>${predictionNumbers.join(", ")}</strong><br><br>
-        <u>Reason:</u><br>• ${reasons.join("<br>• ")}`;
-
-      document.getElementById("feedback").style.display = "flex";
-    }
-
-    function userFeedback(win) {
-      const predictionBox = document.getElementById("prediction");
-      if (win) {
-        document.getElementById("winSound").play();
-        predictionBox.innerHTML += `<br><br>✅ <strong>WIN!</strong> 🎉 Jalwa hai MrPerfect ka!`;
+      if (big > small) {
+        prediction = 'Small';
+        confidence = 60;
+        reason = 'Opposite of human pattern and trend reversal logic applied.';
+      } else if (small > big) {
+        prediction = 'Big';
+        confidence = 60;
+        reason = 'Trend and frequency suggest Big. Applying pattern logic.';
       } else {
-        document.getElementById("lossSound").play();
-        predictionBox.innerHTML += `<br><br>❌ <strong>LOSS!</strong> 😔 Don't worry, AI will improve next time.`;
+        prediction = 'Small';
+        confidence = 52;
+        reason = 'Equal distribution. Small is selected due to recent loss recovery logic.';
       }
-      selectedNumbers.length = 0;
-      document.querySelectorAll('.number-box').forEach(box => box.classList.remove('selected'));
-      document.getElementById("feedback").style.display = "none";
+
+      const top2 = numbers.sort((a,b) => numbers.filter(v => v === b).length - numbers.filter(v => v === a).length).slice(0,2);
+
+      resultBox.innerHTML = `
+        🔮 Prediction: <b>${prediction}</b><br />
+        🎯 Numbers Likely: <b>${top2.join(', ')}</b><br />
+        📈 Confidence: <b>${confidence}%</b><br />
+        💡 Reason: ${reason}
+      `;
+      document.getElementById('feedback').classList.remove('hidden');
     }
 
-    setupNumberGrid();
+    function handleFeedback(win) {
+      if (win) {
+        document.getElementById('winSound').play();
+        resultBox.innerHTML += '<br><b>🎉 Jalwa hai MrPerfect ka!</b>';
+      } else {
+        document.getElementById('loseSound').play();
+        resultBox.innerHTML += '<br><b>😔 Don’t worry, next time will be better. AI is improving.</b>';
+      }
+      selected.length = 0;
+      selectedDisplay.innerText = '';
+      document.getElementById('feedback').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
