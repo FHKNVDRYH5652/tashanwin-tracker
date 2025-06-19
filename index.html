@@ -1,227 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MrPerfect Pro Big/Small Predictor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(to bottom right, #0d001a, #1a0033, #000010);
-      color: #ffffff;
-    }
-    #accessOverlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999;
-    }
-    #accessBox {
-      background: #1c002f;
-      padding: 30px; border: 2px solid #ff3399;
-      border-radius: 10px; text-align: center;
-    }
-    #accessBox input, #accessBox button {
-      padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin: 5px;
-    }
-    #accessBox button {
-      background: #ff3399; color: #000; font-weight: bold; cursor: pointer;
-    }
-    header {
-      text-align: center; padding: 20px; font-size: 2rem;
-      background-color: #1a002b; color: #ff66cc;
-      border-bottom: 3px solid #ff3399; text-shadow: 0 0 12px #ff0077;
-    }
-    .container {
-      max-width: 700px; margin: 30px auto;
-      background-color: #0d0d26; padding: 20px;
-      border-radius: 16px; border: 2px solid #9900cc;
-      box-shadow: 0 0 20px #9900cc;
-    }
-    .bs-buttons {
-      display: flex; flex-direction: column; gap: 8px;
-      margin-top: 20px;
-    }
-    .bs-buttons .entry {
-      display: flex; gap: 10px; align-items: center;
-    }
-    .bs-buttons button {
-      padding: 12px; font-size: 18px; font-weight: bold;
-      border-radius: 10px; border: none; cursor: pointer;
-      flex: 1;
-    }
-    .big { background: orange; color: #000; }
-    .small { background: #3399ff; color: #fff; }
-    .selected { box-shadow: 0 0 12px #00ffcc; border: 2px solid #00ffcc; }
-    #predictBtn {
-      display: block; margin: 20px auto;
-      padding: 14px 30px; background: #00ffcc;
-      border: none; border-radius: 12px;
-      font-weight: bold; font-size: 1.3rem; cursor: pointer;
-    }
-    #finalResult {
-      text-align: center; font-size: 2.4rem; font-weight: bold;
-      margin-bottom: 15px; padding: 15px; border: 2px solid #00ffcc;
-      background: #1a0033; color: #00ffcc;
-      border-radius: 14px; box-shadow: 0 0 15px #00ffcc;
-    }
-    #analysisBox {
-      margin-top: 15px; padding: 15px;
-      border: 1px dashed #ff66cc;
-      background-color: #220044; border-radius: 12px;
-      white-space: pre-line; color: #ff99ff;
-    }
-    .feedback {
-      margin-top: 15px; text-align: center; font-size: 1.2rem;
-    }
-    .feedback span.win {
-      color: #00ff66; text-shadow: 0 0 8px #00ff66;
-    }
-    .feedback span.loss {
-      color: #ff0033; text-shadow: 0 0 8px #ff0033;
-    }
-    canvas {
-      width: 100%;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="accessOverlay">
-    <div id="accessBox">
-      <h3>Enter Access Key</h3>
-      <input type="password" id="accessKey" placeholder="Enter Key" />
-      <button onclick="checkKey()">Unlock</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mr Perfect Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: black;
+        background-image: radial-gradient(red 1px, transparent 1px),
+          radial-gradient(red 1px, transparent 1px);
+        background-position: 0 0, 25px 25px;
+        background-size: 50px 50px;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen flex items-center justify-center text-white font-bold">
+    <div class="w-full max-w-md bg-[#0f0f0f] border border-red-600 rounded-2xl p-6 shadow-xl">
+      <!-- Avatar -->
+      <div class="flex justify-center">
+        <img
+          src="https://i.imgur.com/ODwIbjz.png"
+          alt="avatar"
+          class="w-24 h-24 rounded-full border-4 border-red-500"
+        />
+      </div>
+
+      <!-- Telegram -->
+      <p class="text-center text-red-400 mt-2">TG :- @MrPerfectTG</p>
+
+      <!-- Search Version -->
+      <button class="bg-red-500 text-black w-full py-2 mt-4 rounded-md font-extrabold">
+        SEARCH VERSION
+      </button>
+
+      <!-- Game Version -->
+      <div class="mt-4">
+        <p class="text-sm text-red-500">Game Version</p>
+        <input
+          type="text"
+          value="2025##"
+          readonly
+          class="w-full mt-1 p-2 rounded-md bg-black border border-red-600 text-white"
+        />
+      </div>
+
+      <!-- Game Name -->
+      <div class="mt-4">
+        <p class="text-sm text-red-500">Game Name</p>
+        <input
+          type="text"
+          value="Big Mumbai"
+          readonly
+          class="w-full mt-1 p-2 rounded-md bg-black border border-red-600 text-white"
+        />
+      </div>
+
+      <!-- Play Mode -->
+      <div class="mt-4">
+        <p class="text-sm text-red-500">Play Mode</p>
+        <input
+          type="text"
+          value="SAFE { 85-90% Accuracy }"
+          readonly
+          class="w-full mt-1 p-2 rounded-md bg-black border border-red-600 text-white"
+        />
+      </div>
+
+      <!-- License Key -->
+      <div class="mt-4">
+        <p class="text-sm text-red-500">License Key</p>
+        <input
+          type="password"
+          placeholder="...."
+          id="licenseInput"
+          class="w-full mt-1 p-2 rounded-md bg-black border border-red-600 text-white"
+        />
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-between mt-6 gap-4">
+        <button class="bg-red-600 flex-1 py-2 rounded-l-full">GET KEY</button>
+        <button
+          class="bg-red-600 flex-1 py-2 rounded-r-full"
+          onclick="handleLogin()"
+        >
+          LOGIN
+        </button>
+      </div>
+
+      <p id="errorMessage" class="text-red-400 text-center mt-2 hidden">Invalid Key</p>
+
+      <!-- VIP Login -->
+      <div class="mt-6 text-center">
+        <button class="w-full py-2 bg-red-700 rounded-md">
+          👑 VIP LOGIN ACCESS 👑
+        </button>
+      </div>
     </div>
-  </div>
 
-  <header>MrPerfect Pro Big/Small Predictor</header>
-  <div class="container">
-    <div id="finalResult">🔮 Waiting for Prediction...</div>
-    <h3>Enter Last 10 Results (Big/Small):</h3>
-    <div class="bs-buttons" id="resultButtons"></div>
-    <button id="predictBtn" onclick="predictResult()">Predict Next</button>
-    <canvas id="trendChart" height="100"></canvas>
-    <div id="analysisBox"></div>
-    <div class="feedback" id="feedback"></div>
-  </div>
-
-  <audio id="tapSound" src="tap.mp3"></audio>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    let historyResults = Array(10).fill(undefined);
-    let lossStreak = 0;
-
-    function checkKey() {
-      const key = document.getElementById('accessKey').value;
-      if (key === 'Mrperfect456') {
-        document.getElementById('accessOverlay').style.display = 'none';
-      } else {
-        alert('❌ Wrong key. Try again.');
+    <script>
+      function handleLogin() {
+        const key = document.getElementById('licenseInput').value;
+        const error = document.getElementById('errorMessage');
+        if (key === 'Mrperfect456') {
+          alert('Access Granted to Mr Perfect Pro!');
+          error.classList.add('hidden');
+        } else {
+          error.classList.remove('hidden');
+        }
       }
-    }
-
-    function setupResultButtons() {
-      const container = document.getElementById('resultButtons');
-      for (let i = 0; i < 10; i++) {
-        const entry = document.createElement('div');
-        entry.className = 'entry';
-
-        const big = document.createElement('button');
-        big.innerText = 'BIG';
-        big.className = 'big';
-        big.onclick = () => selectResult(i, 'BIG', big);
-
-        const small = document.createElement('button');
-        small.innerText = 'SMALL';
-        small.className = 'small';
-        small.onclick = () => selectResult(i, 'SMALL', small);
-
-        entry.appendChild(big);
-        entry.appendChild(small);
-        container.appendChild(entry);
-      }
-    }
-
-    function selectResult(index, value, btn) {
-      document.getElementById('tapSound').play();
-      historyResults[index] = value;
-      const siblings = btn.parentElement.querySelectorAll('button');
-      siblings.forEach(el => el.classList.remove('selected'));
-      btn.classList.add('selected');
-    }
-
-    function predictResult() {
-      if (historyResults.includes(undefined)) {
-        alert("Please enter all 10 results.");
-        return;
-      }
-
-      let bigCount = historyResults.filter(r => r === 'BIG').length;
-      let smallCount = 10 - bigCount;
-      let prediction = '';
-      let logicUsed = '';
-
-      if (lossStreak >= 2) {
-        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
-        logicUsed = 'Recovery Mode';
-      } else if (Math.abs(bigCount - smallCount) >= 4) {
-        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
-        logicUsed = 'High Confidence Trend';
-      } else if (Math.abs(bigCount - smallCount) >= 2) {
-        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
-        logicUsed = 'Medium Confidence Trend';
-      } else {
-        document.getElementById('finalResult').innerText = '⛔ SKIP - Weak Trend';
-        document.getElementById('analysisBox').innerText = '🔍 Weak trend detected. Prediction skipped to protect accuracy.';
-        return;
-      }
-
-      document.getElementById('finalResult').innerText = `🎯 Predicted: ${prediction}`;
-      document.getElementById('analysisBox').innerText = `📊 Analysis:\nBig: ${bigCount}, Small: ${smallCount}\nLoss Streak: ${lossStreak}\nLogic: ${logicUsed}`;
-
-      drawTrendChart();
-
-      document.getElementById('feedback').innerHTML = `Prediction Outcome?<br>
-        <button onclick="feedback(true)">✅ Win</button>
-        <button onclick="feedback(false)">❌ Loss</button>`;
-    }
-
-    function feedback(win) {
-      const box = document.getElementById('feedback');
-      if (win) {
-        lossStreak = 0;
-        box.innerHTML = '<span class="win">🏆 Prediction Result: WIN</span>';
-      } else {
-        lossStreak++;
-        box.innerHTML = '<span class="loss">😞 Prediction Result: LOSS</span>';
-      }
-      // reset for next round
-      historyResults = Array(10).fill(undefined);
-      document.getElementById('resultButtons').innerHTML = '';
-      setupResultButtons();
-    }
-
-    function drawTrendChart() {
-      const ctx = document.getElementById('trendChart').getContext('2d');
-      const data = {
-        labels: historyResults.map((_, i) => `#${i+1}`),
-        datasets: [{
-          label: 'Trend',
-          data: historyResults.map(v => v === 'BIG' ? 1 : 0),
-          backgroundColor: historyResults.map(v => v === 'BIG' ? 'orange' : '#3399ff'),
-        }]
-      };
-      if (window.trendChart) window.trendChart.destroy();
-      window.trendChart = new Chart(ctx, {
-        type: 'bar', data,
-        options: {scales: {y: {beginAtZero: true, max: 1}}, plugins: {legend: {display: false}}}
-      });
-    }
-
-    setupResultButtons();
-  </script>
-</body>
+    </script>
+  </body>
 </html>
