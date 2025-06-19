@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MrPerfect Pro Big/Small Prediction</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #0a0a1a);
-      color: #00ffe7;
+      background: linear-gradient(135deg, #1f002d, #300040);
+      color: #ff5cf0;
     }
     #accessOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -19,68 +20,66 @@
       z-index: 9999;
     }
     #accessBox {
-      background: #111;
-      padding: 30px;
-      border: 2px solid #00ffe7;
-      border-radius: 10px;
-      text-align: center;
+      background: #220033;
+      padding: 30px; border: 2px solid #ff00c8;
+      border-radius: 10px; text-align: center;
     }
     #accessBox input, #accessBox button {
       padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-right: 10px;
     }
     #accessBox button {
-      background: #00ffe7; font-weight: bold; cursor: pointer;
+      background: #ff00c8; font-weight: bold; cursor: pointer;
     }
     header {
-      text-align: center; padding: 20px; font-size: 1.8rem;
-      background-color: #141428; color: #00fff7;
-      border-bottom: 3px solid #00ffe7; text-shadow: 0 0 10px #00ffe7;
+      text-align: center; padding: 20px; font-size: 2rem;
+      background-color: #2a003f; color: #ff5cf0;
+      border-bottom: 3px solid #ff00c8; text-shadow: 0 0 15px #ff00c8;
     }
     .container {
-      max-width: 600px; margin: 30px auto;
-      background-color: #0e0e1f;
-      padding: 20px; border-radius: 12px; border: 2px solid #00ffe7;
-      box-shadow: 0 0 25px #00ffe7;
+      max-width: 700px; margin: 30px auto;
+      background-color: #1a002c;
+      padding: 25px; border-radius: 16px; border: 2px solid #ff00c8;
+      box-shadow: 0 0 35px #ff00c8;
     }
     .number-inputs {
       display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
     }
     .number-inputs button {
-      width: 50px; height: 50px; font-size: 20px;
-      border-radius: 10px; border: 1px solid #00ffcc;
-      background: #222; color: #00ffe7;
-      transition: 0.2s;
+      width: 55px; height: 55px; font-size: 22px;
+      border-radius: 10px; border: 1px solid #ff5cf0;
+      background: #331144; color: #ff5cf0; transition: 0.2s;
     }
     .number-inputs button.selected {
-      background: #00ffcc; color: #000; box-shadow: 0 0 10px #00ffcc;
+      background: #ff00c8; color: #000; box-shadow: 0 0 12px #ff00c8;
     }
     #selectedList {
       margin-top: 10px; text-align: center; font-size: 1.2rem;
     }
     #predictBtn {
       display: block; margin: 20px auto;
-      padding: 12px 25px; background: #00ffe7;
-      border: none; border-radius: 10px;
-      font-weight: bold; font-size: 1.2rem; cursor: pointer;
-      box-shadow: 0 0 10px #00ffe7;
+      padding: 14px 30px; background: #ff00c8;
+      border: none; border-radius: 12px;
+      font-weight: bold; font-size: 1.3rem; cursor: pointer;
+      box-shadow: 0 0 12px #ff00c8;
     }
     #finalResult {
-      text-align: center; font-size: 2rem; font-weight: bold;
-      margin-bottom: 15px; padding: 10px;
-      border: 2px solid #00ffe7; border-radius: 12px;
-      background: #000a; box-shadow: 0 0 15px #00ffe7;
+      text-align: center; font-size: 2.3rem; font-weight: bold;
+      margin-bottom: 15px; padding: 15px;
+      border: 2px solid #ff00c8; border-radius: 14px;
+      background: #220033; box-shadow: 0 0 18px #ff00c8;
+      color: #fff;
     }
     #statusLine {
-      text-align: center; font-size: 1.3rem; font-weight: bold;
-      margin-bottom: 15px;
+      text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 15px;
     }
-    .winStatus { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
-    .lossStatus { color: #ff0033; text-shadow: 0 0 5px #ff0033; }
+    .winStatus { color: #00ff66; text-shadow: 0 0 8px #00ff66; }
+    .lossStatus { color: #ff0033; text-shadow: 0 0 8px #ff0033; }
     #analysisBox {
       margin-top: 10px; padding: 15px;
-      border: 1px dashed #00ffcc;
-      background-color: #111a;
-      border-radius: 10px;
+      border: 1px dashed #ff5cf0;
+      background-color: #2b003f;
+      border-radius: 12px;
+      font-size: 0.95rem;
     }
     #feedbackArea {
       margin-top: 20px; text-align: center;
@@ -88,7 +87,10 @@
     #feedbackArea button {
       padding: 10px 20px; margin: 10px;
       font-size: 16px; border: none; border-radius: 8px;
-      cursor: pointer; background: #00ffcc;
+      cursor: pointer; background: #ff5cf0; color: #000;
+    }
+    #chartContainer {
+      margin-top: 25px;
     }
   </style>
 </head>
@@ -116,6 +118,9 @@
       <button onclick="userFeedback(true)">✅ Win</button>
       <button onclick="userFeedback(false)">❌ Loss</button>
     </div>
+    <div id="chartContainer">
+      <canvas id="resultChart"></canvas>
+    </div>
   </div>
 
   <audio id="winSound" src="win.mp3"></audio>
@@ -123,21 +128,36 @@
   <audio id="tapSound" src="tap.mp3"></audio>
 
   <script>
-    const selectedNumbers = [];
-    let locked = false;
-    let lossCount = 0;
-
+    const selectedNumbers = [], resultHistory = [];
+    let locked = false, lossCount = 0;
     const logicMethods = [
       'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic',
       'Ratio Analysis', 'Odd-Even Tracker', 'Range Behavior',
       'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
     ];
 
+    const chartCtx = document.getElementById('resultChart').getContext('2d');
+    const resultChart = new Chart(chartCtx, {
+      type: 'line', data: { labels: [], datasets: [{
+        label: 'Confidence %', data: [], borderColor: '#ff00c8', fill: false
+      }] }, options: { scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+
+    function updateChart(conf) {
+      const label = new Date().toLocaleTimeString();
+      resultChart.data.labels.push(label);
+      resultChart.data.datasets[0].data.push(conf);
+      if (resultChart.data.labels.length > 10) {
+        resultChart.data.labels.shift();
+        resultChart.data.datasets[0].data.shift();
+      }
+      resultChart.update();
+    }
+
     function checkKey() {
       const key = document.getElementById('accessKey').value;
       if (key === 'Mrperfect456') {
         document.getElementById('accessOverlay').style.display = 'none';
-        setTimeout(() => alert('📢 Join our Telegram Channel @MrPerfectPro'), 300);
       } else {
         alert('❌ Wrong key. Try again.');
       }
@@ -188,13 +208,14 @@
       const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
 
       currentFinal = final;
+      updateChart(confidence);
 
       document.getElementById('finalResult').innerHTML = `🔮 Final Prediction: <span style="color:#fff">${final}</span><br>📊 Confidence: ${confidence}%`;
       document.getElementById('statusLine').innerHTML = '<span style="color:yellow">⏳ Waiting for result...</span>';
 
-      let analysisHTML = '<h4>Prediction Breakdown:</h4>';
+      let analysisHTML = '<h4>Hack Analysis:</h4>';
       analysis.forEach(a => {
-        analysisHTML += `${a.method}: ${a.predicted}<br>`;
+        analysisHTML += `<strong>${a.method}</strong>: ${a.predicted}<br>`;
       });
       document.getElementById('analysisBox').innerHTML = analysisHTML;
 
@@ -212,7 +233,7 @@
       } else {
         lossCount++;
         document.getElementById('failSound').play();
-        alert("We'll improve accuracy further based on your feedback!");
+        alert("We're learning from feedback and improving next prediction!");
       }
 
       document.getElementById('feedbackArea').style.display = 'none';
