@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(to bottom right, #000000, #0a0a23, #002244);
+      background: linear-gradient(to bottom right, #0d001a, #1a0033, #000010);
       color: #ffffff;
     }
     #accessOverlay {
@@ -19,20 +19,20 @@
       z-index: 9999;
     }
     #accessBox {
-      background: #121236;
-      padding: 30px; border: 2px solid #ff0066;
+      background: #1c002f;
+      padding: 30px; border: 2px solid #ff3399;
       border-radius: 10px; text-align: center;
     }
     #accessBox input, #accessBox button {
       padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin: 5px;
     }
     #accessBox button {
-      background: #ff0066; color: #000; font-weight: bold; cursor: pointer;
+      background: #ff3399; color: #000; font-weight: bold; cursor: pointer;
     }
     header {
       text-align: center; padding: 20px; font-size: 2rem;
       background-color: #1a002b; color: #ff66cc;
-      border-bottom: 3px solid #ff0066; text-shadow: 0 0 12px #ff0077;
+      border-bottom: 3px solid #ff3399; text-shadow: 0 0 12px #ff0077;
     }
     .container {
       max-width: 700px; margin: 30px auto;
@@ -82,6 +82,10 @@
     .feedback span.loss {
       color: #ff0033; text-shadow: 0 0 8px #ff0033;
     }
+    canvas {
+      width: 100%;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -99,11 +103,13 @@
     <h3>Enter Last 10 Results (Big/Small):</h3>
     <div class="bs-buttons" id="resultButtons"></div>
     <button id="predictBtn" onclick="predictResult()">Predict Next</button>
+    <canvas id="trendChart" height="100"></canvas>
     <div id="analysisBox"></div>
     <div class="feedback" id="feedback"></div>
   </div>
 
   <audio id="tapSound" src="tap.mp3"></audio>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let historyResults = Array(10).fill(undefined);
     let lossStreak = 0;
@@ -156,29 +162,29 @@
       let bigCount = historyResults.filter(r => r === 'BIG').length;
       let smallCount = 10 - bigCount;
       let prediction = '';
-      let confidence = '';
+      let logicUsed = '';
 
       if (lossStreak >= 2) {
         prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
-        confidence = '💡 Smart Recovery Mode Activated';
-      } else if (Math.abs(bigCount - smallCount) >= 3) {
+        logicUsed = 'Recovery Mode';
+      } else if (Math.abs(bigCount - smallCount) >= 4) {
         prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
-        confidence = '📊 Trend-Based Decision';
+        logicUsed = 'High Confidence Trend';
+      } else if (Math.abs(bigCount - smallCount) >= 2) {
+        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
+        logicUsed = 'Medium Confidence Trend';
       } else {
-        document.getElementById('finalResult').innerText = '⛔ Skip - No Strong Signal';
-        document.getElementById('analysisBox').innerText = 'Analysis Skipped: Equal or near-equal Big/Small counts detected.';
+        document.getElementById('finalResult').innerText = '⛔ SKIP - Weak Trend';
+        document.getElementById('analysisBox').innerText = '🔍 Weak trend detected. Prediction skipped to protect accuracy.';
         return;
       }
 
       document.getElementById('finalResult').innerText = `🎯 Predicted: ${prediction}`;
-      document.getElementById('analysisBox').innerText = `📈 Calculation Insight:
-- Big: ${bigCount}, Small: ${smallCount}
-- Trend Margin: ${Math.abs(bigCount - smallCount)}
-- Logic Used: ${confidence}
-- Current Loss Streak: ${lossStreak}`;
+      document.getElementById('analysisBox').innerText = `📊 Analysis:\nBig: ${bigCount}, Small: ${smallCount}\nLoss Streak: ${lossStreak}\nLogic: ${logicUsed}`;
 
-      const feedbackBox = document.getElementById('feedback');
-      feedbackBox.innerHTML = `Prediction Outcome?<br>
+      drawTrendChart();
+
+      document.getElementById('feedback').innerHTML = `Prediction Outcome?<br>
         <button onclick="feedback(true)">✅ Win</button>
         <button onclick="feedback(false)">❌ Loss</button>`;
     }
@@ -192,6 +198,27 @@
         lossStreak++;
         box.innerHTML = '<span class="loss">😞 Prediction Result: LOSS</span>';
       }
+      // reset for next round
+      historyResults = Array(10).fill(undefined);
+      document.getElementById('resultButtons').innerHTML = '';
+      setupResultButtons();
+    }
+
+    function drawTrendChart() {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      const data = {
+        labels: historyResults.map((_, i) => `#${i+1}`),
+        datasets: [{
+          label: 'Trend',
+          data: historyResults.map(v => v === 'BIG' ? 1 : 0),
+          backgroundColor: historyResults.map(v => v === 'BIG' ? 'orange' : '#3399ff'),
+        }]
+      };
+      if (window.trendChart) window.trendChart.destroy();
+      window.trendChart = new Chart(ctx, {
+        type: 'bar', data,
+        options: {scales: {y: {beginAtZero: true, max: 1}}, plugins: {legend: {display: false}}}
+      });
     }
 
     setupResultButtons();
