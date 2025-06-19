@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MrPerfect Pro Big/Small Prediction</title>
+  <title>MrPerfect Pro Big/Small Predictor</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #1f002d, #300040);
-      color: #ff5cf0;
+      background: linear-gradient(to bottom right, #2e003e, #1a001f);
+      color: #ffffff;
     }
     #accessOverlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -20,78 +19,62 @@
       z-index: 9999;
     }
     #accessBox {
-      background: #220033;
-      padding: 30px; border: 2px solid #ff00c8;
+      background: #2a0033;
+      padding: 30px; border: 2px solid #ff0066;
       border-radius: 10px; text-align: center;
     }
     #accessBox input, #accessBox button {
-      padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-right: 10px;
+      padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin: 5px;
     }
     #accessBox button {
-      background: #ff00c8; font-weight: bold; cursor: pointer;
+      background: #ff0066; color: #000; font-weight: bold; cursor: pointer;
     }
     header {
       text-align: center; padding: 20px; font-size: 2rem;
-      background-color: #2a003f; color: #ff5cf0;
-      border-bottom: 3px solid #ff00c8; text-shadow: 0 0 15px #ff00c8;
+      background-color: #3b004d; color: #ff66cc;
+      border-bottom: 3px solid #ff0066; text-shadow: 0 0 10px #ff0077;
     }
     .container {
       max-width: 700px; margin: 30px auto;
-      background-color: #1a002c;
-      padding: 25px; border-radius: 16px; border: 2px solid #ff00c8;
-      box-shadow: 0 0 35px #ff00c8;
+      background-color: #1f0028; padding: 20px;
+      border-radius: 14px; border: 2px solid #ff0066;
+      box-shadow: 0 0 15px #ff0066;
     }
-    .number-inputs {
-      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    .bs-buttons {
+      display: flex; flex-direction: column; gap: 8px;
+      margin-top: 20px;
     }
-    .number-inputs button {
-      width: 55px; height: 55px; font-size: 22px;
-      border-radius: 10px; border: 1px solid #ff5cf0;
-      background: #331144; color: #ff5cf0; transition: 0.2s;
+    .bs-buttons .entry {
+      display: flex; gap: 10px; align-items: center;
     }
-    .number-inputs button.selected {
-      background: #ff00c8; color: #000; box-shadow: 0 0 12px #ff00c8;
+    .bs-buttons button {
+      padding: 12px; font-size: 18px; font-weight: bold;
+      border-radius: 10px; border: none; cursor: pointer;
+      flex: 1;
     }
-    #selectedList {
-      margin-top: 10px; text-align: center; font-size: 1.2rem;
-    }
+    .big { background: orange; color: #000; }
+    .small { background: #3399ff; color: #fff; }
+    .selected { box-shadow: 0 0 12px lime; border: 2px solid #00ff00; }
     #predictBtn {
       display: block; margin: 20px auto;
-      padding: 14px 30px; background: #ff00c8;
+      padding: 14px 30px; background: #00ff99;
       border: none; border-radius: 12px;
       font-weight: bold; font-size: 1.3rem; cursor: pointer;
-      box-shadow: 0 0 12px #ff00c8;
     }
     #finalResult {
-      text-align: center; font-size: 2.3rem; font-weight: bold;
-      margin-bottom: 15px; padding: 15px;
-      border: 2px solid #ff00c8; border-radius: 14px;
-      background: #220033; box-shadow: 0 0 18px #ff00c8;
-      color: #fff;
+      text-align: center; font-size: 2.2rem; font-weight: bold;
+      margin-bottom: 15px; padding: 15px; border: 2px solid #00ff99;
+      background: #330033; color: lime;
+      border-radius: 14px; box-shadow: 0 0 15px lime;
     }
-    #statusLine {
-      text-align: center; font-size: 1.4rem; font-weight: bold; margin-bottom: 15px;
-    }
-    .winStatus { color: #00ff66; text-shadow: 0 0 8px #00ff66; }
-    .lossStatus { color: #ff0033; text-shadow: 0 0 8px #ff0033; }
     #analysisBox {
-      margin-top: 10px; padding: 15px;
-      border: 1px dashed #ff5cf0;
-      background-color: #2b003f;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      margin-top: 15px; padding: 15px;
+      border: 1px dashed #ff66cc;
+      background-color: #2b003f; border-radius: 12px;
     }
-    #feedbackArea {
-      margin-top: 20px; text-align: center;
-    }
-    #feedbackArea button {
-      padding: 10px 20px; margin: 10px;
-      font-size: 16px; border: none; border-radius: 8px;
-      cursor: pointer; background: #ff5cf0; color: #000;
-    }
-    #chartContainer {
-      margin-top: 25px;
-    }
+    .feedback { margin-top: 15px; text-align: center; font-size: 1.2rem; }
+    .feedback span.win { color: #00ff66; text-shadow: 0 0 8px #00ff66; }
+    .feedback span.loss { color: #ff0033; text-shadow: 0 0 8px #ff0033; }
   </style>
 </head>
 <body>
@@ -104,55 +87,19 @@
   </div>
 
   <header>MrPerfect Pro Big/Small Predictor</header>
-
   <div class="container">
     <div id="finalResult">🔮 Waiting for Prediction...</div>
-    <div id="statusLine"></div>
-    <h2>Enter Last 10 Results</h2>
-    <div class="number-inputs" id="numberGrid"></div>
-    <div id="selectedList"></div>
-    <button id="predictBtn" onclick="predictResult()">🔮 Predict</button>
+    <h3>Tap Last 10 Results (Big/Small):</h3>
+    <div class="bs-buttons" id="resultButtons"></div>
+    <button id="predictBtn" onclick="predictResult()">Predict Next</button>
     <div id="analysisBox"></div>
-    <div id="feedbackArea" style="display:none;">
-      <h3>Was the prediction correct?</h3>
-      <button onclick="userFeedback(true)">✅ Win</button>
-      <button onclick="userFeedback(false)">❌ Loss</button>
-    </div>
-    <div id="chartContainer">
-      <canvas id="resultChart"></canvas>
-    </div>
+    <div class="feedback" id="feedback"></div>
   </div>
 
-  <audio id="winSound" src="win.mp3"></audio>
-  <audio id="failSound" src="fail.mp3"></audio>
   <audio id="tapSound" src="tap.mp3"></audio>
-
   <script>
-    const selectedNumbers = [], resultHistory = [];
-    let locked = false, lossCount = 0;
-    const logicMethods = [
-      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic',
-      'Ratio Analysis', 'Odd-Even Tracker', 'Range Behavior',
-      'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
-    ];
-
-    const chartCtx = document.getElementById('resultChart').getContext('2d');
-    const resultChart = new Chart(chartCtx, {
-      type: 'line', data: { labels: [], datasets: [{
-        label: 'Confidence %', data: [], borderColor: '#ff00c8', fill: false
-      }] }, options: { scales: { y: { beginAtZero: true, max: 100 } } }
-    });
-
-    function updateChart(conf) {
-      const label = new Date().toLocaleTimeString();
-      resultChart.data.labels.push(label);
-      resultChart.data.datasets[0].data.push(conf);
-      if (resultChart.data.labels.length > 10) {
-        resultChart.data.labels.shift();
-        resultChart.data.datasets[0].data.shift();
-      }
-      resultChart.update();
-    }
+    let historyResults = [];
+    let lossStreak = 0;
 
     function checkKey() {
       const key = document.getElementById('accessKey').value;
@@ -163,91 +110,82 @@
       }
     }
 
-    function setupGrid() {
-      const grid = document.getElementById('numberGrid');
-      for (let i = 0; i <= 9; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i;
-        btn.onclick = () => selectNumber(i, btn);
-        grid.appendChild(btn);
+    function setupResultButtons() {
+      const container = document.getElementById('resultButtons');
+      for (let i = 0; i < 10; i++) {
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+
+        const big = document.createElement('button');
+        big.innerText = 'BIG';
+        big.className = 'big';
+        big.onclick = () => selectResult(i, 'BIG', big);
+
+        const small = document.createElement('button');
+        small.innerText = 'SMALL';
+        small.className = 'small';
+        small.onclick = () => selectResult(i, 'SMALL', small);
+
+        entry.appendChild(big);
+        entry.appendChild(small);
+        container.appendChild(entry);
       }
     }
 
-    function playTapSound() {
+    function selectResult(index, value, btn) {
       document.getElementById('tapSound').play();
-    }
-
-    function selectNumber(num, btn) {
-      if (locked) return;
-      if (selectedNumbers.length >= 10) return alert("Only 10 numbers allowed!");
-      selectedNumbers.push(num);
+      historyResults[index] = value;
       btn.classList.add('selected');
-      updateList();
-      playTapSound();
+      const siblings = btn.parentElement.querySelectorAll('button');
+      siblings.forEach(el => {
+        if (el !== btn) el.classList.remove('selected');
+      });
     }
-
-    function updateList() {
-      document.getElementById('selectedList').innerText = `Selected: ${selectedNumbers.join(', ')}`;
-    }
-
-    let currentFinal = '';
 
     function predictResult() {
-      if (locked || selectedNumbers.length !== 10) return alert("Please select 10 numbers first.");
-      locked = true;
-
-      const analysis = logicMethods.map(method => {
-        let predicted = Math.random() > 0.5 ? 'BIG' : 'SMALL';
-        if (lossCount >= 2) predicted = 'BIG';
-        return { method, predicted };
-      });
-
-      const bigCount = analysis.filter(a => a.predicted === 'BIG').length;
-      const smallCount = 10 - bigCount;
-      const final = bigCount > smallCount ? 'BIG' : 'SMALL';
-      const confidence = Math.round((Math.max(bigCount, smallCount) / 10) * 100);
-
-      currentFinal = final;
-      updateChart(confidence);
-
-      document.getElementById('finalResult').innerHTML = `🔮 Final Prediction: <span style="color:#fff">${final}</span><br>📊 Confidence: ${confidence}%`;
-      document.getElementById('statusLine').innerHTML = '<span style="color:yellow">⏳ Waiting for result...</span>';
-
-      let analysisHTML = '<h4>Hack Analysis:</h4>';
-      analysis.forEach(a => {
-        analysisHTML += `<strong>${a.method}</strong>: ${a.predicted}<br>`;
-      });
-      document.getElementById('analysisBox').innerHTML = analysisHTML;
-
-      document.getElementById('feedbackArea').style.display = 'block';
-    }
-
-    function userFeedback(isWin) {
-      document.getElementById('statusLine').innerHTML = isWin
-        ? '<span class="winStatus">✅ Prediction Result: WIN</span>'
-        : '<span class="lossStatus">❌ Prediction Result: LOSS</span>';
-
-      if (isWin) {
-        lossCount = 0;
-        document.getElementById('winSound').play();
-      } else {
-        lossCount++;
-        document.getElementById('failSound').play();
-        alert("We're learning from feedback and improving next prediction!");
+      if (historyResults.length < 10 || historyResults.includes(undefined)) {
+        alert("Please enter all 10 results.");
+        return;
       }
 
-      document.getElementById('feedbackArea').style.display = 'none';
-      clearAll();
+      let bigCount = historyResults.filter(r => r === 'BIG').length;
+      let smallCount = 10 - bigCount;
+      let prediction = '';
+      let confidence = '';
+
+      if (lossStreak >= 2) {
+        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
+        confidence = '🔁 Recovery Mode: High Confidence';
+      } else if (Math.abs(bigCount - smallCount) >= 4) {
+        prediction = bigCount > smallCount ? 'SMALL' : 'BIG';
+        confidence = '📈 Trend Detected';
+      } else {
+        document.getElementById('finalResult').innerText = '⚠️ Skipping Prediction - Low Confidence';
+        document.getElementById('analysisBox').innerText = 'Analysis: Results too balanced. System decided to skip prediction.';
+        return;
+      }
+
+      document.getElementById('finalResult').innerText = `✅ Prediction: ${prediction}`;
+      document.getElementById('analysisBox').innerText = `Logic Summary:\n- BIG count: ${bigCount}\n- SMALL count: ${smallCount}\n- Confidence: ${confidence}\n- Loss Streak: ${lossStreak}`;
+
+      const feedbackBox = document.getElementById('feedback');
+      feedbackBox.innerHTML = `Was prediction correct? <br>
+        <button onclick="feedback(true)">✅ Win</button>
+        <button onclick="feedback(false)">❌ Loss</button>`;
     }
 
-    function clearAll() {
-      selectedNumbers.length = 0;
-      updateList();
-      document.querySelectorAll('.number-inputs button').forEach(btn => btn.classList.remove('selected'));
-      locked = false;
+    function feedback(win) {
+      const box = document.getElementById('feedback');
+      if (win) {
+        lossStreak = 0;
+        box.innerHTML = '<span class="win">🎉 Result: WIN</span>';
+      } else {
+        lossStreak++;
+        box.innerHTML = '<span class="loss">💔 Result: LOSS</span>';
+      }
     }
 
-    setupGrid();
+    setupResultButtons();
   </script>
 </body>
 </html>
