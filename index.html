@@ -58,18 +58,19 @@
       color: gold;
       text-decoration: none;
     }
-    .game-interface {
-      margin-top: 30px;
+    .result-box {
+      margin-top: 20px;
       padding: 20px;
-      border: 1px solid lime;
       border-radius: 10px;
-      display: none;
       background: #111;
+      border: 1px solid limegreen;
       text-align: center;
-      max-width: 320px;
     }
-    .game-interface h2 {
-      color: #39FF14;
+    .result-box h2 {
+      color: lime;
+    }
+    .result-box button {
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -78,7 +79,7 @@
   <div class="title">TG: @MrPerfectHack</div>
 
   <input class="input-box" type="text" value="#2025" readonly>
-  <input class="input-box" type="text" value="TASHAN WIN" readonly>
+  <input class="input-box" type="text" value="91 CLUB KA WINGO 1 MIN" readonly>
   <input class="input-box" type="text" value="SAFE { 85-90% Accuracy }" readonly>
   <input id="licenseKey" class="input-box" type="password" placeholder="Enter License Key">
 
@@ -88,48 +89,67 @@
     <p><a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">🔗 JOIN CHANNEL</a></p>
   </div>
 
-  <!-- Game Interface after login -->
-  <div class="game-interface" id="gameInterface">
+  <div class="result-box" id="nextInterface" style="display:none;">
     <h2>Welcome to Mr Perfect Pro</h2>
-    <p>Server: TASHAN WIN</p>
+    <p>Server: 91 CLUB KA WINGO 1 MIN</p>
     <p>Prediction Mode: SAFE (85-90% Accuracy)</p>
-    <p>Period: <span id="periodNumber">Loading...</span></p>
-    <p>Next Result In: <span id="countdown">00:30</span></p>
-    <button class="btn" onclick="showPrediction()">CHECK PREDICTION</button>
-    <p id="predictionResult"></p>
+    <p id="periodInfo">Period: Loading...</p>
+    <p id="nextResult">Next Result In: 01:00</p>
+    <button class="btn" onclick="checkPlayerResult()">CHECK PREDICTION</button>
+    <p id="resultPlayer"></p>
   </div>
 
   <script>
     let timer;
-    let lastPeriod = "";
+    let previousPlayerText = "";
+    let countdown = 60;
 
     function login() {
       const key = document.getElementById('licenseKey').value;
       if (key === 'Mrperfect456') {
-        document.getElementById('gameInterface').style.display = 'block';
-        updatePeriod();
-        timer = setInterval(updatePeriod, 1000);
+        document.querySelector('input[type="password"]').style.display = 'none';
+        document.querySelector('button').style.display = 'none';
+        document.getElementById('nextInterface').style.display = 'block';
+        startTimer();
       } else {
         alert('Invalid Key!');
       }
     }
 
-    function updatePeriod() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 30, 0);
-      const elapsed = Math.floor((now - start) / 1000);
-      const period = Math.floor(elapsed / 30) + 1;
-      const date = now.toISOString().split('T')[0].replace(/-/g, '');
-      const periodNumber = "100005" + String(period).padStart(4, '0');
-      document.getElementById("periodNumber").textContent = date + periodNumber;
-
-      const secondsLeft = 30 - (elapsed % 30);
-      document.getElementById("countdown").textContent = `00:${String(secondsLeft).padStart(2, '0')}`;
+    function startTimer() {
+      updatePeriod();
+      timer = setInterval(() => {
+        if (countdown <= 0) {
+          countdown = 60;
+          updatePeriod();
+        }
+        document.getElementById('nextResult').textContent = `Next Result In: 00:${String(countdown).padStart(2, '0')}`;
+        countdown--;
+      }, 1000);
     }
 
-    function showPrediction() {
-      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
-      document.getElementById("predictionResult").textContent = `Prediction: ${result}`;
+    function updatePeriod() {
+      const now = new Date();
+      const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 30, 0);
+      const elapsedMillis = now - startTime;
+      const elapsedSeconds = Math.max(0, Math.floor(elapsedMillis / 1000));
+      const totalPeriods = Math.floor(elapsedSeconds / 60);
+      const periodNum = totalPeriods + 1;
+
+      const formattedDate = now.toISOString().split('T')[0].replace(/-/g, '');
+      const period = formattedDate + "100005" + String(periodNum).padStart(4, '0');
+      document.getElementById('periodInfo').textContent = `Period: ${period}`;
+    }
+
+    function checkPlayerResult() {
+      const currentText = document.getElementById("periodInfo").textContent;
+      if (currentText !== previousPlayerText) {
+        const result = Math.random() > 0.5 ? "BIG" : "SMALL";
+        document.getElementById("resultPlayer").textContent = `Prediction: ${result}`;
+        previousPlayerText = currentText;
+      } else {
+        alert("PLS WAIT FOR NEXT PERIOD");
+      }
     }
   </script>
 </body>
