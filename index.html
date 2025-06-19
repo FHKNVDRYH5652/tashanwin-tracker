@@ -3,24 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MrPerfect Pro Prediction</title>
+  <title>MrPerfect Pro Big/Small Prediction</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: url('1000003741.png') no-repeat center center fixed;
-      background-size: cover;
+      background: linear-gradient(135deg, #1e1e2f, #0a0a1a);
       color: #00ffe7;
     }
     #accessOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 9999;
     }
     #accessBox {
@@ -31,125 +26,69 @@
       text-align: center;
     }
     #accessBox input, #accessBox button {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-      margin-right: 10px;
+      padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-right: 10px;
     }
     #accessBox button {
-      background: #00ffe7;
-      font-weight: bold;
-      cursor: pointer;
+      background: #00ffe7; font-weight: bold; cursor: pointer;
     }
     header {
-      text-align: center;
-      padding: 20px;
-      font-size: 1.5rem;
-      background-color: rgba(0, 0, 0, 0.7);
-      border-bottom: 2px solid #00ffe7;
-    }
-    .menu {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 10px;
-    }
-    .menu button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      background: #00ffcc;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
+      text-align: center; padding: 20px; font-size: 1.8rem;
+      background-color: #141428; color: #00fff7;
+      border-bottom: 3px solid #00ffe7; text-shadow: 0 0 10px #00ffe7;
     }
     .container {
-      max-width: 600px;
-      margin: 30px auto;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 20px;
-      border-radius: 12px;
-      border: 2px solid #00ffe7;
+      max-width: 600px; margin: 30px auto;
+      background-color: #0e0e1f;
+      padding: 20px; border-radius: 12px; border: 2px solid #00ffe7;
+      box-shadow: 0 0 25px #00ffe7;
     }
     .number-inputs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
     }
     .number-inputs button {
-      width: 50px;
-      height: 50px;
-      font-size: 20px;
-      border-radius: 10px;
-      border: 1px solid #00ffcc;
-      background: #222;
-      color: #00ffe7;
+      width: 50px; height: 50px; font-size: 20px;
+      border-radius: 10px; border: 1px solid #00ffcc;
+      background: #222; color: #00ffe7;
+      transition: 0.2s;
     }
     .number-inputs button.selected {
-      background: #00ffcc;
-      color: #000;
+      background: #00ffcc; color: #000; box-shadow: 0 0 10px #00ffcc;
     }
     #selectedList {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 1.2rem;
+      margin-top: 10px; text-align: center; font-size: 1.2rem;
     }
     #predictBtn {
-      display: block;
-      margin: 20px auto;
-      padding: 12px 25px;
-      background: #00ffe7;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
+      display: block; margin: 20px auto;
+      padding: 12px 25px; background: #00ffe7;
+      border: none; border-radius: 10px;
+      font-weight: bold; font-size: 1.2rem; cursor: pointer;
+      box-shadow: 0 0 10px #00ffe7;
     }
     #finalResult {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 15px;
-      padding: 10px;
-      border: 2px solid #00ffe7;
-      border-radius: 12px;
-      background: #000a;
-      box-shadow: 0 0 15px #00ffe7;
+      text-align: center; font-size: 2rem; font-weight: bold;
+      margin-bottom: 15px; padding: 10px;
+      border: 2px solid #00ffe7; border-radius: 12px;
+      background: #000a; box-shadow: 0 0 15px #00ffe7;
     }
     #statusLine {
-      text-align: center;
-      font-size: 1.3rem;
-      font-weight: bold;
+      text-align: center; font-size: 1.3rem; font-weight: bold;
       margin-bottom: 15px;
     }
-    .winStatus {
-      color: #00ff00;
-      text-shadow: 0 0 5px #00ff00;
-    }
-    .lossStatus {
-      color: #ff0033;
-      text-shadow: 0 0 5px #ff0033;
-    }
+    .winStatus { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+    .lossStatus { color: #ff0033; text-shadow: 0 0 5px #ff0033; }
     #analysisBox {
-      margin-top: 10px;
-      padding: 15px;
+      margin-top: 10px; padding: 15px;
       border: 1px dashed #00ffcc;
       background-color: #111a;
       border-radius: 10px;
     }
     #feedbackArea {
-      margin-top: 20px;
-      text-align: center;
+      margin-top: 20px; text-align: center;
     }
     #feedbackArea button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #00ffcc;
+      padding: 10px 20px; margin: 10px;
+      font-size: 16px; border: none; border-radius: 8px;
+      cursor: pointer; background: #00ffcc;
     }
   </style>
 </head>
@@ -162,12 +101,7 @@
     </div>
   </div>
 
-  <header>MrPerfect Pro Prediction System</header>
-  <div class="menu">
-    <button onclick="selectMode('bigsmall')">Big/Small</button>
-    <button onclick="selectMode('color')">Color</button>
-    <button onclick="selectMode('number')">Number</button>
-  </div>
+  <header>MrPerfect Pro Big/Small Predictor</header>
 
   <div class="container">
     <div id="finalResult">🔮 Waiting for Prediction...</div>
@@ -191,10 +125,12 @@
   <script>
     const selectedNumbers = [];
     let locked = false;
+    let lossCount = 0;
 
     const logicMethods = [
-      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic', 'Ratio Analysis',
-      'Odd-Even Tracker', 'Range Behavior', 'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
+      'Trend System', 'Pattern Match', 'Last Digit Logic', 'Reversal Logic',
+      'Ratio Analysis', 'Odd-Even Tracker', 'Range Behavior',
+      'Swing Strategy', 'Volume-Like Checker', 'Hybrid Model'
     ];
 
     function checkKey() {
@@ -205,10 +141,6 @@
       } else {
         alert('❌ Wrong key. Try again.');
       }
-    }
-
-    function selectMode(mode) {
-      alert(`Mode switched to: ${mode}`);
     }
 
     function setupGrid() {
@@ -245,7 +177,8 @@
       locked = true;
 
       const analysis = logicMethods.map(method => {
-        const predicted = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+        let predicted = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+        if (lossCount >= 2) predicted = 'BIG';
         return { method, predicted };
       });
 
@@ -269,15 +202,17 @@
     }
 
     function userFeedback(isWin) {
-      document.getElementById('statusLine').innerHTML = isWin 
-        ? '<span class="winStatus">✅ Prediction Result: WIN</span>' 
+      document.getElementById('statusLine').innerHTML = isWin
+        ? '<span class="winStatus">✅ Prediction Result: WIN</span>'
         : '<span class="lossStatus">❌ Prediction Result: LOSS</span>';
 
       if (isWin) {
+        lossCount = 0;
         document.getElementById('winSound').play();
       } else {
+        lossCount++;
         document.getElementById('failSound').play();
-        alert("We'll adjust and improve the prediction logic based on this loss!");
+        alert("We'll improve accuracy further based on your feedback!");
       }
 
       document.getElementById('feedbackArea').style.display = 'none';
