@@ -33,6 +33,16 @@
       <h2 class="text-xl mb-2">🔢 Enter Last 10 Results</h2>
       <div id="inputs" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></div>
 
+      <div class="bg-gray-800 p-3 rounded mb-2">
+        <p class="text-sm text-gray-300">🧩 Trend Preview:</p>
+        <div id="trendPreview" class="text-yellow-300 font-semibold"></div>
+      </div>
+
+      <div class="bg-gray-900 p-3 rounded mb-4">
+        <p class="text-sm text-gray-300">📦 Trend Result:</p>
+        <div id="trendResult" class="text-green-400 font-semibold"></div>
+      </div>
+
       <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 w-full py-2 rounded">Predict</button>
 
       <div id="predictionOutput" class="text-center text-xl mt-4"></div>
@@ -73,6 +83,8 @@
     const logicBox = document.getElementById("logicBox");
     const chart = document.getElementById("chart");
     const stats = document.getElementById("stats");
+    const trendPreview = document.getElementById("trendPreview");
+    const trendResult = document.getElementById("trendResult");
 
     function unlockApp() {
       const input = document.getElementById("keyInput").value;
@@ -90,8 +102,16 @@
         const select = document.createElement("select");
         select.className = "bg-gray-900 border border-purple-500 p-2 rounded text-center";
         select.innerHTML = '<option value="">--</option><option value="Big">Big</option><option value="Small">Small</option>';
+        select.addEventListener("change", updateTrendDisplay);
         inputs.appendChild(select);
       }
+    }
+
+    function updateTrendDisplay() {
+      const values = Array.from(inputs.querySelectorAll("select")).map(s => s.value);
+      const filtered = values.filter(v => v);
+      trendPreview.textContent = filtered.join(" → ");
+      trendResult.textContent = filtered.join(", ");
     }
 
     function analyze(name, vals) {
@@ -123,6 +143,8 @@
 
       const values = Array.from(inputs.querySelectorAll("select")).map(s => s.value);
       if (values.includes("")) return alert("Fill all 10 Big/Small values.");
+
+      updateTrendDisplay();
 
       const votes = logicNames.map(name => analyze(name, values));
       const counts = count(votes);
