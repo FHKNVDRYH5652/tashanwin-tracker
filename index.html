@@ -1,123 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mr Perfect Pro - Color Prediction</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr Perfect Pro - Big/Small Prediction</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      background: linear-gradient(to bottom right, #1f1c2c, #928dab);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    body { background: linear-gradient(to bottom right, #1f1c2c, #928dab); font-family: 'Segoe UI', sans-serif; }
     .hidden { display: none; }
-    .glow { box-shadow: 0 0 20px rgba(147, 112, 219, 0.6); }
+    .popup { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); background: #222; color: white; padding: 20px; border-radius: 10px; z-index: 999; text-align: center; }
   </style>
 </head>
 <body class="text-white p-6">
-  <div id="loginPage" class="text-center">
-    <h1 class="text-3xl font-bold mb-6">🔐 Login to Mr Perfect Pro</h1>
-    <input id="username" placeholder="Username" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
-    <input type="password" id="userpass" placeholder="Password" class="bg-gray-800 border border-gray-600 p-2 rounded mb-4 w-full" />
-    <button onclick="loginUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Login</button>
+  <div id="mainApp">
+    <h1 class="text-3xl font-bold text-center text-purple-400 mb-6">🎯 Mr Perfect Pro - Big/Small Prediction</h1>
+
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xl font-bold mb-4">🔢 Enter Last 10 Results (Big or Small)</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="inputFields"></div>
+      <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full">Predict</button>
+      <div id="predictionResult" class="mt-4 text-center text-2xl"></div>
+      <div id="logicBreakdown" class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto mt-10">
+      <canvas id="predictionChart" height="150"></canvas>
+    </div>
   </div>
 
-  <div id="mainApp" class="hidden">
-    <header class="text-center mb-10">
-      <h1 class="text-4xl font-bold text-purple-400">🎯 Mr Perfect Pro - Color Prediction System</h1>
-      <p class="text-sm text-gray-300 mt-2">High Accuracy | Real-Time Analysis | Admin Tools</p>
-      <div class="mt-4">
-        <button id="themeToggle" class="bg-yellow-400 text-black px-4 py-1 rounded">Toggle Theme</button>
-        <button onclick="logoutUser()" class="bg-red-500 text-white ml-4 px-3 py-1 rounded">Logout</button>
-      </div>
-    </header>
-
-    <section class="max-w-5xl mx-auto mb-10">
-      <h2 class="text-xl font-bold mb-4">🔢 Enter Last 10 Results</h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="inputFields"></div>
-      <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full">Predict Color</button>
-    </section>
-
-    <section class="max-w-5xl mx-auto mb-10">
-      <h2 class="text-xl font-bold mb-4">📋 Prediction Result</h2>
-      <div id="predictionResult" class="text-center text-2xl text-yellow-300 font-bold">No prediction yet.</div>
-    </section>
-
-    <section class="max-w-5xl mx-auto mb-10">
-      <h2 class="text-xl font-bold mb-4">📊 Prediction Breakdown (10 Logic Systems)</h2>
-      <div id="logicBreakdown" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
-    </section>
-
-    <section class="max-w-5xl mx-auto mb-10">
-      <h2 class="text-xl font-bold mb-4">📈 Prediction History Chart</h2>
-      <canvas id="predictionChart" height="150"></canvas>
-    </section>
-
-    <section class="max-w-5xl mx-auto mb-20">
-      <h2 class="text-xl font-bold mb-4">🔐 Admin Panel (Secret Mode)</h2>
-      <input type="password" id="adminPass" placeholder="Enter Admin Code" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
-      <button onclick="checkAdmin()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Access Admin</button>
-      <div id="adminPanel" class="hidden mt-6 p-4 bg-gray-900 rounded-lg border border-green-500">
-        <p class="mb-3 text-green-400 font-bold">Welcome Admin 👨‍💻</p>
-        <textarea rows="5" class="w-full p-2 bg-gray-800 text-white rounded mb-3" placeholder="Override prediction or logic..."></textarea>
-        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">Save Logic</button>
-      </div>
-    </section>
+  <div id="popup" class="popup hidden">
+    <p id="popupMsg"></p>
+    <button onclick="closePopup()" class="mt-4 px-4 py-2 bg-green-500 rounded">OK</button>
   </div>
 
   <audio id="dingSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
-    const systems = ["Trend", "Pattern", "Skip", "Mirror", "Reverse", "Wave", "RandomGap", "Weighted", "LevelUp", "Repeat"];
-    const resultDisplay = document.getElementById("predictionResult");
+    const logicNames = ["Trend", "Pattern", "Reverse", "Mirror", "Skip", "Weighted", "Zigzag", "Repeat", "Majority", "Gap"];
+    const inputFields = document.getElementById("inputFields");
+    const predictionResult = document.getElementById("predictionResult");
     const logicBreakdown = document.getElementById("logicBreakdown");
     const predictBtn = document.getElementById("predictBtn");
-    const chartCanvas = document.getElementById("predictionChart");
-    const inputFields = document.getElementById("inputFields");
-    const themeToggle = document.getElementById("themeToggle");
     const ding = document.getElementById("dingSound");
-    const loginPage = document.getElementById("loginPage");
-    const mainApp = document.getElementById("mainApp");
-    let historyData = [];
+    const popup = document.getElementById("popup");
+    const popupMsg = document.getElementById("popupMsg");
+    const chartCanvas = document.getElementById("predictionChart");
 
-    function initInputs() {
-      inputFields.innerHTML = "";
-      for (let i = 0; i < 10; i++) {
-        const input = document.createElement("input");
-        input.type = "number";
-        input.placeholder = `#${i+1}`;
-        input.className = "bg-gray-800 border border-purple-500 p-2 rounded text-center";
-        inputFields.appendChild(input);
+    let historyData = [];
+    let lastPrediction = null;
+    let predictionLocked = false;
+    let logicVotes = [];
+
+    for (let i = 0; i < 10; i++) {
+      const select = document.createElement("select");
+      select.className = "bg-gray-800 border border-purple-500 p-2 rounded text-center text-white";
+      select.innerHTML = `<option value="">--</option><option value="Big">Big</option><option value="Small">Small</option>`;
+      inputFields.appendChild(select);
+    }
+
+    function analyzeLogic(type, values) {
+      switch (type) {
+        case "Trend":
+          return values.filter(v => v === values[values.length - 1]).length > 5 ? values[values.length - 1] : (values[9] === "Big" ? "Small" : "Big");
+        case "Pattern":
+          return values[0] === values[2] && values[2] === values[4] ? values[0] : values[9] === "Big" ? "Small" : "Big";
+        case "Reverse":
+          return values[9] === "Big" ? "Small" : "Big";
+        case "Mirror":
+          return values[8] === values[6] ? values[8] : values[9];
+        case "Skip":
+          return values[8] === values[6] && values[6] === values[4] ? values[8] : values[9];
+        case "Weighted":
+          let count = values.reduce((acc, cur) => { acc[cur] = (acc[cur] || 0) + 1; return acc; }, {});
+          return count["Big"] >= count["Small"] ? "Big" : "Small";
+        case "Zigzag":
+          return values[9] === values[7] ? values[9] : values[9] === "Big" ? "Small" : "Big";
+        case "Repeat":
+          return values[9];
+        case "Majority":
+          let countMajor = values.reduce((acc, cur) => { acc[cur] = (acc[cur] || 0) + 1; return acc; }, {});
+          return countMajor["Big"] > countMajor["Small"] ? "Big" : "Small";
+        case "Gap":
+          return values[0] === values[3] ? values[0] : values[9] === "Big" ? "Small" : "Big";
+        default:
+          return "Big";
       }
     }
 
-    function getColor(num) {
-      if (num % 5 === 0) return "Violet";
-      return num % 2 === 0 ? "Green" : "Red";
+    function predict() {
+      if (predictionLocked) {
+        alert("You must confirm the last result before predicting again.");
+        return;
+      }
+
+      const inputs = Array.from(inputFields.querySelectorAll("select"));
+      const values = inputs.map(s => s.value).filter(v => v);
+      if (values.length < 10) return alert("Enter all 10 values (Big/Small)");
+
+      logicVotes = logicNames.map(name => analyzeLogic(name, values));
+      logicBreakdown.innerHTML = logicVotes.map((vote, i) =>
+        `<div class='p-2 bg-gray-800 rounded text-center'><strong>${logicNames[i]}</strong><div class='text-${vote === "Big" ? "green" : "red"}-400'>${vote}</div></div>`
+      ).join("");
+
+      const count = logicVotes.reduce((acc, cur) => { acc[cur] = (acc[cur] || 0) + 1; return acc; }, {});
+      const final = count["Big"] > count["Small"] ? "Big" : "Small";
+      const confidence = Math.floor((count[final] / 10) * 100);
+
+      predictionResult.innerHTML = `Prediction: <span class='text-${final === "Big" ? "green" : "red"}-400 font-bold'>${final}</span> (${confidence}%)`;
+      ding.play();
+
+      lastPrediction = final;
+      predictionLocked = true;
+      showResultPopup();
     }
 
-    function predictColor() {
-      const inputs = Array.from(inputFields.querySelectorAll("input"));
-      let values = inputs.map(input => parseInt(input.value)).filter(n => !isNaN(n));
-
-      let counts = { Green: 0, Red: 0, Violet: 0 };
-      logicBreakdown.innerHTML = "";
-
-      systems.forEach(sys => {
-        const pick = values[Math.floor(Math.random() * values.length)] || 0;
-        const color = getColor(pick);
-        counts[color]++;
-        const card = `<div class='p-2 bg-gray-800 rounded text-center'><strong>${sys}</strong><div class='text-${color === 'Green' ? 'green' : color === 'Red' ? 'red' : 'purple'}-400'>${color}</div></div>`;
-        logicBreakdown.innerHTML += card;
-      });
-
-      const final = Object.entries(counts).reduce((a, b) => a[1] >= b[1] ? a : b);
-      const confidence = Math.floor((final[1] / systems.length) * 100);
-      resultDisplay.innerHTML = `🎯 ${final[0]} with ${confidence}% confidence`;
-      ding.play();
-      historyData.push({ index: historyData.length + 1, confidence });
+    function showResultPopup() {
+      const win = confirm("Did your prediction win? Click OK for Win, Cancel for Loss.");
+      if (win) {
+        popupMsg.innerText = "✅ You Won! Prediction successful.";
+      } else {
+        popupMsg.innerText = "❌ You Lost! Improving next logic...";
+        improveNextLogic();
+      }
+      popup.classList.remove("hidden");
+      historyData.push({ index: historyData.length + 1, confidence: 10 * logicVotes.filter(v => v === lastPrediction).length });
       drawChart();
+    }
+
+    function closePopup() {
+      popup.classList.add("hidden");
+      predictionLocked = false;
+    }
+
+    function improveNextLogic() {
+      logicNames.push("SmartAI" + Math.floor(Math.random() * 1000));
     }
 
     function drawChart() {
@@ -144,43 +161,7 @@
       });
     }
 
-    function checkAdmin() {
-      const pass = document.getElementById("adminPass").value;
-      if (pass === "mrperfect") {
-        document.getElementById("adminPanel").classList.remove("hidden");
-      } else {
-        alert("Wrong password!");
-      }
-    }
-
-    function loginUser() {
-      const u = document.getElementById("username").value;
-      const p = document.getElementById("userpass").value;
-      if (u === "user" && p === "1234") {
-        loginPage.classList.add("hidden");
-        mainApp.classList.remove("hidden");
-        initInputs();
-      } else {
-        alert("Invalid credentials");
-      }
-    }
-
-    function logoutUser() {
-      loginPage.classList.remove("hidden");
-      mainApp.classList.add("hidden");
-    }
-
-    let darkMode = true;
-    themeToggle?.addEventListener("click", () => {
-      document.body.classList.toggle("bg-white");
-      document.body.classList.toggle("text-black");
-      document.body.classList.toggle("text-white");
-      darkMode = !darkMode;
-      themeToggle.innerText = darkMode ? "Toggle Theme" : "Dark Mode";
-    });
-
-    setInterval(() => { if (!loginPage.classList.contains("hidden")) return; predictColor(); }, 60000);
-    predictBtn?.addEventListener("click", predictColor);
+    predictBtn.addEventListener("click", predict);
   </script>
 </body>
 </html>
