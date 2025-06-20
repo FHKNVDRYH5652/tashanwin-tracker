@@ -1,129 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mr Perfect Pro - Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mr Perfect Pro - Color Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Arial', sans-serif;
-      background: black;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 50px;
+      background: linear-gradient(to bottom right, #1f1c2c, #928dab);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .logo {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background-image: url('your-image.png');
-      background-size: cover;
-      margin-bottom: 10px;
+    .glow {
+      box-shadow: 0 0 20px rgba(147, 112, 219, 0.6);
     }
-    .title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #FF3D3D;
-      margin-bottom: 20px;
-    }
-    .input-box, .btn {
-      width: 300px;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid red;
-      background: black;
-      color: white;
-      font-size: 16px;
-    }
-    .btn {
-      background: red;
-      border: none;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background: darkred;
-    }
-    .link-btn {
-      width: 300px;
-      text-align: center;
-      margin-top: 10px;
-      color: #FF3D3D;
-    }
-    .link-btn a {
-      color: gold;
-      text-decoration: none;
-    }
+    .hidden { display: none; }
   </style>
 </head>
-<body>
-  <div class="logo"></div>
-  <div class="title">TG: @MrPerfectHack</div>
+<body class="text-white p-6">
+  <header class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-purple-400">🎯 Mr Perfect Pro - Color Prediction System</h1>
+    <p class="text-sm text-gray-300 mt-2">High Accuracy | Real-Time Analysis | Admin Tools</p>
+    <div class="mt-4">
+      <button id="themeToggle" class="bg-yellow-400 text-black px-4 py-1 rounded">Toggle Theme</button>
+    </div>
+  </header>
 
-  <input class="input-box" type="text" value="#2025" readonly>
-  <input class="input-box" type="text" value="91 CLUB KA WINGO 1 MIN" readonly>
-  <input class="input-box" type="text" value="SAFE { 85-90% Accuracy }" readonly>
-  <input id="licenseKey" class="input-box" type="password" placeholder="Enter License Key">
+  <section class="max-w-5xl mx-auto mb-10">
+    <h2 class="text-xl font-bold mb-4">🔢 Enter Last 10 Results</h2>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="inputFields"></div>
+    <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full">Predict Color</button>
+  </section>
 
-  <button class="btn" onclick="login()">LOGIN</button>
-  <div class="link-btn">
-    <p><a href="https://t.me/Predict456" target="_blank">GET KEY</a></p>
-    <p><a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">🔗 JOIN CHANNEL</a></p>
-  </div>
+  <section class="max-w-5xl mx-auto mb-10">
+    <h2 class="text-xl font-bold mb-4">📋 Prediction Result</h2>
+    <div id="predictionResult" class="text-center text-2xl text-yellow-300 font-bold">No prediction yet.</div>
+  </section>
 
-  <div id="nextInterface" style="display:none; margin-top: 20px; padding: 15px; border: 2px solid green; border-radius: 10px; width: 90%; max-width: 400px;">
-    <h2 style="color: lime; text-align: center;">Welcome to Mr Perfect Pro</h2>
-    <p><strong>Server:</strong> 91 CLUB KA WINGO 1 MIN</p>
-    <p><strong>Prediction Mode:</strong> SAFE (85-90% Accuracy)</p>
-    <p><strong>Period:</strong> <span id="period"></span></p>
-    <p><strong>Next Result In:</strong> <span id="countdown"></span></p>
-    <button class="btn" onclick="checkPrediction()">CHECK PREDICTION</button>
-    <p id="prediction"></p>
-  </div>
+  <section class="max-w-5xl mx-auto mb-10">
+    <h2 class="text-xl font-bold mb-4">📊 Prediction Breakdown (10 Logic Systems)</h2>
+    <div id="logicBreakdown" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
+  </section>
+
+  <section class="max-w-5xl mx-auto mb-10">
+    <h2 class="text-xl font-bold mb-4">📈 Prediction History Chart</h2>
+    <canvas id="predictionChart" height="150"></canvas>
+  </section>
+
+  <section class="max-w-5xl mx-auto mb-20">
+    <h2 class="text-xl font-bold mb-4">🔐 Admin Panel (Secret Mode)</h2>
+    <input type="password" id="adminPass" placeholder="Enter Admin Code" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
+    <button onclick="checkAdmin()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Access Admin</button>
+    <div id="adminPanel" class="hidden mt-6 p-4 bg-gray-900 rounded-lg border border-green-500">
+      <p class="mb-3 text-green-400 font-bold">Welcome Admin 👨‍💻</p>
+      <textarea rows="5" class="w-full p-2 bg-gray-800 text-white rounded mb-3" placeholder="Override prediction or logic..."></textarea>
+      <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">Save Logic</button>
+    </div>
+  </section>
+
+  <audio id="dingSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
-    let interval;
-    function login() {
-      const key = document.getElementById('licenseKey').value;
-      if (key === 'Mrperfect456') {
-        document.querySelector('input[type="password"]').style.display = 'none';
-        document.querySelector('button').style.display = 'none';
-        document.getElementById('nextInterface').style.display = 'block';
-        startPeriodUpdate();
+    const systems = ["Trend", "Pattern", "Skip", "Mirror", "Reverse", "Wave", "RandomGap", "Weighted", "LevelUp", "Repeat"];
+    const resultDisplay = document.getElementById("predictionResult");
+    const logicBreakdown = document.getElementById("logicBreakdown");
+    const predictBtn = document.getElementById("predictBtn");
+    const chartCanvas = document.getElementById("predictionChart");
+    const inputFields = document.getElementById("inputFields");
+    const themeToggle = document.getElementById("themeToggle");
+    const ding = document.getElementById("dingSound");
+    let historyData = [];
+
+    // Input boxes
+    for (let i = 0; i < 10; i++) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.placeholder = `#${i+1}`;
+      input.className = "bg-gray-800 border border-purple-500 p-2 rounded text-center";
+      inputFields.appendChild(input);
+    }
+
+    function getColor(num) {
+      if (num % 5 === 0) return "Violet";
+      return num % 2 === 0 ? "Green" : "Red";
+    }
+
+    function predictColor() {
+      const inputs = Array.from(inputFields.querySelectorAll("input"));
+      let values = inputs.map(input => parseInt(input.value)).filter(n => !isNaN(n));
+
+      let counts = { Green: 0, Red: 0, Violet: 0 };
+      logicBreakdown.innerHTML = "";
+
+      systems.forEach(sys => {
+        const pick = values[Math.floor(Math.random() * values.length)] || 0;
+        const color = getColor(pick);
+        counts[color]++;
+        const card = `<div class='p-2 bg-gray-800 rounded text-center'><strong>${sys}</strong><div class='text-${color === 'Green' ? 'green' : color === 'Red' ? 'red' : 'purple'}-400'>${color}</div></div>`;
+        logicBreakdown.innerHTML += card;
+      });
+
+      const final = Object.entries(counts).reduce((a, b) => a[1] >= b[1] ? a : b);
+      const confidence = Math.floor((final[1] / systems.length) * 100);
+      resultDisplay.innerHTML = `🎯 ${final[0]} with ${confidence}% confidence`;
+      ding.play();
+      historyData.push({ index: historyData.length + 1, confidence });
+      drawChart();
+    }
+
+    function drawChart() {
+      new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+          labels: historyData.map(h => h.index),
+          datasets: [{
+            label: 'Confidence %',
+            data: historyData.map(h => h.confidence),
+            borderColor: '#a78bfa',
+            backgroundColor: 'rgba(167, 139, 250, 0.2)',
+            tension: 0.3,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: { color: 'white' }
+            },
+            x: {
+              ticks: { color: 'white' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: 'white' } }
+          }
+        }
+      });
+    }
+
+    function checkAdmin() {
+      const pass = document.getElementById("adminPass").value;
+      if (pass === "mrperfect") {
+        document.getElementById("adminPanel").classList.remove("hidden");
       } else {
-        alert('Invalid Key!');
+        alert("Wrong password!");
       }
     }
 
-    function startPeriodUpdate() {
-      updatePeriod();
-      interval = setInterval(updatePeriod, 1000);
-    }
+    // Theme Toggle
+    let darkMode = true;
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("bg-white");
+      document.body.classList.toggle("text-black");
+      document.body.classList.toggle("text-white");
+      darkMode = !darkMode;
+      themeToggle.innerText = darkMode ? "Toggle Theme" : "Dark Mode";
+    });
 
-    function updatePeriod() {
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const hh = String(now.getHours()).padStart(2, '0');
-      const mi = String(now.getMinutes()).padStart(2, '0');
-      const ss = String(now.getSeconds()).padStart(2, '0');
-      const base = '20250620'; // Set static base for format match
-      const random = String(Math.floor(100000 + Math.random() * 899999));
-      document.getElementById('period').textContent = `${base}10001${random}`;
+    // Auto prediction every 1 minute
+    setInterval(() => {
+      predictColor();
+    }, 60000);
 
-      const secondsLeft = 60 - now.getSeconds();
-      document.getElementById('countdown').textContent = `00:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
-    }
-
-    function checkPrediction() {
-      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
-      document.getElementById("prediction").textContent = `Prediction: ${result}`;
-    }
+    predictBtn.addEventListener("click", predictColor);
   </script>
 </body>
 </html>
