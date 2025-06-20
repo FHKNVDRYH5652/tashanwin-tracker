@@ -58,20 +58,6 @@
       color: gold;
       text-decoration: none;
     }
-    .result-box {
-      margin-top: 20px;
-      padding: 20px;
-      border-radius: 10px;
-      background: #111;
-      border: 1px solid limegreen;
-      text-align: center;
-    }
-    .result-box h2 {
-      color: lime;
-    }
-    .result-box button {
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -89,67 +75,54 @@
     <p><a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">🔗 JOIN CHANNEL</a></p>
   </div>
 
-  <div class="result-box" id="nextInterface" style="display:none;">
-    <h2>Welcome to Mr Perfect Pro</h2>
-    <p>Server: 91 CLUB KA WINGO 1 MIN</p>
-    <p>Prediction Mode: SAFE (85-90% Accuracy)</p>
-    <p id="periodInfo">Period: Loading...</p>
-    <p id="nextResult">Next Result In: 01:00</p>
-    <button class="btn" onclick="checkPlayerResult()">CHECK PREDICTION</button>
-    <p id="resultPlayer"></p>
+  <div id="nextInterface" style="display:none; margin-top: 20px; padding: 15px; border: 2px solid green; border-radius: 10px; width: 90%; max-width: 400px;">
+    <h2 style="color: lime; text-align: center;">Welcome to Mr Perfect Pro</h2>
+    <p><strong>Server:</strong> 91 CLUB KA WINGO 1 MIN</p>
+    <p><strong>Prediction Mode:</strong> SAFE (85-90% Accuracy)</p>
+    <p><strong>Period:</strong> <span id="period"></span></p>
+    <p><strong>Next Result In:</strong> <span id="countdown"></span></p>
+    <button class="btn" onclick="checkPrediction()">CHECK PREDICTION</button>
+    <p id="prediction"></p>
   </div>
 
   <script>
-    let timer;
-    let previousPlayerText = "";
-    let countdown = 60;
-
+    let interval;
     function login() {
       const key = document.getElementById('licenseKey').value;
       if (key === 'Mrperfect456') {
         document.querySelector('input[type="password"]').style.display = 'none';
         document.querySelector('button').style.display = 'none';
         document.getElementById('nextInterface').style.display = 'block';
-        startTimer();
+        startPeriodUpdate();
       } else {
         alert('Invalid Key!');
       }
     }
 
-    function startTimer() {
+    function startPeriodUpdate() {
       updatePeriod();
-      timer = setInterval(() => {
-        if (countdown <= 0) {
-          countdown = 60;
-          updatePeriod();
-        }
-        document.getElementById('nextResult').textContent = `Next Result In: 00:${String(countdown).padStart(2, '0')}`;
-        countdown--;
-      }, 1000);
+      interval = setInterval(updatePeriod, 1000);
     }
 
     function updatePeriod() {
       const now = new Date();
-      const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 30, 0);
-      const elapsedMillis = now - startTime;
-      const elapsedSeconds = Math.max(0, Math.floor(elapsedMillis / 1000));
-      const totalPeriods = Math.floor(elapsedSeconds / 60);
-      const periodNum = totalPeriods + 1;
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mi = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const base = '20250620'; // Set static base for format match
+      const random = String(Math.floor(100000 + Math.random() * 899999));
+      document.getElementById('period').textContent = `${base}10001${random}`;
 
-      const formattedDate = now.toISOString().split('T')[0].replace(/-/g, '');
-      const period = formattedDate + "100005" + String(periodNum).padStart(4, '0');
-      document.getElementById('periodInfo').textContent = `Period: ${period}`;
+      const secondsLeft = 60 - now.getSeconds();
+      document.getElementById('countdown').textContent = `00:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
     }
 
-    function checkPlayerResult() {
-      const currentText = document.getElementById("periodInfo").textContent;
-      if (currentText !== previousPlayerText) {
-        const result = Math.random() > 0.5 ? "BIG" : "SMALL";
-        document.getElementById("resultPlayer").textContent = `Prediction: ${result}`;
-        previousPlayerText = currentText;
-      } else {
-        alert("PLS WAIT FOR NEXT PERIOD");
-      }
+    function checkPrediction() {
+      const result = Math.random() > 0.5 ? "BIG" : "SMALL";
+      document.getElementById("prediction").textContent = `Prediction: ${result}`;
     }
   </script>
 </body>
