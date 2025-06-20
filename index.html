@@ -11,52 +11,60 @@
       background: linear-gradient(to bottom right, #1f1c2c, #928dab);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    .glow {
-      box-shadow: 0 0 20px rgba(147, 112, 219, 0.6);
-    }
     .hidden { display: none; }
+    .glow { box-shadow: 0 0 20px rgba(147, 112, 219, 0.6); }
   </style>
 </head>
 <body class="text-white p-6">
-  <header class="text-center mb-10">
-    <h1 class="text-4xl font-bold text-purple-400">🎯 Mr Perfect Pro - Color Prediction System</h1>
-    <p class="text-sm text-gray-300 mt-2">High Accuracy | Real-Time Analysis | Admin Tools</p>
-    <div class="mt-4">
-      <button id="themeToggle" class="bg-yellow-400 text-black px-4 py-1 rounded">Toggle Theme</button>
-    </div>
-  </header>
+  <div id="loginPage" class="text-center">
+    <h1 class="text-3xl font-bold mb-6">🔐 Login to Mr Perfect Pro</h1>
+    <input id="username" placeholder="Username" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
+    <input type="password" id="userpass" placeholder="Password" class="bg-gray-800 border border-gray-600 p-2 rounded mb-4 w-full" />
+    <button onclick="loginUser()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Login</button>
+  </div>
 
-  <section class="max-w-5xl mx-auto mb-10">
-    <h2 class="text-xl font-bold mb-4">🔢 Enter Last 10 Results</h2>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="inputFields"></div>
-    <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full">Predict Color</button>
-  </section>
+  <div id="mainApp" class="hidden">
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-purple-400">🎯 Mr Perfect Pro - Color Prediction System</h1>
+      <p class="text-sm text-gray-300 mt-2">High Accuracy | Real-Time Analysis | Admin Tools</p>
+      <div class="mt-4">
+        <button id="themeToggle" class="bg-yellow-400 text-black px-4 py-1 rounded">Toggle Theme</button>
+        <button onclick="logoutUser()" class="bg-red-500 text-white ml-4 px-3 py-1 rounded">Logout</button>
+      </div>
+    </header>
 
-  <section class="max-w-5xl mx-auto mb-10">
-    <h2 class="text-xl font-bold mb-4">📋 Prediction Result</h2>
-    <div id="predictionResult" class="text-center text-2xl text-yellow-300 font-bold">No prediction yet.</div>
-  </section>
+    <section class="max-w-5xl mx-auto mb-10">
+      <h2 class="text-xl font-bold mb-4">🔢 Enter Last 10 Results</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6" id="inputFields"></div>
+      <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full">Predict Color</button>
+    </section>
 
-  <section class="max-w-5xl mx-auto mb-10">
-    <h2 class="text-xl font-bold mb-4">📊 Prediction Breakdown (10 Logic Systems)</h2>
-    <div id="logicBreakdown" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
-  </section>
+    <section class="max-w-5xl mx-auto mb-10">
+      <h2 class="text-xl font-bold mb-4">📋 Prediction Result</h2>
+      <div id="predictionResult" class="text-center text-2xl text-yellow-300 font-bold">No prediction yet.</div>
+    </section>
 
-  <section class="max-w-5xl mx-auto mb-10">
-    <h2 class="text-xl font-bold mb-4">📈 Prediction History Chart</h2>
-    <canvas id="predictionChart" height="150"></canvas>
-  </section>
+    <section class="max-w-5xl mx-auto mb-10">
+      <h2 class="text-xl font-bold mb-4">📊 Prediction Breakdown (10 Logic Systems)</h2>
+      <div id="logicBreakdown" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
+    </section>
 
-  <section class="max-w-5xl mx-auto mb-20">
-    <h2 class="text-xl font-bold mb-4">🔐 Admin Panel (Secret Mode)</h2>
-    <input type="password" id="adminPass" placeholder="Enter Admin Code" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
-    <button onclick="checkAdmin()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Access Admin</button>
-    <div id="adminPanel" class="hidden mt-6 p-4 bg-gray-900 rounded-lg border border-green-500">
-      <p class="mb-3 text-green-400 font-bold">Welcome Admin 👨‍💻</p>
-      <textarea rows="5" class="w-full p-2 bg-gray-800 text-white rounded mb-3" placeholder="Override prediction or logic..."></textarea>
-      <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">Save Logic</button>
-    </div>
-  </section>
+    <section class="max-w-5xl mx-auto mb-10">
+      <h2 class="text-xl font-bold mb-4">📈 Prediction History Chart</h2>
+      <canvas id="predictionChart" height="150"></canvas>
+    </section>
+
+    <section class="max-w-5xl mx-auto mb-20">
+      <h2 class="text-xl font-bold mb-4">🔐 Admin Panel (Secret Mode)</h2>
+      <input type="password" id="adminPass" placeholder="Enter Admin Code" class="bg-gray-800 border border-gray-600 p-2 rounded mb-2 w-full" />
+      <button onclick="checkAdmin()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Access Admin</button>
+      <div id="adminPanel" class="hidden mt-6 p-4 bg-gray-900 rounded-lg border border-green-500">
+        <p class="mb-3 text-green-400 font-bold">Welcome Admin 👨‍💻</p>
+        <textarea rows="5" class="w-full p-2 bg-gray-800 text-white rounded mb-3" placeholder="Override prediction or logic..."></textarea>
+        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">Save Logic</button>
+      </div>
+    </section>
+  </div>
 
   <audio id="dingSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
@@ -69,15 +77,19 @@
     const inputFields = document.getElementById("inputFields");
     const themeToggle = document.getElementById("themeToggle");
     const ding = document.getElementById("dingSound");
+    const loginPage = document.getElementById("loginPage");
+    const mainApp = document.getElementById("mainApp");
     let historyData = [];
 
-    // Input boxes
-    for (let i = 0; i < 10; i++) {
-      const input = document.createElement("input");
-      input.type = "number";
-      input.placeholder = `#${i+1}`;
-      input.className = "bg-gray-800 border border-purple-500 p-2 rounded text-center";
-      inputFields.appendChild(input);
+    function initInputs() {
+      inputFields.innerHTML = "";
+      for (let i = 0; i < 10; i++) {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.placeholder = `#${i+1}`;
+        input.className = "bg-gray-800 border border-purple-500 p-2 rounded text-center";
+        inputFields.appendChild(input);
+      }
     }
 
     function getColor(num) {
@@ -124,18 +136,10 @@
         options: {
           responsive: true,
           scales: {
-            y: {
-              min: 0,
-              max: 100,
-              ticks: { color: 'white' }
-            },
-            x: {
-              ticks: { color: 'white' }
-            }
+            y: { min: 0, max: 100, ticks: { color: 'white' } },
+            x: { ticks: { color: 'white' } }
           },
-          plugins: {
-            legend: { labels: { color: 'white' } }
-          }
+          plugins: { legend: { labels: { color: 'white' } } }
         }
       });
     }
@@ -149,9 +153,25 @@
       }
     }
 
-    // Theme Toggle
+    function loginUser() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("userpass").value;
+      if (u === "user" && p === "1234") {
+        loginPage.classList.add("hidden");
+        mainApp.classList.remove("hidden");
+        initInputs();
+      } else {
+        alert("Invalid credentials");
+      }
+    }
+
+    function logoutUser() {
+      loginPage.classList.remove("hidden");
+      mainApp.classList.add("hidden");
+    }
+
     let darkMode = true;
-    themeToggle.addEventListener("click", () => {
+    themeToggle?.addEventListener("click", () => {
       document.body.classList.toggle("bg-white");
       document.body.classList.toggle("text-black");
       document.body.classList.toggle("text-white");
@@ -159,12 +179,8 @@
       themeToggle.innerText = darkMode ? "Toggle Theme" : "Dark Mode";
     });
 
-    // Auto prediction every 1 minute
-    setInterval(() => {
-      predictColor();
-    }, 60000);
-
-    predictBtn.addEventListener("click", predictColor);
+    setInterval(() => { if (!loginPage.classList.contains("hidden")) return; predictColor(); }, 60000);
+    predictBtn?.addEventListener("click", predictColor);
   </script>
 </body>
 </html>
