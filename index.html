@@ -1,269 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mr Perfect Pro</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>⚡ TEAM UNLEASH SCRIPT ⚡</title>
   <style>
-    body { background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e); font-family: 'Segoe UI', sans-serif; }
-    .hidden { display: none; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .fade-in { animation: fadeIn 0.5s ease-in-out; }
+    body {
+      background-color: black;
+      color: #00ff00;
+      font-family: monospace;
+      padding: 20px;
+    }
+    .entry {
+      border-top: 1px dashed purple;
+      padding: 10px 0;
+    }
+    .big { color: #00ff00; }
+    .small { color: #00ff00; }
+    .wrong { color: red; }
+    .correct { color: lightgreen; }
+    .label { color: magenta; }
+    .stat {
+      color: cyan;
+    }
+    .input-group {
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 5px;
+      font-size: 14px;
+      width: 300px;
+      background: black;
+      color: lime;
+      border: 1px solid green;
+    }
+    button {
+      padding: 6px 15px;
+      background: lime;
+      color: black;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
-<body class="text-white p-4">
+<body>
+  <h2 class="label">⚡TEAM UNLEASH SCRIPT⚡</h2>
 
-<!-- Access Screen -->
-<div id="accessScreen" class="text-center fade-in">
-  <h1 class="text-3xl font-bold mb-4">🔐 Enter Access Key</h1>
-  <input id="keyInput" type="text" placeholder="Enter Key" class="p-2 rounded bg-gray-800 text-white w-64 text-center" />
-  <button onclick="unlockApp()" class="ml-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">Enter</button>
-  <p class="mt-2 text-xs text-gray-400">Admin: Type <b>admin123</b></p>
-</div>
-
-<!-- Admin Panel -->
-<div id="adminPanel" class="hidden text-center fade-in">
-  <h1 class="text-2xl font-bold mb-4">🛠️ Admin Panel</h1>
-  <div class="mb-2">
-    <label class="block mb-1">🔑 Change Access Key:</label>
-    <input id="newKey" type="text" placeholder="New Key" class="p-2 bg-gray-700 rounded" />
-    <button onclick="changeKey()" class="ml-2 px-3 py-1 bg-green-600 rounded">Update</button>
+  <div class="input-group">
+    <input type="text" id="period" placeholder="Period Number (e.g. 20250623100011024)">
   </div>
-  <div class="mb-2">
-    <button onclick="resetStats()" class="px-4 py-2 bg-yellow-600 rounded">Reset Win/Loss Stats</button>
+  <div class="input-group">
+    <input type="text" id="prediction" placeholder="Your Prediction (BIG/SMALL)">
   </div>
-  <div>
-    <label><input type="checkbox" id="toggleLearning" checked onchange="toggleLearning()" /> Enable Auto-Learning</label>
+  <div class="input-group">
+    <input type="text" id="result" placeholder="Actual Result (BIG/SMALL)">
   </div>
-  <button onclick="backToUser()" class="mt-4 px-4 py-2 bg-blue-600 rounded">Back</button>
-</div>
+  <button onclick="addEntry()">Submit</button>
 
-<!-- Main App -->
-<div id="app" class="hidden fade-in">
-  <h1 class="text-3xl font-bold text-center text-purple-400 mb-4">🎯 Mr Perfect Pro</h1>
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-xl mb-2">🔢 Enter Last 10 Results</h2>
-    <div id="inputs" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></div>
+  <div id="output" style="margin-top: 30px;"></div>
 
-    <div class="bg-gray-800 p-3 rounded mb-2">
-      <p class="text-sm text-gray-300">🧩 Trend Preview:</p>
-      <div id="trendPreview" class="text-yellow-300 font-semibold"></div>
-    </div>
-    <div class="bg-gray-900 p-3 rounded mb-4">
-      <p class="text-sm text-gray-300">📦 Trend Result:</p>
-      <div id="trendResult" class="text-green-400 font-semibold"></div>
-    </div>
+  <script>
+    let totalWins = 0;
+    let totalLosses = 0;
+    let allEntries = [];
 
-    <button id="predictBtn" class="bg-purple-600 hover:bg-purple-700 w-full py-2 rounded">Predict</button>
-    <div id="predictionOutput" class="text-center text-xl mt-4"></div>
-    <div id="resultBtns" class="hidden flex justify-center gap-4 mt-4">
-      <button onclick="confirmResult(true)" class="bg-green-600 px-4 py-2 rounded">✅ Win</button>
-      <button onclick="confirmResult(false)" class="bg-red-600 px-4 py-2 rounded">❌ Loss</button>
-    </div>
+    function addEntry() {
+      const period = document.getElementById('period').value.trim();
+      const prediction = document.getElementById('prediction').value.trim().toUpperCase();
+      const result = document.getElementById('result').value.trim().toUpperCase();
 
-    <div class="mt-4">
-      <h3 class="font-bold text-lg mb-2">🧠 Prediction Breakdown</h3>
-      <div id="logicBox" class="grid grid-cols-2 md:grid-cols-5 gap-2"></div>
-    </div>
+      if (!period || !prediction || !result) return alert('Please fill all fields.');
 
-    <div class="mt-6">
-      <canvas id="chart" height="150"></canvas>
-    </div>
-    <div class="mt-6 text-center">
-      <p id="stats" class="text-sm text-gray-300"></p>
-    </div>
-  </div>
-</div>
+      const isCorrect = prediction === result;
+      if (isCorrect) totalWins++;
+      else totalLosses++;
 
-<audio id="ding" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+      const accuracy = ((totalWins / (totalWins + totalLosses)) * 100).toFixed(2);
 
-<script>
-let ACCESS_KEY = "mrperfectkey", ADMIN_KEY = "admin123";
-let logicNames = ["Trend", "Pattern", "Reverse", "Mirror", "Skip", "Weighted", "Zigzag", "Repeat", "Majority", "Gap"];
-let wins = 0, losses = 0, predictionHistory = [], lastPrediction = null, locked = false;
-let autoLearning = true, logicMemory = {};
+      const html = `
+        <div class="entry">
+          <div>Period Number: <span class="stat">${period}</span> | Prediction: <span class="stat">${prediction}</span></div>
+          <div>Previous Result Period: <span class="stat">${period}</span> | Prediction: <span class="stat">${result}</span></div>
+          <div>${isCorrect ? '✅' : '❌'}</div>
+          <div>Total Wins: ${totalWins} | Total Losses: ${totalLosses} | Accuracy: ${accuracy}%</div>
+        </div>
+      `;
 
-const inputs = document.getElementById("inputs"),
-      resultBtns = document.getElementById("resultBtns"),
-      predictionOutput = document.getElementById("predictionOutput"),
-      logicBox = document.getElementById("logicBox"),
-      chart = document.getElementById("chart"),
-      stats = document.getElementById("stats"),
-      trendPreview = document.getElementById("trendPreview"),
-      trendResult = document.getElementById("trendResult");
-
-function unlockApp() {
-  const val = document.getElementById("keyInput").value;
-  if (val === ADMIN_KEY) {
-    document.getElementById("accessScreen").classList.add("hidden");
-    document.getElementById("adminPanel").classList.remove("hidden");
-  } else if (val === ACCESS_KEY) {
-    document.getElementById("accessScreen").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    renderInputs();
-  } else {
-    alert("Wrong key!");
-  }
-}
-
-function backToUser() {
-  document.getElementById("adminPanel").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  renderInputs();
-}
-
-function changeKey() {
-  const newKey = document.getElementById("newKey").value;
-  if (newKey.length >= 4) {
-    ACCESS_KEY = newKey;
-    alert("Access key updated.");
-  } else alert("Key too short.");
-}
-
-function resetStats() {
-  wins = 0; losses = 0;
-  predictionHistory = [];
-  updateStats();
-  alert("Stats reset!");
-}
-
-function toggleLearning() {
-  autoLearning = document.getElementById("toggleLearning").checked;
-}
-
-function renderInputs() {
-  inputs.innerHTML = "";
-  for (let i = 0; i < 10; i++) {
-    const select = document.createElement("select");
-    select.className = "bg-gray-900 border border-purple-500 p-2 rounded text-center";
-    select.innerHTML = '<option value="">--</option><option value="Big">Big</option><option value="Small">Small</option>';
-    select.addEventListener("change", updateTrendDisplay);
-    inputs.appendChild(select);
-  }
-}
-
-function updateTrendDisplay() {
-  const values = getInputValues();
-  trendPreview.textContent = values.join(" → ");
-  trendResult.textContent = "Trend Result: " + values.join(", ");
-}
-
-function getInputValues() {
-  return Array.from(inputs.querySelectorAll("select")).map(s => s.value).filter(v => v);
-}
-
-function count(arr) {
-  return arr.reduce((a, c) => (a[c] = (a[c] || 0) + 1, a), {});
-}
-
-function opposite(v) {
-  return v === "Big" ? "Small" : "Big";
-}
-
-function analyze(name, vals) {
-  let score = 5;
-  switch (name) {
-    case "Trend": score = vals.slice(-3).every(v => v === vals[9]) ? 9 : 4; return { vote: vals[9], score };
-    case "Pattern": return { vote: vals[0] === vals[2] && vals[2] === vals[4] ? vals[0] : opposite(vals[9]), score: 8 };
-    case "Reverse": return { vote: opposite(vals[9]), score: 6 };
-    case "Mirror": return { vote: vals[8] === vals[6] ? vals[8] : vals[9], score: 7 };
-    case "Skip": return { vote: vals[8] === vals[6] && vals[6] === vals[4] ? vals[8] : vals[9], score: 6 };
-    case "Weighted": let c = count(vals); return { vote: c["Big"] >= c["Small"] ? "Big" : "Small", score: 7 };
-    case "Zigzag": return { vote: vals[9] === vals[7] ? vals[9] : opposite(vals[9]), score: 6 };
-    case "Repeat": return { vote: vals[9], score: 7 };
-    case "Majority": let m = count(vals); return { vote: m["Big"] > m["Small"] ? "Big" : "Small", score: 6 };
-    case "Gap": return { vote: vals[0] === vals[3] ? vals[0] : opposite(vals[9]), score: 7 };
-    default: return { vote: "Big", score: 5 };
-  }
-}
-
-function predict() {
-  if (locked) return alert("Confirm result first!");
-  const values = getInputValues();
-  if (values.length !== 10) return alert("Fill all 10 Big/Small values.");
-
-  const analysis = logicNames.map(name => {
-    const res = analyze(name, values);
-    if (autoLearning && logicMemory[name]) {
-      res.score += logicMemory[name];
+      allEntries.unshift(html);
+      document.getElementById('output').innerHTML = allEntries.join('');
+      document.getElementById('period').value = '';
+      document.getElementById('prediction').value = '';
+      document.getElementById('result').value = '';
     }
-    return res;
-  });
-
-  const scores = {};
-  analysis.forEach(a => { scores[a.vote] = (scores[a.vote] || 0) + a.score; });
-  const final = scores["Big"] > scores["Small"] ? "Big" : "Small";
-  const confidence = Math.min(100, Math.floor((scores[final] / (logicNames.length * 10)) * 100));
-
-  predictionOutput.innerHTML = `Prediction: <span class='text-${final === "Big" ? "green" : "red"}-400 font-bold'>${final}</span> (${confidence}%)`;
-  document.getElementById("ding").play();
-
-  logicBox.innerHTML = logicNames.map((l, i) =>
-    `<div class='p-2 bg-gray-800 rounded'><b>${l}</b><br/><span class='text-${analysis[i].vote === "Big" ? "green" : "red"}-400'>${analysis[i].vote}</span> <small>(${analysis[i].score})</small></div>`
-  ).join("");
-
-  predictionHistory.push(confidence);
-  lastPrediction = final;
-  resultBtns.classList.remove("hidden");
-  locked = true;
-  drawChart();
-}
-
-function confirmResult(win) {
-  if (win) {
-    wins++;
-    if (autoLearning && lastPrediction) {
-      logicNames.forEach(name => {
-        logicMemory[name] = (logicMemory[name] || 0) + 1;
-      });
-    }
-  } else {
-    losses++;
-    if (autoLearning) {
-      logicNames.forEach(name => {
-        logicMemory[name] = (logicMemory[name] || 0) - 1;
-      });
-    }
-  }
-  updateStats();
-  locked = false;
-  resultBtns.classList.add("hidden");
-}
-
-function updateStats() {
-  const total = wins + losses;
-  const acc = total ? Math.round((wins / total) * 100) : 0;
-  stats.innerText = `Total: ${total} | Wins: ${wins} | Losses: ${losses} | Accuracy: ${acc}%`;
-}
-
-function drawChart() {
-  new Chart(chart, {
-    type: 'line',
-    data: {
-      labels: predictionHistory.map((_, i) => i + 1),
-      datasets: [{
-        label: 'Confidence %',
-        data: predictionHistory,
-        borderColor: '#a78bfa',
-        backgroundColor: 'rgba(167, 139, 250, 0.2)',
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { min: 0, max: 100, ticks: { color: 'white' } },
-        x: { ticks: { color: 'white' } }
-      },
-      plugins: { legend: { labels: { color: 'white' } } }
-    }
-  });
-}
-
-document.getElementById("predictBtn").addEventListener("click", predict);
-</script>
-
+  </script>
 </body>
 </html>
