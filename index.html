@@ -1,96 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>⚡ MR PERFECT PRO SCRIPT ⚡</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WINGO 1-Min Prediction Tool</title>
   <style>
     body {
-      background-color: black;
-      color: #00ff00;
-      font-family: monospace;
-      padding: 20px;
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
     }
-    .entry {
-      border-top: 1px dashed purple;
-      padding: 10px 0;
-    }
-    .big { color: #00ff00; }
-    .small { color: #00ff00; }
-    .wrong { color: red; }
-    .correct { color: lightgreen; }
-    .label { color: magenta; }
-    .stat {
-      color: cyan;
-    }
-    .input-group {
+    h1 {
+      color: #00ffcc;
       margin-bottom: 10px;
     }
-    input {
-      padding: 5px;
-      font-size: 14px;
-      width: 300px;
-      background: black;
-      color: lime;
-      border: 1px solid green;
+    textarea, button {
+      width: 100%;
+      max-width: 500px;
+      margin: 10px 0;
+      font-size: 16px;
     }
     button {
-      padding: 6px 15px;
-      background: lime;
-      color: black;
-      font-weight: bold;
+      padding: 10px;
+      background-color: #00ffcc;
+      color: #000;
       border: none;
       cursor: pointer;
+      font-weight: bold;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      background: #111;
+      padding: 20px;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .safe {
+      color: #00ff00;
+    }
+    .danger {
+      color: #ff3333;
+    }
+    .sureshot {
+      color: #ffd700;
     }
   </style>
 </head>
 <body>
-  <h2 class="label">⚡MR PERFECT PRO SCRIPT⚡</h2>
-
-  <div class="input-group">
-    <input type="text" id="period" placeholder="Period Number (e.g. 20250623100011024)">
-  </div>
-  <div class="input-group">
-    <input type="text" id="prediction" placeholder="Your Prediction (BIG/SMALL)">
-  </div>
-  <div class="input-group">
-    <input type="text" id="result" placeholder="Actual Result (BIG/SMALL)">
-  </div>
-  <button onclick="addEntry()">Submit</button>
-
-  <div id="output" style="margin-top: 30px;"></div>
+  <h1>WINGO 1-Min Hack Prediction Tool</h1>
+  <textarea id="pastData" rows="12" placeholder="Paste last 15 results (only numbers)"></textarea>
+  <button onclick="analyzePrediction()">Predict Now</button>
+  <div id="result">Prediction will appear here.</div>
 
   <script>
-    let totalWins = 0;
-    let totalLosses = 0;
-    let allEntries = [];
+    function analyzePrediction() {
+      const input = document.getElementById("pastData").value.trim();
+      const lines = input.split(/\n|,/).map(n => parseInt(n)).filter(n => !isNaN(n));
+      if (lines.length < 15) {
+        document.getElementById("result").innerHTML = '<span class="danger">❌ Please enter at least 15 valid numbers.</span>';
+        return;
+      }
+      
+      const last15 = lines.slice(-15);
+      const bigCount = last15.filter(n => n >= 5).length;
+      const smallCount = 15 - bigCount;
 
-    function addEntry() {
-      const period = document.getElementById('period').value.trim();
-      const prediction = document.getElementById('prediction').value.trim().toUpperCase();
-      const result = document.getElementById('result').value.trim().toUpperCase();
+      // Pattern signals
+      let prediction = "";
+      let confidence = 50;
 
-      if (!period || !prediction || !result) return alert('Please fill all fields.');
+      // Voting system logic:
+      const votes = [];
 
-      const isCorrect = prediction === result;
-      if (isCorrect) totalWins++;
-      else totalLosses++;
+      // 1. Last 3 same? Predict reverse
+      if (last15.slice(-3).every(v => v >= 5)) votes.push("Small");
+      else if (last15.slice(-3).every(v => v < 5)) votes.push("Big");
 
-      const accuracy = ((totalWins / (totalWins + totalLosses)) * 100).toFixed(2);
+      // 2. Count-based prediction
+      if (bigCount > smallCount + 3) votes.push("Small");
+      else if (smallCount > bigCount + 3) votes.push("Big");
 
-      const html = `
-        <div class="entry">
-          <div>Period Number: <span class="stat">${period}</span> | Prediction: <span class="stat">${prediction}</span></div>
-          <div>Previous Result Period: <span class="stat">${period}</span> | Prediction: <span class="stat">${result}</span></div>
-          <div>${isCorrect ? '✅' : '❌'}</div>
-          <div>Total Wins: ${totalWins} | Total Losses: ${totalLosses} | Accuracy: ${accuracy}%</div>
-        </div>
-      `;
+      // 3. Zigzag pattern
+      const last5 = last15.slice(-5);
+      let zigzag = true;
+      for (let i = 1; i < last5.length; i++) {
+        if ((last5[i] >= 5 && last5[i - 1] >= 5) || (last5[i] < 5 && last5[i - 1] < 5)) {
+          zigzag = false;
+          break;
+        }
+      }
+      if (zigzag) votes.push(last5[last5.length - 1] >= 5 ? "Small" : "Big");
 
-      allEntries.unshift(html);
-      document.getElementById('output').innerHTML = allEntries.join('');
-      document.getElementById('period').value = '';
-      document.getElementById('prediction').value = '';
-      document.getElementById('result').value = '';
+      // 4. Last 10 even/odd count bias
+      const evenOdd = last15.map(n => n % 2 === 0 ? 'even' : 'odd');
+      const evens = evenOdd.filter(e => e === 'even').length;
+      const odds = 15 - evens;
+      if (evens > 11) votes.push("Small");
+      if (odds > 11) votes.push("Big");
+
+      // Result analysis
+      const bigVotes = votes.filter(v => v === "Big").length;
+      const smallVotes = votes.filter(v => v === "Small").length;
+
+      if (bigVotes > smallVotes) {
+        prediction = "Big";
+        confidence = Math.round((bigVotes / votes.length) * 100);
+      } else if (smallVotes > bigVotes) {
+        prediction = "Small";
+        confidence = Math.round((smallVotes / votes.length) * 100);
+      } else {
+        prediction = last15[last15.length - 1] >= 5 ? "Small" : "Big";
+        confidence = 55;
+      }
+
+      let confidenceClass = "safe";
+      let message = "✅ Suggested: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
+
+      if (confidence >= 85) {
+        confidenceClass = "sureshot";
+        message = "💥 <b>SURESHOT!</b> Play with all wallet.<br>Prediction: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
+      } else if (confidence < 60) {
+        confidenceClass = "danger";
+        message = "⚠️ High Risk. Do NOT Play.<br>Prediction: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
+      }
+
+      document.getElementById("result").innerHTML = `<div class="${confidenceClass}">${message}</div>`;
     }
   </script>
 </body>
