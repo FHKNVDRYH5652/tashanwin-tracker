@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WINGO 1-Min Prediction Tool</title>
+  <title>WINGO AI Smart Prediction Tool</title>
   <style>
     body {
-      background: #0f0f0f;
+      background: #0d0d0d;
       color: #fff;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 30px;
     }
     h1 {
-      color: #00ffcc;
+      color: #00ffe0;
       margin-bottom: 10px;
     }
-    textarea, button {
+    textarea, button, select {
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       margin: 10px 0;
       font-size: 16px;
     }
     button {
       padding: 10px;
-      background-color: #00ffcc;
+      background-color: #00ffe0;
       color: #000;
       border: none;
       cursor: pointer;
@@ -37,100 +37,126 @@
       font-size: 20px;
       background: #111;
       padding: 20px;
-      border: 2px solid #00ffcc;
+      border: 2px solid #00ffe0;
       border-radius: 10px;
       text-align: center;
     }
-    .safe {
-      color: #00ff00;
+    .safe { color: #00ff00; }
+    .danger { color: #ff4444; }
+    .sureshot { color: #ffd700; }
+    .history {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      padding: 10px;
+      border-radius: 10px;
     }
-    .danger {
-      color: #ff3333;
-    }
-    .sureshot {
-      color: #ffd700;
+    .history h3 { margin: 0 0 10px; }
+    .history-entry {
+      padding: 5px 0;
+      border-bottom: 1px dashed #333;
     }
   </style>
 </head>
 <body>
-  <h1>WINGO 1-Min Hack Prediction Tool</h1>
-  <textarea id="pastData" rows="12" placeholder="Paste last 15 results (only numbers)"></textarea>
-  <button onclick="analyzePrediction()">Predict Now</button>
-  <div id="result">Prediction will appear here.</div>
+  <h1>WINGO AI Smart Prediction</h1>
+  <textarea id="pastData" rows="12" placeholder="Paste last 15 numbers (0-9)"></textarea>
+  <select id="predictionType">
+    <option value="bigsmall">Big / Small</option>
+    <option value="color">Color</option>
+  </select>
+  <button onclick="predictAI()">Predict Now</button>
+  <div id="result">AI prediction will appear here.</div>
+  <div class="history" id="history">
+    <h3>Prediction History</h3>
+    <div id="historyEntries"></div>
+  </div>
 
   <script>
-    function analyzePrediction() {
+    let historyLog = [];
+
+    function predictAI() {
       const input = document.getElementById("pastData").value.trim();
-      const lines = input.split(/\n|,/).map(n => parseInt(n)).filter(n => !isNaN(n));
-      if (lines.length < 15) {
-        document.getElementById("result").innerHTML = '<span class="danger">❌ Please enter at least 15 valid numbers.</span>';
+      const mode = document.getElementById("predictionType").value;
+      const nums = input.split(/\n|,/).map(n => parseInt(n)).filter(n => !isNaN(n));
+
+      if (nums.length < 15) {
+        document.getElementById("result").innerHTML = '<span class="danger">❌ Minimum 15 numbers required.</span>';
         return;
       }
-      
-      const last15 = lines.slice(-15);
-      const bigCount = last15.filter(n => n >= 5).length;
-      const smallCount = 15 - bigCount;
 
-      // Pattern signals
-      let prediction = "";
-      let confidence = 50;
+      const last15 = nums.slice(-15);
+      const bigSmall = last15.map(n => n >= 5 ? 'B' : 'S');
+      let prediction = '';
+      let confidence = 0;
 
-      // Voting system logic:
-      const votes = [];
+      if (mode === 'bigsmall') {
+        let bigCount = bigSmall.filter(c => c === 'B').length;
+        let smallCount = 15 - bigCount;
 
-      // 1. Last 3 same? Predict reverse
-      if (last15.slice(-3).every(v => v >= 5)) votes.push("Small");
-      else if (last15.slice(-3).every(v => v < 5)) votes.push("Big");
+        let votes = [];
+        votes.push(bigCount > smallCount ? 'B' : 'S');
 
-      // 2. Count-based prediction
-      if (bigCount > smallCount + 3) votes.push("Small");
-      else if (smallCount > bigCount + 3) votes.push("Big");
+        const last3 = bigSmall.slice(-3);
+        if (last3.every(v => v === 'B')) votes.push('S');
+        if (last3.every(v => v === 'S')) votes.push('B');
 
-      // 3. Zigzag pattern
-      const last5 = last15.slice(-5);
-      let zigzag = true;
-      for (let i = 1; i < last5.length; i++) {
-        if ((last5[i] >= 5 && last5[i - 1] >= 5) || (last5[i] < 5 && last5[i - 1] < 5)) {
-          zigzag = false;
-          break;
-        }
+        const repeat = bigSmall.reduce((acc, cur, i, arr) => cur === arr[i - 1] ? acc + 1 : acc, 0);
+        if (repeat > 5) votes.push(bigSmall[14] === 'B' ? 'S' : 'B');
+
+        const wave = bigSmall.slice(-5);
+        const waveMatch = wave.every((v, i) => i % 2 === 0 ? v === 'B' : v === 'S');
+        if (waveMatch) votes.push('S');
+
+        const first5 = bigSmall.slice(0, 5);
+        const last5 = bigSmall.slice(10);
+        const biasShift = last5.filter(c => c === 'B').length - first5.filter(c => c === 'B').length;
+        if (biasShift >= 3) votes.push('B');
+        else if (biasShift <= -3) votes.push('S');
+
+        const bigVotes = votes.filter(v => v === 'B').length;
+        const smallVotes = votes.filter(v => v === 'S').length;
+        prediction = bigVotes > smallVotes ? 'Big' : 'Small';
+        confidence = Math.round((Math.max(bigVotes, smallVotes) / votes.length) * 100);
+
+      } else if (mode === 'color') {
+        const colorMap = last15.map(n => {
+          if (n === 0 || n === 5) return 'green';
+          if (n % 2 === 0) return 'red';
+          return 'violet';
+        });
+        const reds = colorMap.filter(c => c === 'red').length;
+        const greens = colorMap.filter(c => c === 'green').length;
+        const violets = colorMap.filter(c => c === 'violet').length;
+
+        const max = Math.max(reds, greens, violets);
+        if (max === reds) prediction = 'Red';
+        else if (max === greens) prediction = 'Green';
+        else prediction = 'Violet';
+
+        confidence = Math.round((max / 15) * 100);
       }
-      if (zigzag) votes.push(last5[last5.length - 1] >= 5 ? "Small" : "Big");
 
-      // 4. Last 10 even/odd count bias
-      const evenOdd = last15.map(n => n % 2 === 0 ? 'even' : 'odd');
-      const evens = evenOdd.filter(e => e === 'even').length;
-      const odds = 15 - evens;
-      if (evens > 11) votes.push("Small");
-      if (odds > 11) votes.push("Big");
-
-      // Result analysis
-      const bigVotes = votes.filter(v => v === "Big").length;
-      const smallVotes = votes.filter(v => v === "Small").length;
-
-      if (bigVotes > smallVotes) {
-        prediction = "Big";
-        confidence = Math.round((bigVotes / votes.length) * 100);
-      } else if (smallVotes > bigVotes) {
-        prediction = "Small";
-        confidence = Math.round((smallVotes / votes.length) * 100);
-      } else {
-        prediction = last15[last15.length - 1] >= 5 ? "Small" : "Big";
-        confidence = 55;
-      }
-
-      let confidenceClass = "safe";
-      let message = "✅ Suggested: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
-
+      let output = '';
       if (confidence >= 85) {
-        confidenceClass = "sureshot";
-        message = "💥 <b>SURESHOT!</b> Play with all wallet.<br>Prediction: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
+        output = `<div class="sureshot">💥 <b>SURESHOT</b><br>Prediction: <b>${prediction}</b><br>Confidence: ${confidence}%</div>`;
       } else if (confidence < 60) {
-        confidenceClass = "danger";
-        message = "⚠️ High Risk. Do NOT Play.<br>Prediction: <b>" + prediction + "</b><br>Confidence: " + confidence + "%";
+        output = `<div class="danger">⚠️ <b>High Risk</b><br>Do NOT Play<br>Confidence: ${confidence}%</div>`;
+      } else {
+        output = `<div class="safe">✅ Suggested: <b>${prediction}</b><br>Confidence: ${confidence}%</div>`;
       }
 
-      document.getElementById("result").innerHTML = `<div class="${confidenceClass}">${message}</div>`;
+      document.getElementById("result").innerHTML = output;
+      updateHistory(prediction, confidence);
+    }
+
+    function updateHistory(prediction, confidence) {
+      const time = new Date().toLocaleTimeString();
+      historyLog.unshift(`<div class="history-entry">[${time}] ➤ Prediction: <b>${prediction}</b> (${confidence}%)</div>`);
+      if (historyLog.length > 10) historyLog.pop();
+      document.getElementById("historyEntries").innerHTML = historyLog.join('');
     }
   </script>
 </body>
