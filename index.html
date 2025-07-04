@@ -139,46 +139,44 @@
 
       const last15 = sequence;
       const bigSmall = last15.map(n => n >= 5 ? 'B' : 'S');
+      const redGreenViolet = last15.map(n => n === 0 || n === 5 ? 'Green' : n % 2 === 0 ? 'Red' : 'Violet');
 
-      let bigCount = bigSmall.filter(c => c === 'B').length;
-      let smallCount = 15 - bigCount;
-      let patternScore = 0;
+      let scores = { Big: 0, Small: 0 };
 
-      // Logic 1: Trend Flow
-      patternScore += (bigCount > smallCount) ? 1 : -1;
+      // Logic 1: Count-based
+      const bigCount = bigSmall.filter(v => v === 'B').length;
+      const smallCount = bigSmall.filter(v => v === 'S').length;
+      if (bigCount > smallCount) scores.Big += 1; else scores.Small += 1;
 
-      // Logic 2: Last 3 same trend => possible reversal
+      // Logic 2: Last 3 same check
       const last3 = bigSmall.slice(-3);
-      if (last3.every(v => v === 'B')) patternScore -= 2;
-      if (last3.every(v => v === 'S')) patternScore += 2;
+      if (last3.every(v => v === 'B')) scores.Small += 2;
+      else if (last3.every(v => v === 'S')) scores.Big += 2;
 
-      // Logic 3: Zigzag pattern in last 5
+      // Logic 3: Alternating pattern
       const zigzag = bigSmall.slice(-5).every((v, i, arr) => i === 0 || v !== arr[i - 1]);
-      if (zigzag) patternScore += 1;
+      if (zigzag) {
+        scores.Big += 1;
+        scores.Small += 1;
+      }
 
-      // Logic 4: Shift detection
-      const biasShift = bigSmall.slice(0, 5).filter(c => c === 'B').length - bigSmall.slice(10).filter(c => c === 'B').length;
-      if (biasShift >= 3) patternScore -= 1;
-      else if (biasShift <= -3) patternScore += 1;
+      // Logic 4: Last number direction prediction
+      const lastNum = last15[last15.length - 1];
+      if (lastNum >= 5) scores.Small += 1;
+      else scores.Big += 1;
 
-      // Self-Learning: Adjust weight if last prediction failed
+      // Self-learning adjustment
       if (predictionHistory.length >= 2) {
         const last = predictionHistory[predictionHistory.length - 1];
-        const prev = predictionHistory[predictionHistory.length - 2];
-        if (last.result !== last.prediction) {
-          patternScore += (last.prediction === "Small" ? 1 : -1);
+        if (last.result !== 'Unknown' && last.prediction !== last.result) {
+          scores[last.result] += 1; // Reinforce correct trend
         }
       }
 
-      let prediction = "";
-      let confidence = 50 + (patternScore * 10);
-      confidence = Math.max(10, Math.min(95, confidence));
+      const finalPrediction = scores.Big > scores.Small ? 'Big' : 'Small';
+      const confidence = 50 + Math.abs(scores.Big - scores.Small) * 10;
 
-      if (patternScore > 1) prediction = "Small";
-      else if (patternScore < -1) prediction = "Big";
-      else prediction = last15[last15.length - 1] >= 5 ? "Small" : "Big";
-
-      let resultMsg = `🤖 Prediction: <b>${prediction}</b><br>🧠 Chance: <b>${confidence}%</b>`;
+      let resultMsg = `🤖 Prediction: <b>${finalPrediction}</b><br>🧠 Chance: <b>${confidence}%</b>`;
       if (confidence >= 85) {
         resultMsg += "<br>💥 Strong pattern detected.";
         document.getElementById("soundSuccess").play();
@@ -190,11 +188,10 @@
       }
 
       document.getElementById("result").innerHTML = resultMsg;
-
-      predictionHistory.push({ prediction, result: "Unknown" });
+      predictionHistory.push({ prediction: finalPrediction, result: 'Unknown' });
       if (predictionHistory.length > 5) predictionHistory.shift();
 
-      chartContainer.innerHTML = predictionHistory.map((entry, i) => `#${i+1}: <b>${entry.prediction}</b> (${entry.result})`).join('<br>');
+      chartContainer.innerHTML = predictionHistory.map((entry, i) => `#${i + 1}: <b>${entry.prediction}</b> (${entry.result})`).join('<br>');
     }
   </script>
 </body>
