@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WINGO AI Smart Prediction Tool</title>
+  <title>WINGO AI Real Prediction Tool</title>
   <style>
     body {
       background: #0d0d0d;
@@ -18,19 +18,48 @@
       color: #00ffe0;
       margin-bottom: 10px;
     }
-    textarea, button, select {
-      width: 100%;
-      max-width: 600px;
-      margin: 10px 0;
-      font-size: 16px;
+    .number-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      margin-bottom: 20px;
     }
-    button {
+    .number-buttons button {
+      background: #222;
+      color: #00ffe0;
+      border: 1px solid #00ffe0;
+      font-size: 18px;
       padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .input-sequence {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .input-sequence span {
+      background: #222;
+      border: 1px solid #555;
+      border-radius: 5px;
+      padding: 8px 12px;
+      margin: 5px;
+      font-size: 18px;
+    }
+    .input-sequence span:hover {
+      background: #ff4444;
+      cursor: pointer;
+    }
+    button.predict-btn {
+      padding: 10px 20px;
       background-color: #00ffe0;
       color: #000;
+      font-weight: bold;
       border: none;
       cursor: pointer;
-      font-weight: bold;
+      font-size: 18px;
+      border-radius: 8px;
     }
     #result {
       margin-top: 20px;
@@ -40,123 +69,132 @@
       border: 2px solid #00ffe0;
       border-radius: 10px;
       text-align: center;
+      width: 100%;
+      max-width: 600px;
     }
-    .safe { color: #00ff00; }
-    .danger { color: #ff4444; }
-    .sureshot { color: #ffd700; }
-    .history {
-      margin-top: 20px;
+    .chart {
+      margin-top: 30px;
       width: 100%;
       max-width: 600px;
       background: #1a1a1a;
-      border: 1px solid #333;
-      padding: 10px;
+      padding: 20px;
       border-radius: 10px;
-    }
-    .history h3 { margin: 0 0 10px; }
-    .history-entry {
-      padding: 5px 0;
-      border-bottom: 1px dashed #333;
     }
   </style>
 </head>
 <body>
-  <h1>WINGO AI Smart Prediction</h1>
-  <textarea id="pastData" rows="12" placeholder="Paste last 15 numbers (0-9)"></textarea>
-  <select id="predictionType">
-    <option value="bigsmall">Big / Small</option>
-    <option value="color">Color</option>
-  </select>
-  <button onclick="predictAI()">Predict Now</button>
-  <div id="result">AI prediction will appear here.</div>
-  <div class="history" id="history">
-    <h3>Prediction History</h3>
-    <div id="historyEntries"></div>
+  <h1>WINGO AI Real Prediction</h1>
+
+  <div class="number-buttons" id="numberButtons"></div>
+  <div class="input-sequence" id="inputSequence"></div>
+  <button class="predict-btn" onclick="predictAI()">Predict Now</button>
+  <div id="result">Prediction will appear here.</div>
+
+  <div class="chart">
+    <h3>Prediction Chart (Last 5)</h3>
+    <div id="chartHistory"></div>
   </div>
 
+  <audio id="soundSuccess" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+  <audio id="soundRisk" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
   <script>
-    let historyLog = [];
+    let sequence = [];
+    let predictionHistory = [];
+    const sequenceContainer = document.getElementById("inputSequence");
+    const numberButtonsContainer = document.getElementById("numberButtons");
+    const chartContainer = document.getElementById("chartHistory");
+
+    for (let i = 0; i <= 9; i++) {
+      const btn = document.createElement("button");
+      btn.innerText = i;
+      btn.onclick = () => {
+        if (sequence.length < 15) {
+          sequence.push(i);
+          updateSequenceDisplay();
+        }
+      };
+      numberButtonsContainer.appendChild(btn);
+    }
+
+    function updateSequenceDisplay() {
+      sequenceContainer.innerHTML = '';
+      sequence.forEach((num, index) => {
+        const span = document.createElement("span");
+        span.innerText = num;
+        span.title = "Click to remove";
+        span.onclick = () => {
+          sequence.splice(index, 1);
+          updateSequenceDisplay();
+        };
+        sequenceContainer.appendChild(span);
+      });
+    }
 
     function predictAI() {
-      const input = document.getElementById("pastData").value.trim();
-      const mode = document.getElementById("predictionType").value;
-      const nums = input.split(/\n|,/).map(n => parseInt(n)).filter(n => !isNaN(n));
-
-      if (nums.length < 15) {
-        document.getElementById("result").innerHTML = '<span class="danger">❌ Minimum 15 numbers required.</span>';
+      if (sequence.length < 15) {
+        document.getElementById("result").innerHTML = "❌ Please enter 15 numbers by tapping buttons.";
         return;
       }
 
-      const last15 = nums.slice(-15);
+      const last15 = sequence;
       const bigSmall = last15.map(n => n >= 5 ? 'B' : 'S');
-      let prediction = '';
-      let confidence = 0;
 
-      if (mode === 'bigsmall') {
-        let bigCount = bigSmall.filter(c => c === 'B').length;
-        let smallCount = 15 - bigCount;
+      let bigCount = bigSmall.filter(c => c === 'B').length;
+      let smallCount = 15 - bigCount;
+      let patternScore = 0;
 
-        let votes = [];
-        votes.push(bigCount > smallCount ? 'B' : 'S');
+      // Logic 1: Trend Flow
+      patternScore += (bigCount > smallCount) ? 1 : -1;
 
-        const last3 = bigSmall.slice(-3);
-        if (last3.every(v => v === 'B')) votes.push('S');
-        if (last3.every(v => v === 'S')) votes.push('B');
+      // Logic 2: Last 3 same trend => possible reversal
+      const last3 = bigSmall.slice(-3);
+      if (last3.every(v => v === 'B')) patternScore -= 2;
+      if (last3.every(v => v === 'S')) patternScore += 2;
 
-        const repeat = bigSmall.reduce((acc, cur, i, arr) => cur === arr[i - 1] ? acc + 1 : acc, 0);
-        if (repeat > 5) votes.push(bigSmall[14] === 'B' ? 'S' : 'B');
+      // Logic 3: Zigzag pattern in last 5
+      const zigzag = bigSmall.slice(-5).every((v, i, arr) => i === 0 || v !== arr[i - 1]);
+      if (zigzag) patternScore += 1;
 
-        const wave = bigSmall.slice(-5);
-        const waveMatch = wave.every((v, i) => i % 2 === 0 ? v === 'B' : v === 'S');
-        if (waveMatch) votes.push('S');
+      // Logic 4: Shift detection
+      const biasShift = bigSmall.slice(0, 5).filter(c => c === 'B').length - bigSmall.slice(10).filter(c => c === 'B').length;
+      if (biasShift >= 3) patternScore -= 1;
+      else if (biasShift <= -3) patternScore += 1;
 
-        const first5 = bigSmall.slice(0, 5);
-        const last5 = bigSmall.slice(10);
-        const biasShift = last5.filter(c => c === 'B').length - first5.filter(c => c === 'B').length;
-        if (biasShift >= 3) votes.push('B');
-        else if (biasShift <= -3) votes.push('S');
-
-        const bigVotes = votes.filter(v => v === 'B').length;
-        const smallVotes = votes.filter(v => v === 'S').length;
-        prediction = bigVotes > smallVotes ? 'Big' : 'Small';
-        confidence = Math.round((Math.max(bigVotes, smallVotes) / votes.length) * 100);
-
-      } else if (mode === 'color') {
-        const colorMap = last15.map(n => {
-          if (n === 0 || n === 5) return 'green';
-          if (n % 2 === 0) return 'red';
-          return 'violet';
-        });
-        const reds = colorMap.filter(c => c === 'red').length;
-        const greens = colorMap.filter(c => c === 'green').length;
-        const violets = colorMap.filter(c => c === 'violet').length;
-
-        const max = Math.max(reds, greens, violets);
-        if (max === reds) prediction = 'Red';
-        else if (max === greens) prediction = 'Green';
-        else prediction = 'Violet';
-
-        confidence = Math.round((max / 15) * 100);
+      // Self-Learning: Adjust weight if last prediction failed
+      if (predictionHistory.length >= 2) {
+        const last = predictionHistory[predictionHistory.length - 1];
+        const prev = predictionHistory[predictionHistory.length - 2];
+        if (last.result !== last.prediction) {
+          patternScore += (last.prediction === "Small" ? 1 : -1);
+        }
       }
 
-      let output = '';
+      let prediction = "";
+      let confidence = 50 + (patternScore * 10);
+      confidence = Math.max(10, Math.min(95, confidence));
+
+      if (patternScore > 1) prediction = "Small";
+      else if (patternScore < -1) prediction = "Big";
+      else prediction = last15[last15.length - 1] >= 5 ? "Small" : "Big";
+
+      let resultMsg = `🤖 Prediction: <b>${prediction}</b><br>🧠 Chance: <b>${confidence}%</b>`;
       if (confidence >= 85) {
-        output = `<div class="sureshot">💥 <b>SURESHOT</b><br>Prediction: <b>${prediction}</b><br>Confidence: ${confidence}%</div>`;
-      } else if (confidence < 60) {
-        output = `<div class="danger">⚠️ <b>High Risk</b><br>Do NOT Play<br>Confidence: ${confidence}%</div>`;
+        resultMsg += "<br>💥 Strong pattern detected.";
+        document.getElementById("soundSuccess").play();
+      } else if (confidence <= 40) {
+        resultMsg += "<br>⚠️ Risky prediction, play cautiously.";
+        document.getElementById("soundRisk").play();
       } else {
-        output = `<div class="safe">✅ Suggested: <b>${prediction}</b><br>Confidence: ${confidence}%</div>`;
+        resultMsg += "<br>✅ Normal prediction.";
       }
 
-      document.getElementById("result").innerHTML = output;
-      updateHistory(prediction, confidence);
-    }
+      document.getElementById("result").innerHTML = resultMsg;
 
-    function updateHistory(prediction, confidence) {
-      const time = new Date().toLocaleTimeString();
-      historyLog.unshift(`<div class="history-entry">[${time}] ➤ Prediction: <b>${prediction}</b> (${confidence}%)</div>`);
-      if (historyLog.length > 10) historyLog.pop();
-      document.getElementById("historyEntries").innerHTML = historyLog.join('');
+      predictionHistory.push({ prediction, result: "Unknown" });
+      if (predictionHistory.length > 5) predictionHistory.shift();
+
+      chartContainer.innerHTML = predictionHistory.map((entry, i) => `#${i+1}: <b>${entry.prediction}</b> (${entry.result})`).join('<br>');
     }
   </script>
 </body>
