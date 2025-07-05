@@ -1,109 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WINGO AI Real Prediction Tool</title>
+  <title>WINGO Pro Max Predictor</title>
   <style>
     body {
-      background: #0d0d0d;
-      color: #fff;
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
+      background: linear-gradient(120deg, #0f0f0f, #1a1a1a);
+      color: #fff;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    canvas#bg {
+      position: fixed;
+      top: 0; left: 0;
+      z-index: -1;
     }
     h1 {
+      margin-top: 30px;
       color: #00ffe0;
-      margin-bottom: 10px;
+      text-shadow: 0 0 10px #00ffe0;
     }
     .number-buttons {
       display: grid;
       grid-template-columns: repeat(5, 60px);
       gap: 10px;
-      margin-bottom: 20px;
+      justify-content: center;
+      margin: 20px 0;
     }
-    .number-buttons button {
-      background: #222;
+    button {
+      background: #111;
       color: #00ffe0;
       border: 1px solid #00ffe0;
-      font-size: 18px;
       padding: 10px;
+      font-size: 16px;
       border-radius: 10px;
       cursor: pointer;
+      transition: 0.2s;
     }
-    .input-sequence {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 20px;
+    button:hover {
+      background: #00ffe0;
+      color: #000;
     }
     .input-sequence span {
       background: #222;
       border: 1px solid #555;
-      border-radius: 5px;
+      border-radius: 6px;
       padding: 8px 12px;
       margin: 5px;
-      font-size: 18px;
-    }
-    .input-sequence span:hover {
-      background: #ff4444;
       cursor: pointer;
+      display: inline-block;
     }
-    button.predict-btn {
-      padding: 10px 20px;
-      background-color: #00ffe0;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      border-radius: 8px;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 20px;
-      background: #111;
-      padding: 20px;
-      border: 2px solid #00ffe0;
-      border-radius: 10px;
-      text-align: center;
-      width: 100%;
+    .box {
+      background: rgba(0, 0, 0, 0.7);
+      margin: 15px auto;
       max-width: 600px;
-    }
-    .chart {
-      margin-top: 30px;
-      width: 100%;
-      max-width: 600px;
-      background: #1a1a1a;
-      padding: 20px;
       border-radius: 10px;
+      border: 1px solid #00ffe0;
+      padding: 15px;
+      box-shadow: 0 0 20px #00ffe0;
+      text-align: left;
     }
+    .highlight { color: #00ff88; font-weight: bold; }
+    .reset-btn { margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h1>WINGO AI Real Prediction</h1>
+  <canvas id="bg"></canvas>
+  <h1>WINGO Pro Max Predictor 🔮</h1>  <div class="number-buttons" id="numberButtons"></div>
+  <div class="input-sequence" id="inputSequence"></div><button onclick="predictNow()">Predict Now</button>
 
-  <div class="number-buttons" id="numberButtons"></div>
-  <div class="input-sequence" id="inputSequence"></div>
-  <button class="predict-btn" onclick="predictAI()">Predict Now</button>
-  <div id="result">Prediction will appear here.</div>
+  <div class="box" id="resultBox">Prediction will appear here.</div>
+  <div class="box" id="analysisBox">Analysis will appear here.</div>
+  <div class="box" id="statsBox">Stats will appear here.</div>
+  <div class="box">
+    <b>Confirm Result:</b><br>
+    <button onclick="submitFeedback(true)">✅ Win</button>
+    <button onclick="submitFeedback(false)">❌ Loss</button>
+    <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
+  </div>  <script>
+    const sequence = [];
+    const learning = [];
+    let lastPrediction = {};
+    let total = 0, win = 0, loss = 0;
 
-  <div class="chart">
-    <h3>Prediction Chart (Last 5)</h3>
-    <div id="chartHistory"></div>
-  </div>
-
-  <audio id="soundSuccess" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-  <audio id="soundRisk" src="https://www.soundjay.com/button/beep-07.wav"></audio>
-
-  <script>
-    let sequence = [];
-    let predictionHistory = [];
-    const sequenceContainer = document.getElementById("inputSequence");
-    const numberButtonsContainer = document.getElementById("numberButtons");
-    const chartContainer = document.getElementById("chartHistory");
+    const numberButtons = document.getElementById("numberButtons");
+    const inputSequence = document.getElementById("inputSequence");
+    const resultBox = document.getElementById("resultBox");
+    const analysisBox = document.getElementById("analysisBox");
+    const statsBox = document.getElementById("statsBox");
 
     for (let i = 0; i <= 9; i++) {
       const btn = document.createElement("button");
@@ -111,88 +97,138 @@
       btn.onclick = () => {
         if (sequence.length < 15) {
           sequence.push(i);
-          updateSequenceDisplay();
+          updateInput();
         }
       };
-      numberButtonsContainer.appendChild(btn);
+      numberButtons.appendChild(btn);
     }
 
-    function updateSequenceDisplay() {
-      sequenceContainer.innerHTML = '';
-      sequence.forEach((num, index) => {
-        const span = document.createElement("span");
-        span.innerText = num;
-        span.title = "Click to remove";
-        span.onclick = () => {
-          sequence.splice(index, 1);
-          updateSequenceDisplay();
+    function updateInput() {
+      inputSequence.innerHTML = '';
+      sequence.forEach((num, i) => {
+        const el = document.createElement("span");
+        el.innerText = num;
+        el.onclick = () => {
+          sequence.splice(i, 1);
+          updateInput();
         };
-        sequenceContainer.appendChild(span);
+        inputSequence.appendChild(el);
       });
     }
 
-    function predictAI() {
-      if (sequence.length < 15) {
-        document.getElementById("result").innerHTML = "❌ Please enter 15 numbers by tapping buttons.";
+    function predictNow() {
+      if (sequence.length !== 15) {
+        resultBox.innerHTML = '❗ Enter exactly 15 numbers.';
         return;
       }
+      const bigSmall = sequence.map(n => n >= 5 ? 'Big' : 'Small');
+      const colorMap = sequence.map(n => n === 0 || n === 5 ? 'Green' : n % 2 === 0 ? 'Red' : 'Violet');
 
-      const last15 = sequence;
-      const bigSmall = last15.map(n => n >= 5 ? 'B' : 'S');
-      const redGreenViolet = last15.map(n => n === 0 || n === 5 ? 'Green' : n % 2 === 0 ? 'Red' : 'Violet');
+      let scoreB = 0, scoreS = 0, colorScores = { Red: 0, Green: 0, Violet: 0 }, analysis = [];
 
-      let scores = { Big: 0, Small: 0 };
+      const bCount = bigSmall.filter(v => v === 'Big').length;
+      const sCount = 15 - bCount;
+      scoreB += bCount > sCount ? 2 : 0;
+      scoreS += sCount > bCount ? 2 : 0;
+      analysis.push(`Trend: ${bCount} Big vs ${sCount} Small`);
 
-      // Logic 1: Count-based
-      const bigCount = bigSmall.filter(v => v === 'B').length;
-      const smallCount = bigSmall.filter(v => v === 'S').length;
-      if (bigCount > smallCount) scores.Big += 1; else scores.Small += 1;
-
-      // Logic 2: Last 3 same check
       const last3 = bigSmall.slice(-3);
-      if (last3.every(v => v === 'B')) scores.Small += 2;
-      else if (last3.every(v => v === 'S')) scores.Big += 2;
+      if (last3.every(v => v === 'Big')) { scoreS += 2; analysis.push("Reversal Expected: Last 3 Big"); }
+      else if (last3.every(v => v === 'Small')) { scoreB += 2; analysis.push("Reversal Expected: Last 3 Small"); }
 
-      // Logic 3: Alternating pattern
-      const zigzag = bigSmall.slice(-5).every((v, i, arr) => i === 0 || v !== arr[i - 1]);
-      if (zigzag) {
-        scores.Big += 1;
-        scores.Small += 1;
+      const recentLosses = learning.slice(-3).filter(x => x.result === 'Loss');
+      if (recentLosses.length >= 2) {
+        const bias = recentLosses[0].prediction;
+        if (bias === 'Big') { scoreS++; analysis.push("AI: Losses on Big → Boosting Small"); }
+        else { scoreB++; analysis.push("AI: Losses on Small → Boosting Big"); }
       }
 
-      // Logic 4: Last number direction prediction
-      const lastNum = last15[last15.length - 1];
-      if (lastNum >= 5) scores.Small += 1;
-      else scores.Big += 1;
+      // Color prediction logic
+      colorMap.slice(-5).forEach(c => colorScores[c]++);
+      const topColor = Object.entries(colorScores).sort((a, b) => b[1] - a[1])[0][0];
 
-      // Self-learning adjustment
-      if (predictionHistory.length >= 2) {
-        const last = predictionHistory[predictionHistory.length - 1];
-        if (last.result !== 'Unknown' && last.prediction !== last.result) {
-          scores[last.result] += 1; // Reinforce correct trend
-        }
-      }
+      let prediction = scoreB > scoreS ? 'Big' : 'Small';
+      let confidence = 60 + Math.abs(scoreB - scoreS) * 10;
+      if (confidence > 95) confidence = 95;
 
-      const finalPrediction = scores.Big > scores.Small ? 'Big' : 'Small';
-      const confidence = 50 + Math.abs(scores.Big - scores.Small) * 10;
+      lastPrediction = { prediction, color: topColor };
 
-      let resultMsg = `🤖 Prediction: <b>${finalPrediction}</b><br>🧠 Chance: <b>${confidence}%</b>`;
-      if (confidence >= 85) {
-        resultMsg += "<br>💥 Strong pattern detected.";
-        document.getElementById("soundSuccess").play();
-      } else if (confidence <= 40) {
-        resultMsg += "<br>⚠️ Risky prediction, play cautiously.";
-        document.getElementById("soundRisk").play();
-      } else {
-        resultMsg += "<br>✅ Normal prediction.";
-      }
-
-      document.getElementById("result").innerHTML = resultMsg;
-      predictionHistory.push({ prediction: finalPrediction, result: 'Unknown' });
-      if (predictionHistory.length > 5) predictionHistory.shift();
-
-      chartContainer.innerHTML = predictionHistory.map((entry, i) => `#${i + 1}: <b>${entry.prediction}</b> (${entry.result})`).join('<br>');
+      resultBox.innerHTML = `
+        <b>Prediction:</b> <span class="highlight">${prediction}</span><br>
+        <b>Color:</b> <span class="highlight">${topColor}</span><br>
+        <b>Confidence:</b> ${confidence}%
+      `;
+      analysis.push(`Final: ${prediction} (${confidence}%) | Color: ${topColor}`);
+      analysisBox.innerHTML = `<b>Analysis:</b><br>` + analysis.join('<br>');
+      updateStats();
+      playSound();
     }
-  </script>
-</body>
+
+    function submitFeedback(winResult) {
+      if (!lastPrediction.prediction) return alert("❗ No prediction yet.");
+      learning.push({ ...lastPrediction, result: winResult ? 'Win' : 'Loss' });
+      if (learning.length > 20) learning.shift();
+      winResult ? win++ : loss++;
+      total++;
+      updateStats();
+    }
+
+    function updateStats() {
+      const accuracy = total === 0 ? 0 : Math.round((win / total) * 100);
+      statsBox.innerHTML = `
+        <b>Wins:</b> ${win} | <b>Losses:</b> ${loss} | <b>Accuracy:</b> ${accuracy}%
+      `;
+    }
+
+    function resetAll() {
+      sequence.length = 0;
+      total = win = loss = 0;
+      learning.length = 0;
+      lastPrediction = {};
+      updateInput();
+      resultBox.innerHTML = 'Prediction will appear here.';
+      analysisBox.innerHTML = 'Analysis will appear here.';
+      updateStats();
+    }
+
+    function playSound() {
+      const beep = new Audio("https://www.soundjay.com/button/beep-07.wav");
+      beep.play();
+    }
+
+    // Background animation
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    let stars = Array(150).fill().map(() => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 2,
+      dx: (Math.random() - 0.5) * 0.5,
+      dy: (Math.random() - 0.5) * 0.5
+    }));
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#00ffe055";
+      stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+        s.x += s.dx;
+        s.y += s.dy;
+        if (s.x < 0 || s.x > w) s.dx *= -1;
+        if (s.y < 0 || s.y > h) s.dy *= -1;
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script></body>
 </html>
