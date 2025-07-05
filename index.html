@@ -2,233 +2,221 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WINGO Pro Max Predictor</title>
+  <title>Mr Perfect Pro - Ultimate AI Prediction</title>
   <style>
     body {
       margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(120deg, #0f0f0f, #1a1a1a);
       color: #fff;
-      text-align: center;
       overflow-x: hidden;
     }
-    canvas#bg {
-      position: fixed;
-      top: 0; left: 0;
-      z-index: -1;
+    h1, h2, h3 {
+      color: #00ffc8;
+      text-align: center;
+      text-shadow: 0 0 10px #00ffc8;
     }
-    h1 {
-      margin-top: 30px;
-      color: #00ffe0;
-      text-shadow: 0 0 10px #00ffe0;
-    }
-    .number-buttons {
-      display: grid;
-      grid-template-columns: repeat(5, 60px);
-      gap: 10px;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    button {
-      background: #111;
-      color: #00ffe0;
-      border: 1px solid #00ffe0;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button:hover {
-      background: #00ffe0;
-      color: #000;
-    }
-    .input-sequence span {
-      background: #222;
-      border: 1px solid #555;
-      border-radius: 6px;
-      padding: 8px 12px;
-      margin: 5px;
-      cursor: pointer;
-      display: inline-block;
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
     }
     .box {
-      background: rgba(0, 0, 0, 0.7);
-      margin: 15px auto;
-      max-width: 600px;
-      border-radius: 10px;
-      border: 1px solid #00ffe0;
-      padding: 15px;
-      box-shadow: 0 0 20px #00ffe0;
-      text-align: left;
+      background: #161616;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00ffc85e;
+      margin: 20px 0;
+      padding: 20px;
+      position: relative;
     }
-    .highlight { color: #00ff88; font-weight: bold; }
-    .reset-btn { margin-top: 10px; }
+    select {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #00ffc8;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      margin: 10px;
+      box-shadow: 0 0 10px #00ffc8;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    .result-area, .confidence, .trend-preview, .logic-row, .history-row {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .logic-row, .history-row {
+      border-bottom: 1px solid #333;
+      padding: 5px;
+    }
+    .win { color: #0f0; }
+    .loss { color: #f33; }
+    .sureshot {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff0;
+      text-shadow: 0 0 10px #ff0;
+      margin-top: 15px;
+    }
+    .bg-animated {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: radial-gradient(circle, #00ffc822 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: movebg 30s linear infinite;
+    }
+    @keyframes movebg {
+      from { background-position: 0 0; }
+      to { background-position: 1000px 1000px; }
+    }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <h1>WINGO Pro Max Predictor 🔮</h1>  <div class="number-buttons" id="numberButtons"></div>
-  <div class="input-sequence" id="inputSequence"></div><button onclick="predictNow()">Predict Now</button>
+  <div class="bg-animated"></div>
+  <div class="container">
+    <h1>Mr Perfect Pro - AI Prediction Tool</h1><div class="box">
+  <h2>Input Last 15 Results (Big/Small)</h2>
+  <div id="inputs"></div>
+  <button onclick="makePrediction()">🔮 Predict Now</button>
+  <div class="trend-preview" id="trendPreview"></div>
+</div>
 
-  <div class="box" id="resultBox">Prediction will appear here.</div>
-  <div class="box" id="analysisBox">Analysis will appear here.</div>
-  <div class="box" id="statsBox">Stats will appear here.</div>
-  <div class="box">
-    <b>Confirm Result:</b><br>
-    <button onclick="submitFeedback(true)">✅ Win</button>
-    <button onclick="submitFeedback(false)">❌ Loss</button>
-    <button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
+<div class="box">
+  <h2>Final Prediction</h2>
+  <div class="result-area" id="predictionResult">--</div>
+  <div class="confidence" id="confidenceResult">Confidence: --%</div>
+  <div class="sureshot" id="sureshotAlert"></div>
+  <h3>Was Prediction Correct?</h3>
+  <button onclick="recordResult(true)">✅ Win</button>
+  <button onclick="recordResult(false)">❌ Loss</button>
+</div>
+
+<div class="box">
+  <h2>AI Logic Breakdown (10 Systems)</h2>
+  <div id="logicAnalysis"></div>
+</div>
+
+<div class="box">
+  <h2>Prediction History</h2>
+  <div id="historyList"></div>
+</div>
+
   </div>  <script>
-    const sequence = [];
-    const learning = [];
-    let lastPrediction = {};
-    let total = 0, win = 0, loss = 0;
+    const resultHistory = [];
+    const logicMemory = [];
 
-    const numberButtons = document.getElementById("numberButtons");
-    const inputSequence = document.getElementById("inputSequence");
-    const resultBox = document.getElementById("resultBox");
-    const analysisBox = document.getElementById("analysisBox");
-    const statsBox = document.getElementById("statsBox");
-
-    for (let i = 0; i <= 9; i++) {
-      const btn = document.createElement("button");
-      btn.innerText = i;
-      btn.onclick = () => {
-        if (sequence.length < 15) {
-          sequence.push(i);
-          updateInput();
-        }
-      };
-      numberButtons.appendChild(btn);
+    function generateInputs() {
+      const inputDiv = document.getElementById('inputs');
+      inputDiv.innerHTML = '';
+      for (let i = 1; i <= 15; i++) {
+        const select = document.createElement('select');
+        select.id = 'input' + i;
+        select.innerHTML = `
+          <option value="">--</option>
+          <option value="Big">Big</option>
+          <option value="Small">Small</option>
+        `;
+        inputDiv.appendChild(select);
+      }
     }
 
-    function updateInput() {
-      inputSequence.innerHTML = '';
-      sequence.forEach((num, i) => {
-        const el = document.createElement("span");
-        el.innerText = num;
-        el.onclick = () => {
-          sequence.splice(i, 1);
-          updateInput();
-        };
-        inputSequence.appendChild(el);
+    function makePrediction() {
+      const inputs = [];
+      for (let i = 1; i <= 15; i++) {
+        const val = document.getElementById('input' + i).value;
+        if (val === '') return alert('Please fill all 15 values!');
+        inputs.push(val);
+      }
+
+      document.getElementById('trendPreview').innerText = 'Trend: ' + inputs.join(' ➤ ');
+
+      const logicResults = runLogicSystems(inputs);
+      const voteCount = logicResults.reduce((acc, val) => {
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+      let finalPrediction = voteCount.Big > voteCount.Small ? 'Big' : 'Small';
+      let confidence = Math.round((Math.max(voteCount.Big || 0, voteCount.Small || 0) / 10) * 100);
+
+      document.getElementById('predictionResult').innerText = finalPrediction;
+      document.getElementById('confidenceResult').innerText = 'Confidence: ' + confidence + '%';
+      document.getElementById('sureshotAlert').innerText = confidence >= 80 ? '💥 SURESHOT ENTRY!' : '';
+
+      displayLogicBreakdown(logicResults);
+
+      logicMemory.push({ input: [...inputs], prediction: finalPrediction, confidence });
+    }
+
+    function runLogicSystems(data) {
+      const results = [];
+      const bigCount = data.filter(v => v === 'Big').length;
+      const smallCount = data.length - bigCount;
+      const last = data[data.length - 1];
+      const reverse = [...data].reverse();
+
+      results.push(bigCount > smallCount ? 'Big' : 'Small');
+      results.push(data[0] === 'Big' ? 'Small' : 'Big');
+      results.push(last);
+      results.push(reverse[1]);
+      results.push(bigCount % 2 === 0 ? 'Small' : 'Big');
+      results.push(data[7]);
+      results.push(Math.random() > 0.5 ? 'Big' : 'Small');
+      results.push(bigCount >= 10 ? 'Small' : 'Big');
+      results.push(smallCount > bigCount ? 'Small' : 'Big');
+      results.push(reverse[0] === reverse[1] ? (reverse[2] || 'Small') : reverse[0]);
+
+      return results;
+    }
+
+    function displayLogicBreakdown(results) {
+      const logicNames = [
+        'Trend Logic', 'Reversal Start', 'Continuation', '2nd Last Mirror',
+        'Parity Even/Odd', 'Middle Point', 'Random Throw',
+        'Saturation Check', 'Dominance Logic', 'Pattern Follow'
+      ];
+      const container = document.getElementById('logicAnalysis');
+      container.innerHTML = '';
+      results.forEach((res, i) => {
+        const div = document.createElement('div');
+        div.className = 'logic-row';
+        div.innerText = `${logicNames[i]}: ${res}`;
+        container.appendChild(div);
       });
     }
 
-    function predictNow() {
-      if (sequence.length !== 15) {
-        resultBox.innerHTML = '❗ Enter exactly 15 numbers.';
-        return;
-      }
-      const bigSmall = sequence.map(n => n >= 5 ? 'Big' : 'Small');
-      const colorMap = sequence.map(n => n === 0 || n === 5 ? 'Green' : n % 2 === 0 ? 'Red' : 'Violet');
-
-      let scoreB = 0, scoreS = 0, colorScores = { Red: 0, Green: 0, Violet: 0 }, analysis = [];
-
-      const bCount = bigSmall.filter(v => v === 'Big').length;
-      const sCount = 15 - bCount;
-      scoreB += bCount > sCount ? 2 : 0;
-      scoreS += sCount > bCount ? 2 : 0;
-      analysis.push(`Trend: ${bCount} Big vs ${sCount} Small`);
-
-      const last3 = bigSmall.slice(-3);
-      if (last3.every(v => v === 'Big')) { scoreS += 2; analysis.push("Reversal Expected: Last 3 Big"); }
-      else if (last3.every(v => v === 'Small')) { scoreB += 2; analysis.push("Reversal Expected: Last 3 Small"); }
-
-      const recentLosses = learning.slice(-3).filter(x => x.result === 'Loss');
-      if (recentLosses.length >= 2) {
-        const bias = recentLosses[0].prediction;
-        if (bias === 'Big') { scoreS++; analysis.push("AI: Losses on Big → Boosting Small"); }
-        else { scoreB++; analysis.push("AI: Losses on Small → Boosting Big"); }
-      }
-
-      // Color prediction logic
-      colorMap.slice(-5).forEach(c => colorScores[c]++);
-      const topColor = Object.entries(colorScores).sort((a, b) => b[1] - a[1])[0][0];
-
-      let prediction = scoreB > scoreS ? 'Big' : 'Small';
-      let confidence = 60 + Math.abs(scoreB - scoreS) * 10;
-      if (confidence > 95) confidence = 95;
-
-      lastPrediction = { prediction, color: topColor };
-
-      resultBox.innerHTML = `
-        <b>Prediction:</b> <span class="highlight">${prediction}</span><br>
-        <b>Color:</b> <span class="highlight">${topColor}</span><br>
-        <b>Confidence:</b> ${confidence}%
-      `;
-      analysis.push(`Final: ${prediction} (${confidence}%) | Color: ${topColor}`);
-      analysisBox.innerHTML = `<b>Analysis:</b><br>` + analysis.join('<br>');
-      updateStats();
-      playSound();
+    function recordResult(win) {
+      if (logicMemory.length === 0) return alert('Please predict first!');
+      const last = logicMemory[logicMemory.length - 1];
+      last.result = win ? 'Win' : 'Loss';
+      resultHistory.push(last);
+      updateHistory();
     }
 
-    function submitFeedback(winResult) {
-      if (!lastPrediction.prediction) return alert("❗ No prediction yet.");
-      learning.push({ ...lastPrediction, result: winResult ? 'Win' : 'Loss' });
-      if (learning.length > 20) learning.shift();
-      winResult ? win++ : loss++;
-      total++;
-      updateStats();
-    }
-
-    function updateStats() {
-      const accuracy = total === 0 ? 0 : Math.round((win / total) * 100);
-      statsBox.innerHTML = `
-        <b>Wins:</b> ${win} | <b>Losses:</b> ${loss} | <b>Accuracy:</b> ${accuracy}%
-      `;
-    }
-
-    function resetAll() {
-      sequence.length = 0;
-      total = win = loss = 0;
-      learning.length = 0;
-      lastPrediction = {};
-      updateInput();
-      resultBox.innerHTML = 'Prediction will appear here.';
-      analysisBox.innerHTML = 'Analysis will appear here.';
-      updateStats();
-    }
-
-    function playSound() {
-      const beep = new Audio("https://www.soundjay.com/button/beep-07.wav");
-      beep.play();
-    }
-
-    // Background animation
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
-    let w, h;
-    function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resize);
-    resize();
-
-    let stars = Array(150).fill().map(() => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: Math.random() * 2,
-      dx: (Math.random() - 0.5) * 0.5,
-      dy: (Math.random() - 0.5) * 0.5
-    }));
-
-    function draw() {
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#00ffe055";
-      stars.forEach(s => {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
-        s.x += s.dx;
-        s.y += s.dy;
-        if (s.x < 0 || s.x > w) s.dx *= -1;
-        if (s.y < 0 || s.y > h) s.dy *= -1;
+    function updateHistory() {
+      const container = document.getElementById('historyList');
+      container.innerHTML = '';
+      resultHistory.slice().reverse().forEach((entry, i) => {
+        const div = document.createElement('div');
+        div.className = 'history-row ' + (entry.result === 'Win' ? 'win' : 'loss');
+        div.innerText = `#${resultHistory.length - i} ➤ ${entry.prediction} (${entry.confidence}%) - ${entry.result}`;
+        container.appendChild(div);
       });
-      requestAnimationFrame(draw);
     }
-    draw();
+
+    generateInputs();
   </script></body>
 </html>
