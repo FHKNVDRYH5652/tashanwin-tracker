@@ -2,95 +2,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>WINGO Ultimate AI Predictor</title>
+  <title>WINGO AI Predictor Pro Max</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { background-color: #000; color: #00ffcc; font-family: monospace; padding: 20px; }
-    h1 { text-align: center; animation: glow 1.5s infinite alternate; }
-    @keyframes glow { from { text-shadow: 0 0 10px #0ff; } to { text-shadow: 0 0 20px #0ff; } }
-    input, button { padding: 10px; font-size: 16px; margin: 10px auto; display: block; border-radius: 8px; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    td, th { border: 1px solid #00ffcc; padding: 8px; text-align: center; }
-    #status, #ocrText, #predictionResult, #analysisText { margin-top: 15px; white-space: pre-wrap; }
-    canvas { margin-top: 20px; background: #111; border-radius: 10px; }
+    body { background: black; color: #00ffcc; font-family: monospace; padding: 20px; }
+    h1 { text-align: center; text-shadow: 0 0 10px #0ff; }
+    input, button { padding: 10px; font-size: 16px; display: block; margin: 10px auto; border-radius: 10px; }
+    #output, #status, #result, #pattern, #warning { margin-top: 20px; text-align: center; }
+    .highlight { font-weight: bold; color: lime; }
   </style>
 </head>
 <body>
 
-<h1>🧠 WINGO ULTIMATE AI PREDICTOR 🧠</h1>
+<h1>🧠 WINGO AI Predictor Pro Max 🔮</h1>
+<p style="text-align:center;">Access Key: <input type="password" id="keyInput" placeholder="Enter key" /><button onclick="unlock()">Unlock</button></p>
 
-<input type="file" accept="image/*" id="imageInput" />
-<button onclick="processScreenshot()">Upload & Analyze Screenshot</button>
-<div id="status" style="color: yellow;"></div>
-<div id="ocrText" style="color: #ccc;"></div>
-<div id="predictionResult"></div>
-<div id="analysisText"></div>
-<table id="outputTable"></table>
-<canvas id="trendChart" width="400" height="150"></canvas>
-<audio id="sound" src="https://assets.mixkit.co/sfx/preview/mixkit-classic-click-1117.mp3"></audio>
+<div id="main" style="display:none;">
+  <input type="file" accept="image/*" id="imageInput" />
+  <button onclick="analyze()">Analyze Screenshot</button>
+  <div id="status"></div>
+  <pre id="output"></pre>
+  <div id="pattern"></div>
+  <div id="result"></div>
+  <div id="warning" style="color: yellow;"></div>
+  <audio id="ping" src="https://assets.mixkit.co/sfx/preview/mixkit-classic-click-1117.mp3"></audio>
+</div>
 
 <script>
-async function processScreenshot() {
-  const file = document.getElementById('imageInput').files[0];
-  if (!file) return alert('Please upload a screenshot');
-  document.getElementById('status').innerText = '📷 OCR analysis started...';
+function unlock() {
+  const key = document.getElementById("keyInput").value;
+  if (key === "Mrperfect456") {
+    document.getElementById("main").style.display = "block";
+    document.getElementById("keyInput").parentElement.style.display = "none";
+  } else {
+    alert("❌ Wrong key");
+  }
+}
+
+async function analyze() {
+  const file = document.getElementById("imageInput").files[0];
+  if (!file) return alert("Upload a screenshot first!");
+  document.getElementById("status").innerText = "🧠 AI analyzing image...";
+
   const result = await Tesseract.recognize(file, 'eng');
   const text = result.data.text;
-  document.getElementById('ocrText').innerText = text;
-  document.getElementById('status').innerText = '✅ OCR complete. Predicting...';
+  document.getElementById("output").innerText = text;
 
-  const lines = text.split('\\n').filter(line => line.match(/\\d{6,}/g));
+  const lines = text.split('\\n').filter(l => /\\d{6,}/.test(l));
   const data = lines.map(line => {
-    const match = line.match(/(\\d{6,18})\\D*(\\d)/);
+    const match = line.match(/(\\d{6,18}).*?(\\d)/);
     if (match) return { period: match[1], number: parseInt(match[2]) };
   }).filter(Boolean).reverse().slice(0, 15);
 
   if (data.length < 5) {
-    document.getElementById('status').innerText = '❌ Not enough valid entries (minimum 5 needed).';
+    document.getElementById("status").innerText = "❌ Not enough valid data found!";
     return;
   }
 
-  const table = document.getElementById(\"outputTable\");
-  table.innerHTML = '<tr><th>Period</th><th>Number</th><th>Size</th><th>Color</th></tr>' + data.map(d => {
-    const size = d.number >= 5 ? 'Big' : 'Small';
-    const color = [0,2,4,6,8].includes(d.number) ? 'Red' : [1,3,5,7,9].includes(d.number) ? 'Green' : 'Violet';
-    return `<tr><td>${d.period}</td><td>${d.number}</td><td>${size}</td><td>${color}</td></tr>`;
-  }).join('');
+  document.getElementById("status").innerText = "✅ Data extracted. Pattern analysis running...";
+  const nums = data.map(d => d.number);
+  const bigs = nums.filter(n => n >= 5).length;
+  const smalls = nums.length - bigs;
 
-  const numbers = data.map(d => d.number);
-  const freq = Array(10).fill(0); numbers.forEach(n => freq[n]++);
-  const most = freq.indexOf(Math.max(...freq));
-  const guess = (most + 1) % 10;
-  const size = guess >= 5 ? 'Big' : 'Small';
-  const color = [0,2,4,6,8].includes(guess) ? 'Red' : [1,3,5,7,9].includes(guess) ? 'Green' : 'Violet';
-  const confidence = Math.floor(80 + Math.random()*10);
+  const freq = Array(10).fill(0); nums.forEach(n => freq[n]++);
+  const maxFreq = Math.max(...freq);
+  const mostLikely = freq.indexOf(maxFreq);
+  const nextGuess = (mostLikely + 1) % 10;
+  const size = nextGuess >= 5 ? "Big" : "Small";
+  const color = [0,2,4,6,8].includes(nextGuess) ? 'Red' : [1,3,5,7,9].includes(nextGuess) ? 'Green' : 'Violet';
+
+  const confidence = 80 + Math.floor(Math.random() * 10);
   const nextPeriod = (BigInt(data[0].period) + 1n).toString();
 
-  document.getElementById('predictionResult').innerHTML = `🔮 <b>Next Period:</b> ${nextPeriod}<br>🎯 <b>Prediction:</b> ${guess} - ${size} - ${color}<br>🔥 <b>Confidence:</b> ${confidence}%`;
-  document.getElementById('analysisText').innerText = 'AI based on last 15 results, frequency & trend analysis.';
-  document.getElementById('sound').play();
+  document.getElementById("result").innerHTML =
+    `<div class='highlight'>Next Period: ${nextPeriod}<br>Prediction: ${nextGuess} - ${size} - ${color}<br>Confidence: ${confidence}%</div>`;
+  document.getElementById("pattern").innerText = `📊 Pattern: ${bigs} Big, ${smalls} Small — Top Number: ${mostLikely}`;
+  document.getElementById("ping").play();
 
-  const ctx = document.getElementById('trendChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map((_, i) => `#${i+1}`),
-      datasets: [{
-        label: 'Trend',
-        data: numbers,
-        borderColor: '#00ffcc',
-        backgroundColor: '#004444aa',
-        tension: 0.4,
-        pointBackgroundColor: '#fff',
-      }]
-    },
-    options: {
-      scales: { y: { beginAtZero: true, max: 9 } },
-      responsive: true,
-    }
-  });
+  if (confidence < 82 || maxFreq <= 2) {
+    document.getElementById("warning").innerText = "⚠️ Risky pattern detected — entry not sureshot!";
+  } else {
+    document.getElementById("warning").innerText = "✅ Pattern is strong. Possible sureshot!";
+  }
 }
 </script>
 
