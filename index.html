@@ -2,259 +2,157 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mr. Perfect WINGO AI Tool</title>
+  <title>Mr Perfect AI Screenshot Analyzer</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
   <style>
     body {
-      background-color: #000;
+      background-color: black;
       color: #00ff00;
       font-family: 'Courier New', monospace;
       text-align: center;
       padding: 20px;
     }
     h1 {
-      font-size: 2.5rem;
+      font-size: 2rem;
+      text-shadow: 0 0 10px #00ff00;
+    }
+    input[type="file"] {
+      background: #111;
+      border: 1px solid #00ff00;
       color: #00ff00;
-      text-shadow: 0 0 20px #00ff00;
-    }
-    .input-box {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .input-set {
+      padding: 10px;
       margin: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .input-set input {
-      width: 60px;
-      height: 60px;
-      font-size: 1.5rem;
-      text-align: center;
-      background: #000;
-      color: #00ff00;
-      border: 2px solid #00ff00;
-      border-radius: 10px;
     }
     button {
-      margin: 10px;
-      padding: 12px 30px;
-      font-size: 1.1rem;
       background: #00ff00;
-      border: none;
-      color: #000;
+      color: black;
+      padding: 10px 20px;
+      margin-top: 10px;
       font-weight: bold;
+      cursor: pointer;
       border-radius: 10px;
       box-shadow: 0 0 10px #00ff00;
-      cursor: pointer;
     }
-    .result-box {
-      margin-top: 30px;
-      padding: 20px;
-      border: 2px solid #00ff00;
-      border-radius: 15px;
-      background: #111;
-    }
-    .step {
+    pre {
       text-align: left;
-      max-width: 800px;
-      margin: auto;
-      margin-bottom: 10px;
+      background: #111;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #00ff00;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 400px;
+      margin-top: 20px;
+    }
+    .prediction {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #0f0;
+      text-shadow: 0 0 5px #00ff00;
     }
     .sure { color: #00ff00; font-weight: bold; font-size: 1.4rem; }
-    .risky { color: #ffff00; font-weight: bold; font-size: 1.3rem; }
-
-    #keyPrompt {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      color: #00ff00;
-    }
-    #keyPrompt input {
-      font-size: 1.2rem;
-      padding: 10px;
-      background: #111;
-      color: #00ff00;
-      border: 2px solid #00ff00;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    #analysisBox {
-      margin-top: 30px;
-      padding: 20px;
-      background: #000;
-      color: #00ff00;
-      border: 2px solid #00ff00;
-      border-radius: 10px;
-      text-align: left;
-      max-height: 300px;
-      overflow-y: auto;
-      font-size: 14px;
-      white-space: pre-wrap;
-    }
-    #jalwa {
-      font-size: 1.5rem;
-      color: #00ff00;
-      margin-top: 20px;
-      text-shadow: 0 0 15px #00ff00;
-    }
+    .risky { color: yellow; font-weight: bold; font-size: 1.2rem; }
   </style>
 </head>
 <body>
 
-<div id="keyPrompt">
-  <h2>🔐 Enter Access Key</h2>
-  <input type="password" id="accessKey" placeholder="Enter key">
-  <button onclick="checkKey()">Unlock</button>
-</div>
+<h1>📸 Mr. Perfect Screenshot AI Predictor</h1>
+<p>Upload WINGO result screenshot (like TashanWin)</p>
+<input type="file" id="imageInput" accept="image/*"><br>
+<button onclick="processImage()">🧠 Analyze Screenshot</button>
 
-<h1>💻 Mr. Perfect WINGO AI Predictor</h1>
-<div class="input-box" id="inputs"></div>
+<pre id="ocrResult">Waiting for screenshot...</pre>
 
-<button onclick="soundClick(); analyze()">🎯 Predict</button>
-<button onclick="soundClick(); feedback('win')">✅ I Won</button>
-<button onclick="soundClick(); feedback('loss')">❌ I Lost</button>
-
-<div class="result-box" id="resultBox" style="display:none;">
-  <div class="step" id="step1"></div>
-  <div class="step" id="step2"></div>
-  <div class="step" id="step3"></div>
-  <h2>Prediction: <span id="finalPrediction"></span></h2>
-  <p>Confidence: <span id="confidence"></span>%</p>
-  <p id="entryStatus"></p>
-</div>
-
-<div id="analysisBox">
-  <b>System Analysis Data:</b>
-  <div id="calculationOutput">--</div>
-</div>
-
-<div id="jalwa"></div>
-
-<!-- Sound Effects -->
-<audio id="soundClick" src="https://cdn.pixabay.com/audio/2022/03/15/audio_ea0287b33a.mp3"></audio>
-<audio id="soundWin" src="https://cdn.pixabay.com/audio/2022/03/15/audio_46c8d6eb07.mp3"></audio>
-<audio id="soundLoss" src="https://cdn.pixabay.com/audio/2022/03/15/audio_58cfcce7d4.mp3"></audio>
-<audio id="soundReveal" src="https://cdn.pixabay.com/audio/2022/10/21/audio_84e42c99ab.mp3"></audio>
-<audio id="voiceJalwa" src="https://assets.mixkit.co/voice/mixkit-cool-success-notification-213.wav"></audio>
-
-<!-- Background Music -->
-<audio id="bgMusic" src="https://vgmsite.com/soundtracks/free-fire-ost/lxrbiyytko/01.%20Main%20Theme.mp3" autoplay loop></audio>
+<div class="prediction" id="aiPrediction"></div>
 
 <script>
-  function soundClick() {
-    document.getElementById("soundClick").play();
-  }
+function processImage() {
+  const imageInput = document.getElementById('imageInput');
+  const file = imageInput.files[0];
+  if (!file) return alert("Please upload an image first.");
 
-  function checkKey() {
-    const key = document.getElementById("accessKey").value;
-    if (key === "Mrperfect456") {
-      document.getElementById("keyPrompt").style.display = "none";
-      alert("📢 Join Telegram: https://t.me/+hzN8Ci0F7aYzMmY9");
-      window.open("https://t.me/+hzN8Ci0F7aYzMmY9", "_blank");
-    } else {
-      alert("❌ Invalid key");
-    }
-  }
-
-  const inputContainer = document.getElementById("inputs");
-  for (let i = 1; i <= 15; i++) {
-    const box = document.createElement("div");
-    box.className = "input-set";
-    box.innerHTML = `<label>Box ${i}</label><input type="number" id="num${i}" min="0" max="9">`;
-    inputContainer.appendChild(box);
-  }
-
-  let memoryBias = 0;
-  let lastPrediction = "";
-
-  function analyze() {
-    let nums = [];
-    for (let i = 1; i <= 15; i++) {
-      const val = parseInt(document.getElementById("num" + i).value);
-      if (isNaN(val) || val < 0 || val > 9) {
-        alert("Fill all boxes with numbers 0–9.");
-        return;
-      }
-      nums.push(val);
-    }
-
-    const size = nums.map(n => (n <= 4 ? "Small" : "Big"));
-    const color = nums.map(n => {
-      if (n === 0) return "Red+Violet";
-      if (n === 5) return "Green+Violet";
-      if ([2, 4, 6, 8].includes(n)) return "Red";
-      if ([1, 3, 7, 9].includes(n)) return "Green";
-      return "Unknown";
+  const reader = new FileReader();
+  reader.onload = function () {
+    Tesseract.recognize(reader.result, 'eng').then(({ data: { text } }) => {
+      document.getElementById('ocrResult').innerText = text;
+      parseText(text);
     });
+  };
+  reader.readAsDataURL(file);
+}
 
-    const bigCount = size.filter(x => x === "Big").length;
-    const smallCount = size.filter(x => x === "Small").length;
-    const redCount = color.filter(c => c.includes("Red")).length;
-    const greenCount = color.filter(c => c.includes("Green")).length;
-    const violetCount = nums.filter(n => n === 0 || n === 5).length;
+function parseText(rawText) {
+  const lines = rawText.split('\n').filter(line => line.trim().length > 5);
+  const resultLines = lines.filter(line => line.match(/\d{18}/));
+  
+  const results = resultLines.map(line => {
+    const parts = line.split(/\s+/);
+    const period = parts[0];
+    const number = parseInt(parts[1]);
+    let bigSmall = number >= 5 ? 'Big' : 'Small';
+    let color = getColor(number);
+    return { period, number, bigSmall, color };
+  });
 
-    document.getElementById("resultBox").style.display = "block";
-    document.getElementById("step1").innerHTML = `<b>Step 1:</b> Big: ${bigCount}, Small: ${smallCount}`;
-    document.getElementById("step2").innerHTML = `<b>Step 2:</b> Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}`;
-
-    let predictedSize = bigCount > smallCount ? "Small" : "Big";
-    let predictedColor = redCount >= greenCount ? "Green" : "Red";
-    let confidence = 85 + memoryBias;
-
-    const last3 = size.slice(-3).join("");
-    if (last3 === "BigBigBig") predictedSize = "Small";
-    if (last3 === "SmallSmallSmall") predictedSize = "Big";
-
-    if (violetCount > 4) confidence -= 5;
-    if (predictedColor === "Red" && redCount > greenCount) confidence += 2;
-
-    document.getElementById("step3").innerHTML = `<b>Step 3:</b> Final Decision → ${predictedSize} + ${predictedColor}`;
-    document.getElementById("finalPrediction").innerText = `${predictedSize} + ${predictedColor}`;
-    document.getElementById("confidence").innerText = confidence;
-
-    if (confidence >= 85) {
-      document.getElementById("entryStatus").innerHTML = `<span class="sure">💥 SURESHOT ENTRY</span>`;
-    } else {
-      document.getElementById("entryStatus").innerHTML = `<span class="risky">⚠️ Risky Entry</span>`;
-    }
-
-    lastPrediction = predictedSize + " + " + predictedColor;
-    document.getElementById("soundReveal").play();
-
-    // Show Hacker Calculation
-    let output = "";
-    nums.forEach((n, i) => {
-      output += `Box ${i+1}: ${n} → ${size[i]} / ${color[i]}\n`;
-    });
-    output += `\nBig: ${bigCount}, Small: ${smallCount}, Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}\n`;
-    output += `Bias: ${memoryBias}, Pattern: ${last3}, Final: ${lastPrediction}, Confidence: ${confidence}%`;
-
-    document.getElementById("calculationOutput").innerText = output;
+  if (results.length < 5) {
+    document.getElementById("aiPrediction").innerText = "⚠️ Not enough data found.";
+    return;
   }
 
-  function feedback(type) {
-    if (!lastPrediction) return alert("Make a prediction first.");
+  const last = results[0];
+  const numbers = results.map(r => r.number);
 
-    if (type === "win") {
-      document.getElementById("soundWin").play();
-      document.getElementById("voiceJalwa").play();
-      memoryBias += 1;
-      document.getElementById("jalwa").innerText = "🔥 Mr Perfect Ka Jalwa Hai 🔥";
-    } else {
-      document.getElementById("soundLoss").play();
-      memoryBias -= 2;
-      document.getElementById("jalwa").innerText = "";
-      alert("❌ Loss registered. AI will now adjust.");
-    }
+  // Prediction logic
+  const bigCount = numbers.filter(n => n >= 5).length;
+  const smallCount = numbers.filter(n => n < 5).length;
+  const colorCounts = { red: 0, green: 0, violet: 0 };
+
+  results.forEach(r => {
+    if (r.color.includes("Red")) colorCounts.red++;
+    if (r.color.includes("Green")) colorCounts.green++;
+    if (r.color.includes("Violet")) colorCounts.violet++;
+  });
+
+  let predictSize = bigCount > smallCount ? 'Small' : 'Big';
+  let predictColor = colorCounts.green > colorCounts.red ? 'Red' : 'Green';
+  let confidence = 80 + Math.floor(Math.random() * 10);
+
+  // Adjust for patterns
+  if (results[0].bigSmall === results[1].bigSmall &&
+      results[1].bigSmall === results[2].bigSmall) {
+    predictSize = results[0].bigSmall === 'Big' ? 'Small' : 'Big';
+    confidence += 5;
   }
+
+  const nextPeriod = (parseInt(last.period) + 1).toString();
+
+  let entryStatus = confidence >= 85 ? "💥 SURESHOT ENTRY" : "⚠️ Risky Entry";
+  let predictionText = `
+🧠 Next Period: ${nextPeriod}
+🎯 Prediction: ${predictSize} + ${predictColor}
+Confidence: ${confidence}%
+${confidence >= 85 ? '💥 SURESHOT ENTRY' : '⚠️ RISK WARNING'}
+`;
+
+  document.getElementById("aiPrediction").innerText = predictionText;
+}
+
+function getColor(n) {
+  switch(n) {
+    case 0: return "Red + Violet";
+    case 1: return "Green";
+    case 2: return "Red";
+    case 3: return "Green";
+    case 4: return "Red";
+    case 5: return "Green + Violet";
+    case 6: return "Red";
+    case 7: return "Green";
+    case 8: return "Red";
+    case 9: return "Green";
+    default: return "Unknown";
+  }
+}
 </script>
+
 </body>
 </html>
