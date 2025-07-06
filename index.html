@@ -2,167 +2,257 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WINGO AI Predictor</title>
+  <title>Mr. Perfect WINGO AI Tool</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      font-family: 'Segoe UI', sans-serif;
-      color: #fff;
+      background-color: #000;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
       text-align: center;
       padding: 20px;
     }
     h1 {
       font-size: 2.5rem;
-      text-shadow: 0 0 10px #00ffff;
+      color: #00ff00;
+      text-shadow: 0 0 20px #00ff00;
     }
-    input {
-      width: 40px;
-      margin: 5px;
-      font-size: 1.2rem;
+    .input-box {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .input-set {
+      margin: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .input-set input {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
       text-align: center;
+      background: #000;
+      color: #00ff00;
+      border: 2px solid #00ff00;
       border-radius: 10px;
-      border: none;
-      padding: 5px;
     }
     button {
-      margin-top: 20px;
-      padding: 10px 30px;
-      font-size: 1.2rem;
+      margin: 10px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      background: #00ff00;
       border: none;
-      border-radius: 12px;
-      background: #00ffff;
       color: #000;
       font-weight: bold;
-      box-shadow: 0 0 15px #00ffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ff00;
       cursor: pointer;
     }
     .result-box {
       margin-top: 30px;
-      background: #111;
       padding: 20px;
+      border: 2px solid #00ff00;
       border-radius: 15px;
-      box-shadow: 0 0 10px #00ffcc;
-      display: none;
-    }
-    .sure {
-      color: #00ff00;
-      font-weight: bold;
-      font-size: 1.4rem;
-    }
-    .risky {
-      color: #ffcc00;
-      font-weight: bold;
-      font-size: 1.3rem;
+      background: #111;
     }
     .step {
       text-align: left;
-      margin: 10px auto;
-      max-width: 600px;
+      max-width: 800px;
+      margin: auto;
+      margin-bottom: 10px;
+    }
+    .sure { color: #00ff00; font-weight: bold; font-size: 1.4rem; }
+    .risky { color: #ffff00; font-weight: bold; font-size: 1.3rem; }
+
+    #keyPrompt {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: #00ff00;
+    }
+    #keyPrompt input {
+      font-size: 1.2rem;
+      padding: 10px;
+      background: #111;
+      color: #00ff00;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    canvas {
+      margin-top: 40px;
+      background: #000;
     }
   </style>
 </head>
 <body>
-  <h1>🔮 Mr. Perfect WINGO AI Predictor</h1>
-  <p>Enter last 15 WINGO results (0–9):</p>
-  <div id="inputs"></div>
-  <button onclick="analyze()">Predict</button>
 
-  <div class="result-box" id="resultBox">
-    <div class="step" id="step1"></div>
-    <div class="step" id="step2"></div>
-    <div class="step" id="step3"></div>
-    <h2>🔵 Prediction: <span id="finalPrediction"></span></h2>
-    <p>📊 Confidence: <span id="confidence"></span>%</p>
-    <p id="entryStatus"></p>
-  </div>
+<div id="keyPrompt">
+  <h2>🔐 Enter Access Key</h2>
+  <input type="password" id="accessKey" placeholder="Enter key">
+  <button onclick="checkKey()">Unlock</button>
+</div>
 
-  <script>
-    // Generate 15 inputs
-    const inputContainer = document.getElementById("inputs");
-    for (let i = 0; i < 15; i++) {
-      const input = document.createElement("input");
-      input.type = "number";
-      input.min = "0";
-      input.max = "9";
-      input.id = "num" + i;
-      inputContainer.appendChild(input);
-    }
+<h1>💻 Mr. Perfect WINGO AI Predictor</h1>
+<div class="input-box" id="inputs"></div>
 
-    function analyze() {
-      const nums = [];
-      for (let i = 0; i < 15; i++) {
-        const val = parseInt(document.getElementById("num" + i).value);
-        if (isNaN(val) || val < 0 || val > 9) {
-          alert("Please enter 15 numbers from 0 to 9.");
-          return;
-        }
-        nums.push(val);
-      }
+<button onclick="analyze()">🎯 Predict</button>
+<button onclick="feedback('win')">✅ I Won</button>
+<button onclick="feedback('loss')">❌ I Lost</button>
 
-      // Start Analysis Simulation
-      document.getElementById("resultBox").style.display = "block";
-      document.getElementById("step1").innerHTML = "<b>Step 1: Trend Check</b><br>Analyzing Big/Small flow and shifts...";
-      document.getElementById("step2").innerHTML = "";
-      document.getElementById("step3").innerHTML = "";
-      document.getElementById("finalPrediction").innerText = "";
-      document.getElementById("confidence").innerText = "";
-      document.getElementById("entryStatus").innerText = "";
+<div class="result-box" id="resultBox" style="display:none;">
+  <div class="step" id="step1"></div>
+  <div class="step" id="step2"></div>
+  <div class="step" id="step3"></div>
+  <h2>Prediction: <span id="finalPrediction"></span></h2>
+  <p>Confidence: <span id="confidence"></span>%</p>
+  <p id="entryStatus"></p>
+</div>
 
+<canvas id="trendChart" width="600" height="250"></canvas>
+
+<audio id="soundWin" src="https://cdn.pixabay.com/audio/2022/03/15/audio_46c8d6eb07.mp3"></audio>
+<audio id="soundLoss" src="https://cdn.pixabay.com/audio/2022/03/15/audio_ea0287b33a.mp3"></audio>
+<audio id="soundReveal" src="https://cdn.pixabay.com/audio/2022/03/15/audio_58cfcce7d4.mp3"></audio>
+
+<script>
+  // Access key logic
+  function checkKey() {
+    const key = document.getElementById("accessKey").value;
+    if (key === "Mrperfect456") {
+      document.getElementById("keyPrompt").style.display = "none";
       setTimeout(() => {
-        const size = nums.map(n => (n <= 4 ? "S" : "B"));
-        const color = nums.map(n => {
-          if (n === 0) return "Red+Violet";
-          if (n === 5) return "Green+Violet";
-          if ([2, 4, 6, 8].includes(n)) return "Red";
-          if ([1, 3, 7, 9].includes(n)) return "Green";
-          return "Red"; // fallback
-        });
-
-        // Tally counts
-        const bigCount = size.filter(s => s === "B").length;
-        const smallCount = size.filter(s => s === "S").length;
-        const redCount = color.filter(c => c.includes("Red")).length;
-        const greenCount = color.filter(c => c.includes("Green")).length;
-        const violetCount = nums.filter(n => n === 0 || n === 5).length;
-
-        // Step 2
-        document.getElementById("step2").innerHTML =
-          "<b>Step 2: Pattern Match</b><br>" +
-          `Big: ${bigCount}, Small: ${smallCount} | Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}<br>` +
-          "Checking repetition, color cycles, and reversal patterns...";
-
-        // Step 3: Decision Logic
-        let predictSize = bigCount > smallCount ? "Small" : "Big";
-        let predictColor = redCount >= greenCount ? "Green" : "Red";
-
-        // Final check
-        const lastThree = size.slice(-3).join('');
-        if (lastThree === "BBB") predictSize = "Small";
-        if (lastThree === "SSS") predictSize = "Big";
-
-        const lastColor3 = color.slice(-3).join(',');
-        let confidence = 70;
-        if (predictSize === "Small" && redCount < greenCount) {
-          predictColor = "Red";
-          confidence = 87;
-        }
-        if (violetCount >= 3) confidence -= 5;
-
-        document.getElementById("step3").innerHTML =
-          "<b>Step 3: AI Conclusion</b><br>" +
-          `Size flow shows likely reversal → <b>${predictSize}</b><br>` +
-          `Color trend points to → <b>${predictColor}</b>`;
-
-        document.getElementById("finalPrediction").innerText = `${predictSize} + ${predictColor}`;
-        document.getElementById("confidence").innerText = confidence;
-
-        if (confidence >= 85) {
-          document.getElementById("entryStatus").innerHTML = `<span class="sure">💥 SURESHOT ENTRY</span>`;
-        } else {
-          document.getElementById("entryStatus").innerHTML = `<span class="risky">⚠️ Risky Entry</span>`;
-        }
-      }, 3000); // 3 sec delay to simulate AI thinking
+        alert("📢 Join Telegram: https://t.me/+hzN8Ci0F7aYzMmY9");
+        window.open("https://t.me/+hzN8Ci0F7aYzMmY9", "_blank");
+      }, 500);
+    } else {
+      alert("❌ Invalid key");
     }
-  </script>
+  }
+
+  // Input boxes
+  const inputContainer = document.getElementById("inputs");
+  for (let i = 1; i <= 15; i++) {
+    const box = document.createElement("div");
+    box.className = "input-set";
+    box.innerHTML = `<label>Box ${i}</label><input type="number" id="num${i}" min="0" max="9">`;
+    inputContainer.appendChild(box);
+  }
+
+  let memoryBias = 0;
+  let lastPrediction = "";
+
+  function analyze() {
+    let nums = [];
+    for (let i = 1; i <= 15; i++) {
+      const val = parseInt(document.getElementById("num" + i).value);
+      if (isNaN(val) || val < 0 || val > 9) {
+        alert("Fill all boxes with numbers 0–9.");
+        return;
+      }
+      nums.push(val);
+    }
+
+    const size = nums.map(n => (n <= 4 ? "Small" : "Big"));
+    const color = nums.map(n => {
+      if (n === 0) return "Red+Violet";
+      if (n === 5) return "Green+Violet";
+      if ([2, 4, 6, 8].includes(n)) return "Red";
+      if ([1, 3, 7, 9].includes(n)) return "Green";
+      return "Unknown";
+    });
+
+    const bigCount = size.filter(x => x === "Big").length;
+    const smallCount = size.filter(x => x === "Small").length;
+    const redCount = color.filter(c => c.includes("Red")).length;
+    const greenCount = color.filter(c => c.includes("Green")).length;
+    const violetCount = nums.filter(n => n === 0 || n === 5).length;
+
+    document.getElementById("resultBox").style.display = "block";
+    document.getElementById("step1").innerHTML = `<b>Step 1:</b> Big: ${bigCount}, Small: ${smallCount}`;
+    document.getElementById("step2").innerHTML = `<b>Step 2:</b> Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}`;
+
+    let predictedSize = bigCount > smallCount ? "Small" : "Big";
+    let predictedColor = redCount >= greenCount ? "Green" : "Red";
+    let confidence = 85 + memoryBias;
+
+    const last3 = size.slice(-3).join("");
+    if (last3 === "BigBigBig") predictedSize = "Small";
+    if (last3 === "SmallSmallSmall") predictedSize = "Big";
+
+    if (violetCount > 4) confidence -= 5;
+    if (predictedColor === "Red" && redCount > greenCount) confidence += 2;
+
+    document.getElementById("step3").innerHTML = `<b>Step 3:</b> Final Decision → ${predictedSize} + ${predictedColor}`;
+    document.getElementById("finalPrediction").innerText = `${predictedSize} + ${predictedColor}`;
+    document.getElementById("confidence").innerText = confidence;
+
+    if (confidence >= 85) {
+      document.getElementById("entryStatus").innerHTML = `<span class="sure">💥 SURESHOT ENTRY</span>`;
+    } else {
+      document.getElementById("entryStatus").innerHTML = `<span class="risky">⚠️ Risky Entry</span>`;
+    }
+
+    document.getElementById("soundReveal").play();
+    lastPrediction = predictedSize + " + " + predictedColor;
+    drawChart(size, color);
+  }
+
+  function feedback(type) {
+    if (!lastPrediction) return alert("Make a prediction first.");
+
+    if (type === "win") {
+      document.getElementById("soundWin").play();
+      memoryBias += 1;
+      alert("✅ Win registered. AI will learn.");
+    } else {
+      document.getElementById("soundLoss").play();
+      memoryBias -= 2;
+      alert("❌ Loss registered. Prediction will now adjust.");
+    }
+  }
+
+  function drawChart(sizeData, colorData) {
+    const ctx = document.getElementById("trendChart").getContext('2d');
+    if (window.chartInstance) window.chartInstance.destroy();
+
+    const bgColors = colorData.map(c =>
+      c.includes("Violet") ? "#999" : c.includes("Red") ? "#f00" : "#0f0"
+    );
+    const borderColors = sizeData.map(s => s === "Big" ? "#00f" : "#ff0");
+
+    window.chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: sizeData.map((_, i) => `#${i + 1}`),
+        datasets: [{
+          label: 'WINGO Result (Color = Fill, Size = Border)',
+          data: Array(15).fill(1),
+          backgroundColor: bgColors,
+          borderColor: borderColors,
+          borderWidth: 4
+        }]
+      },
+      options: {
+        responsive: false,
+        scales: {
+          y: { display: false },
+          x: { ticks: { color: '#00ff00' } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+</script>
 </body>
 </html>
