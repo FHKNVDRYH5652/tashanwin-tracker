@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Mr. Perfect WINGO AI Tool</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       background-color: #000;
@@ -87,9 +86,24 @@
       border-radius: 8px;
       margin-top: 10px;
     }
-    canvas {
-      margin-top: 40px;
+    #analysisBox {
+      margin-top: 30px;
+      padding: 20px;
       background: #000;
+      color: #00ff00;
+      border: 2px solid #00ff00;
+      border-radius: 10px;
+      text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    #jalwa {
+      font-size: 1.5rem;
+      color: #00ff00;
+      margin-top: 20px;
+      text-shadow: 0 0 15px #00ff00;
     }
   </style>
 </head>
@@ -104,9 +118,9 @@
 <h1>💻 Mr. Perfect WINGO AI Predictor</h1>
 <div class="input-box" id="inputs"></div>
 
-<button onclick="analyze()">🎯 Predict</button>
-<button onclick="feedback('win')">✅ I Won</button>
-<button onclick="feedback('loss')">❌ I Lost</button>
+<button onclick="soundClick(); analyze()">🎯 Predict</button>
+<button onclick="soundClick(); feedback('win')">✅ I Won</button>
+<button onclick="soundClick(); feedback('loss')">❌ I Lost</button>
 
 <div class="result-box" id="resultBox" style="display:none;">
   <div class="step" id="step1"></div>
@@ -117,28 +131,39 @@
   <p id="entryStatus"></p>
 </div>
 
-<canvas id="trendChart" width="600" height="250"></canvas>
+<div id="analysisBox">
+  <b>System Analysis Data:</b>
+  <div id="calculationOutput">--</div>
+</div>
 
+<div id="jalwa"></div>
+
+<!-- Sound Effects -->
+<audio id="soundClick" src="https://cdn.pixabay.com/audio/2022/03/15/audio_ea0287b33a.mp3"></audio>
 <audio id="soundWin" src="https://cdn.pixabay.com/audio/2022/03/15/audio_46c8d6eb07.mp3"></audio>
-<audio id="soundLoss" src="https://cdn.pixabay.com/audio/2022/03/15/audio_ea0287b33a.mp3"></audio>
-<audio id="soundReveal" src="https://cdn.pixabay.com/audio/2022/03/15/audio_58cfcce7d4.mp3"></audio>
+<audio id="soundLoss" src="https://cdn.pixabay.com/audio/2022/03/15/audio_58cfcce7d4.mp3"></audio>
+<audio id="soundReveal" src="https://cdn.pixabay.com/audio/2022/10/21/audio_84e42c99ab.mp3"></audio>
+<audio id="voiceJalwa" src="https://assets.mixkit.co/voice/mixkit-cool-success-notification-213.wav"></audio>
+
+<!-- Background Music -->
+<audio id="bgMusic" src="https://vgmsite.com/soundtracks/free-fire-ost/lxrbiyytko/01.%20Main%20Theme.mp3" autoplay loop></audio>
 
 <script>
-  // Access key logic
+  function soundClick() {
+    document.getElementById("soundClick").play();
+  }
+
   function checkKey() {
     const key = document.getElementById("accessKey").value;
     if (key === "Mrperfect456") {
       document.getElementById("keyPrompt").style.display = "none";
-      setTimeout(() => {
-        alert("📢 Join Telegram: https://t.me/+hzN8Ci0F7aYzMmY9");
-        window.open("https://t.me/+hzN8Ci0F7aYzMmY9", "_blank");
-      }, 500);
+      alert("📢 Join Telegram: https://t.me/+hzN8Ci0F7aYzMmY9");
+      window.open("https://t.me/+hzN8Ci0F7aYzMmY9", "_blank");
     } else {
       alert("❌ Invalid key");
     }
   }
 
-  // Input boxes
   const inputContainer = document.getElementById("inputs");
   for (let i = 1; i <= 15; i++) {
     const box = document.createElement("div");
@@ -201,9 +226,18 @@
       document.getElementById("entryStatus").innerHTML = `<span class="risky">⚠️ Risky Entry</span>`;
     }
 
-    document.getElementById("soundReveal").play();
     lastPrediction = predictedSize + " + " + predictedColor;
-    drawChart(size, color);
+    document.getElementById("soundReveal").play();
+
+    // Show Hacker Calculation
+    let output = "";
+    nums.forEach((n, i) => {
+      output += `Box ${i+1}: ${n} → ${size[i]} / ${color[i]}\n`;
+    });
+    output += `\nBig: ${bigCount}, Small: ${smallCount}, Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}\n`;
+    output += `Bias: ${memoryBias}, Pattern: ${last3}, Final: ${lastPrediction}, Confidence: ${confidence}%`;
+
+    document.getElementById("calculationOutput").innerText = output;
   }
 
   function feedback(type) {
@@ -211,47 +245,15 @@
 
     if (type === "win") {
       document.getElementById("soundWin").play();
+      document.getElementById("voiceJalwa").play();
       memoryBias += 1;
-      alert("✅ Win registered. AI will learn.");
+      document.getElementById("jalwa").innerText = "🔥 Mr Perfect Ka Jalwa Hai 🔥";
     } else {
       document.getElementById("soundLoss").play();
       memoryBias -= 2;
-      alert("❌ Loss registered. Prediction will now adjust.");
+      document.getElementById("jalwa").innerText = "";
+      alert("❌ Loss registered. AI will now adjust.");
     }
-  }
-
-  function drawChart(sizeData, colorData) {
-    const ctx = document.getElementById("trendChart").getContext('2d');
-    if (window.chartInstance) window.chartInstance.destroy();
-
-    const bgColors = colorData.map(c =>
-      c.includes("Violet") ? "#999" : c.includes("Red") ? "#f00" : "#0f0"
-    );
-    const borderColors = sizeData.map(s => s === "Big" ? "#00f" : "#ff0");
-
-    window.chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: sizeData.map((_, i) => `#${i + 1}`),
-        datasets: [{
-          label: 'WINGO Result (Color = Fill, Size = Border)',
-          data: Array(15).fill(1),
-          backgroundColor: bgColors,
-          borderColor: borderColors,
-          borderWidth: 4
-        }]
-      },
-      options: {
-        responsive: false,
-        scales: {
-          y: { display: false },
-          x: { ticks: { color: '#00ff00' } }
-        },
-        plugins: {
-          legend: { display: false }
-        }
-      }
-    });
   }
 </script>
 </body>
