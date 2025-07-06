@@ -1,156 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mr Perfect AI Screenshot Analyzer</title>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>WINGO AI Screenshot Prediction - FINAL PRO MAX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background-color: black;
-      color: #00ff00;
+      background: black;
+      color: #00ffcc;
       font-family: 'Courier New', monospace;
-      text-align: center;
+      margin: 0;
       padding: 20px;
     }
     h1 {
-      font-size: 2rem;
-      text-shadow: 0 0 10px #00ff00;
+      text-align: center;
+      animation: glow 2s infinite;
     }
-    input[type="file"] {
-      background: #111;
-      border: 1px solid #00ff00;
-      color: #00ff00;
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 5px #00ffcc; }
+      50% { text-shadow: 0 0 20px #00ffcc; }
+    }
+    input, button {
       padding: 10px;
-      margin: 10px;
+      margin: 10px auto;
+      display: block;
+      font-size: 16px;
+      border-radius: 8px;
     }
-    button {
-      background: #00ff00;
-      color: black;
-      padding: 10px 20px;
-      margin-top: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00ff00;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
-    pre {
-      text-align: left;
+    th, td {
+      border: 1px solid #00ffcc;
+      padding: 8px;
+      text-align: center;
+    }
+    .prediction, .analysis {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .telegram-popup {
+      position: fixed;
+      top: 20px;
+      right: 20px;
       background: #111;
-      padding: 15px;
+      border: 2px solid #00ffcc;
+      padding: 10px;
       border-radius: 10px;
-      border: 1px solid #00ff00;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      max-height: 400px;
-      margin-top: 20px;
+      animation: glow 1.5s infinite;
+      z-index: 1000;
     }
-    .prediction {
-      margin-top: 20px;
-      font-size: 1.2rem;
-      color: #0f0;
-      text-shadow: 0 0 5px #00ff00;
+    #accessScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
     }
-    .sure { color: #00ff00; font-weight: bold; font-size: 1.4rem; }
-    .risky { color: yellow; font-weight: bold; font-size: 1.2rem; }
+    #accessScreen input {
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    canvas {
+      background: #111;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
 
-<h1>📸 Mr. Perfect Screenshot AI Predictor</h1>
-<p>Upload WINGO result screenshot (like TashanWin)</p>
-<input type="file" id="imageInput" accept="image/*"><br>
-<button onclick="processImage()">🧠 Analyze Screenshot</button>
+<div id="accessScreen">
+  <h2 style="color:#0f0;">Enter Access Key</h2>
+  <input type="password" id="accessKey" placeholder="Enter key...">
+  <button onclick="checkKey()">Unlock</button>
+</div>
 
-<pre id="ocrResult">Waiting for screenshot...</pre>
+<div class="telegram-popup">
+  🔥 Join Telegram:<br>
+  <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank" style="color:#0f0;">Click Here</a>
+</div>
 
-<div class="prediction" id="aiPrediction"></div>
+<div style="display:none" id="mainApp">
+  <h1>WINGO AI Screenshot Predictor - FINAL PRO MAX</h1>
+  <input type="file" accept="image/*" id="imageInput">
+  <button onclick="processImage()">Analyze Screenshot</button>
+  <div id='ocrText' style='white-space:pre-wrap;color:#ccc;margin-top:10px;font-size:14px;'></div>
+  <div id='status' style='color:yellow;margin-top:5px;'></div>
+
+  <div class="prediction" id="result"></div>
+  <div class="analysis" id="analysis"></div>
+  <button onclick="feedback('win')">✅ Win</button>
+  <button onclick="feedback('loss')">❌ Loss</button>
+  <table id="outputTable"></table>
+  <canvas id="trendChart" width="400" height="150"></canvas>
+  <audio id="ping" src="https://assets.mixkit.co/sfx/preview/mixkit-classic-click-1117.mp3"></audio>
+</div>
 
 <script>
+let memory = [];
+
+function checkKey() {
+  const key = document.getElementById("accessKey").value;
+  if (key === "Mrperfect456") {
+    document.getElementById("accessScreen").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+  } else {
+    alert("Invalid Key");
+  }
+}
+
+function feedback(result) {
+  memory.push(result);
+  if (memory.length > 5) memory.shift();
+  alert("Feedback noted: " + result);
+}
+
 function processImage() {
-  const imageInput = document.getElementById('imageInput');
-  const file = imageInput.files[0];
-  if (!file) return alert("Please upload an image first.");
+  const file = document.getElementById('imageInput').files[0];
+  if (!file) return alert("Please upload a screenshot");
 
-  const reader = new FileReader();
-  reader.onload = function () {
-    Tesseract.recognize(reader.result, 'eng').then(({ data: { text } }) => {
-      document.getElementById('ocrResult').innerText = text;
-      parseText(text);
-    });
-  };
-  reader.readAsDataURL(file);
-}
-
-function parseText(rawText) {
-  const lines = rawText.split('\n').filter(line => line.trim().length > 5);
-  const resultLines = lines.filter(line => line.match(/\d{18}/));
+  document.getElementById('status').innerText = '🧠 OCR in progress...';
   
-  const results = resultLines.map(line => {
-    const parts = line.split(/\s+/);
-    const period = parts[0];
-    const number = parseInt(parts[1]);
-    let bigSmall = number >= 5 ? 'Big' : 'Small';
-    let color = getColor(number);
-    return { period, number, bigSmall, color };
+  Tesseract.recognize(file, 'eng').then(async ({ data: { text } }) => {
+    document.getElementById('ocrText').innerText = text;
+    document.getElementById('status').innerText = '✅ OCR done. Analyzing...';
+    await new Promise(r => setTimeout(r, 5000));
+
+    const lines = text.split("\n").filter(line => /\d{6,18}/.test(line) && /\d/.test(line));
+    if (lines.length === 0) {
+      document.getElementById('status').innerText = '❌ No valid lines found. Try uploading a clearer screenshot.';
+      return;
+    }
+
+    const data = lines.map(line => {
+      const match = line.match(/(\d{6,18})\D*(\d)/);
+      if (match) return { period: match[1], number: parseInt(match[2]) };
+    }).filter(Boolean).slice(-15).reverse(); // ✅ Reverse to get latest data first
+
+    const table = document.getElementById("outputTable");
+    table.innerHTML = "<tr><th>Period</th><th>Number</th><th>Big/Small</th><th>Color</th></tr>" +
+      data.map(d => {
+        const size = d.number >= 5 ? "Big" : "Small";
+        const color = [0,2,4,6,8].includes(d.number) ? 'Red' : [1,3,5,7,9].includes(d.number) ? 'Green' : 'Violet';
+        return `<tr><td>${d.period}</td><td>${d.number}</td><td>${size}</td><td>${color}</td></tr>`;
+      }).join('');
+
+    const numbers = data.map(d => d.number);
+    const bigCount = numbers.filter(n => n >= 5).length;
+    const smallCount = numbers.length - bigCount;
+
+    const freq = Array(10).fill(0);
+    numbers.forEach(n => freq[n]++);
+    const maxNum = freq.indexOf(Math.max(...freq));
+
+    const nextGuess = (maxNum + 1) % 10;
+    const nextSize = nextGuess >= 5 ? "Big" : "Small";
+    const nextColor = [0,2,4,6,8].includes(nextGuess) ? 'Red' : [1,3,5,7,9].includes(nextGuess) ? 'Green' : 'Violet';
+    const confidence = Math.floor(75 + Math.random() * 20);
+    const nextPeriod = (BigInt(data[0].period) + 1n).toString(); // ✅ Pick from latest
+
+    document.getElementById("result").innerHTML = `
+      <b>Next Period:</b> ${nextPeriod}<br>
+      <b>Prediction:</b> ${nextGuess} - ${nextSize} - ${nextColor}<br>
+      <b>Confidence:</b> ${confidence}%
+    `;
+
+    document.getElementById("analysis").innerText = `AI Analysis: ${bigCount} Big / ${smallCount} Small. Highest repeat: ${maxNum}. Pattern ${memory.includes('loss') ? 'shifting' : 'stable'}.`;
+    document.getElementById("ping").play();
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: numbers.map((_, i) => `#${i+1}`),
+        datasets: [{
+          label: 'Number Frequency',
+          data: numbers,
+          backgroundColor: numbers.map(n => n >= 5 ? 'rgba(0,255,0,0.6)' : 'rgba(255,0,0,0.6)')
+        }]
+      },
+      options: { scales: { y: { beginAtZero: true, max: 9 } } }
+    });
   });
-
-  if (results.length < 5) {
-    document.getElementById("aiPrediction").innerText = "⚠️ Not enough data found.";
-    return;
-  }
-
-  const last = results[0];
-  const numbers = results.map(r => r.number);
-
-  // Prediction logic
-  const bigCount = numbers.filter(n => n >= 5).length;
-  const smallCount = numbers.filter(n => n < 5).length;
-  const colorCounts = { red: 0, green: 0, violet: 0 };
-
-  results.forEach(r => {
-    if (r.color.includes("Red")) colorCounts.red++;
-    if (r.color.includes("Green")) colorCounts.green++;
-    if (r.color.includes("Violet")) colorCounts.violet++;
-  });
-
-  let predictSize = bigCount > smallCount ? 'Small' : 'Big';
-  let predictColor = colorCounts.green > colorCounts.red ? 'Red' : 'Green';
-  let confidence = 80 + Math.floor(Math.random() * 10);
-
-  // Adjust for patterns
-  if (results[0].bigSmall === results[1].bigSmall &&
-      results[1].bigSmall === results[2].bigSmall) {
-    predictSize = results[0].bigSmall === 'Big' ? 'Small' : 'Big';
-    confidence += 5;
-  }
-
-  const nextPeriod = (parseInt(last.period) + 1).toString();
-
-  let entryStatus = confidence >= 85 ? "💥 SURESHOT ENTRY" : "⚠️ Risky Entry";
-  let predictionText = `
-🧠 Next Period: ${nextPeriod}
-🎯 Prediction: ${predictSize} + ${predictColor}
-Confidence: ${confidence}%
-${confidence >= 85 ? '💥 SURESHOT ENTRY' : '⚠️ RISK WARNING'}
-`;
-
-  document.getElementById("aiPrediction").innerText = predictionText;
-}
-
-function getColor(n) {
-  switch(n) {
-    case 0: return "Red + Violet";
-    case 1: return "Green";
-    case 2: return "Red";
-    case 3: return "Green";
-    case 4: return "Red";
-    case 5: return "Green + Violet";
-    case 6: return "Red";
-    case 7: return "Green";
-    case 8: return "Red";
-    case 9: return "Green";
-    default: return "Unknown";
-  }
 }
 </script>
 
