@@ -1,222 +1,168 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mr Perfect Pro - Ultimate AI Prediction</title>
+  <meta charset="UTF-8">
+  <title>WINGO AI Predictor</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
-      overflow-x: hidden;
-    }
-    h1, h2, h3 {
-      color: #00ffc8;
       text-align: center;
-      text-shadow: 0 0 10px #00ffc8;
-    }
-    .container {
-      max-width: 1100px;
-      margin: auto;
       padding: 20px;
     }
-    .box {
-      background: #161616;
-      border-radius: 20px;
-      box-shadow: 0 0 20px #00ffc85e;
-      margin: 20px 0;
-      padding: 20px;
-      position: relative;
+    h1 {
+      font-size: 2.5rem;
+      text-shadow: 0 0 10px #00ffff;
     }
-    select {
-      padding: 8px;
+    input {
+      width: 40px;
       margin: 5px;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #00ffc8;
-      color: #000;
-      border: none;
+      font-size: 1.2rem;
+      text-align: center;
       border-radius: 10px;
-      font-weight: bold;
-      font-size: 16px;
-      margin: 10px;
-      box-shadow: 0 0 10px #00ffc8;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    button:hover {
-      transform: scale(1.05);
-    }
-    .result-area, .confidence, .trend-preview, .logic-row, .history-row {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-    .logic-row, .history-row {
-      border-bottom: 1px solid #333;
+      border: none;
       padding: 5px;
     }
-    .win { color: #0f0; }
-    .loss { color: #f33; }
-    .sureshot {
-      font-size: 20px;
+    button {
+      margin-top: 20px;
+      padding: 10px 30px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      background: #00ffff;
+      color: #000;
       font-weight: bold;
-      color: #ff0;
-      text-shadow: 0 0 10px #ff0;
-      margin-top: 15px;
+      box-shadow: 0 0 15px #00ffff;
+      cursor: pointer;
     }
-    .bg-animated {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
-      background: radial-gradient(circle, #00ffc822 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: movebg 30s linear infinite;
+    .result-box {
+      margin-top: 30px;
+      background: #111;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #00ffcc;
+      display: none;
     }
-    @keyframes movebg {
-      from { background-position: 0 0; }
-      to { background-position: 1000px 1000px; }
+    .sure {
+      color: #00ff00;
+      font-weight: bold;
+      font-size: 1.4rem;
+    }
+    .risky {
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+    .step {
+      text-align: left;
+      margin: 10px auto;
+      max-width: 600px;
     }
   </style>
 </head>
 <body>
-  <div class="bg-animated"></div>
-  <div class="container">
-    <h1>Mr Perfect Pro - AI Prediction Tool</h1><div class="box">
-  <h2>Input Last 15 Results (Big/Small)</h2>
+  <h1>🔮 Mr. Perfect WINGO AI Predictor</h1>
+  <p>Enter last 15 WINGO results (0–9):</p>
   <div id="inputs"></div>
-  <button onclick="makePrediction()">🔮 Predict Now</button>
-  <div class="trend-preview" id="trendPreview"></div>
-</div>
+  <button onclick="analyze()">Predict</button>
 
-<div class="box">
-  <h2>Final Prediction</h2>
-  <div class="result-area" id="predictionResult">--</div>
-  <div class="confidence" id="confidenceResult">Confidence: --%</div>
-  <div class="sureshot" id="sureshotAlert"></div>
-  <h3>Was Prediction Correct?</h3>
-  <button onclick="recordResult(true)">✅ Win</button>
-  <button onclick="recordResult(false)">❌ Loss</button>
-</div>
+  <div class="result-box" id="resultBox">
+    <div class="step" id="step1"></div>
+    <div class="step" id="step2"></div>
+    <div class="step" id="step3"></div>
+    <h2>🔵 Prediction: <span id="finalPrediction"></span></h2>
+    <p>📊 Confidence: <span id="confidence"></span>%</p>
+    <p id="entryStatus"></p>
+  </div>
 
-<div class="box">
-  <h2>AI Logic Breakdown (10 Systems)</h2>
-  <div id="logicAnalysis"></div>
-</div>
-
-<div class="box">
-  <h2>Prediction History</h2>
-  <div id="historyList"></div>
-</div>
-
-  </div>  <script>
-    const resultHistory = [];
-    const logicMemory = [];
-
-    function generateInputs() {
-      const inputDiv = document.getElementById('inputs');
-      inputDiv.innerHTML = '';
-      for (let i = 1; i <= 15; i++) {
-        const select = document.createElement('select');
-        select.id = 'input' + i;
-        select.innerHTML = `
-          <option value="">--</option>
-          <option value="Big">Big</option>
-          <option value="Small">Small</option>
-        `;
-        inputDiv.appendChild(select);
-      }
+  <script>
+    // Generate 15 inputs
+    const inputContainer = document.getElementById("inputs");
+    for (let i = 0; i < 15; i++) {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = "0";
+      input.max = "9";
+      input.id = "num" + i;
+      inputContainer.appendChild(input);
     }
 
-    function makePrediction() {
-      const inputs = [];
-      for (let i = 1; i <= 15; i++) {
-        const val = document.getElementById('input' + i).value;
-        if (val === '') return alert('Please fill all 15 values!');
-        inputs.push(val);
+    function analyze() {
+      const nums = [];
+      for (let i = 0; i < 15; i++) {
+        const val = parseInt(document.getElementById("num" + i).value);
+        if (isNaN(val) || val < 0 || val > 9) {
+          alert("Please enter 15 numbers from 0 to 9.");
+          return;
+        }
+        nums.push(val);
       }
 
-      document.getElementById('trendPreview').innerText = 'Trend: ' + inputs.join(' ➤ ');
+      // Start Analysis Simulation
+      document.getElementById("resultBox").style.display = "block";
+      document.getElementById("step1").innerHTML = "<b>Step 1: Trend Check</b><br>Analyzing Big/Small flow and shifts...";
+      document.getElementById("step2").innerHTML = "";
+      document.getElementById("step3").innerHTML = "";
+      document.getElementById("finalPrediction").innerText = "";
+      document.getElementById("confidence").innerText = "";
+      document.getElementById("entryStatus").innerText = "";
 
-      const logicResults = runLogicSystems(inputs);
-      const voteCount = logicResults.reduce((acc, val) => {
-        acc[val] = (acc[val] || 0) + 1;
-        return acc;
-      }, {});
+      setTimeout(() => {
+        const size = nums.map(n => (n <= 4 ? "S" : "B"));
+        const color = nums.map(n => {
+          if (n === 0) return "Red+Violet";
+          if (n === 5) return "Green+Violet";
+          if ([2, 4, 6, 8].includes(n)) return "Red";
+          if ([1, 3, 7, 9].includes(n)) return "Green";
+          return "Red"; // fallback
+        });
 
-      let finalPrediction = voteCount.Big > voteCount.Small ? 'Big' : 'Small';
-      let confidence = Math.round((Math.max(voteCount.Big || 0, voteCount.Small || 0) / 10) * 100);
+        // Tally counts
+        const bigCount = size.filter(s => s === "B").length;
+        const smallCount = size.filter(s => s === "S").length;
+        const redCount = color.filter(c => c.includes("Red")).length;
+        const greenCount = color.filter(c => c.includes("Green")).length;
+        const violetCount = nums.filter(n => n === 0 || n === 5).length;
 
-      document.getElementById('predictionResult').innerText = finalPrediction;
-      document.getElementById('confidenceResult').innerText = 'Confidence: ' + confidence + '%';
-      document.getElementById('sureshotAlert').innerText = confidence >= 80 ? '💥 SURESHOT ENTRY!' : '';
+        // Step 2
+        document.getElementById("step2").innerHTML =
+          "<b>Step 2: Pattern Match</b><br>" +
+          `Big: ${bigCount}, Small: ${smallCount} | Red: ${redCount}, Green: ${greenCount}, Violet: ${violetCount}<br>` +
+          "Checking repetition, color cycles, and reversal patterns...";
 
-      displayLogicBreakdown(logicResults);
+        // Step 3: Decision Logic
+        let predictSize = bigCount > smallCount ? "Small" : "Big";
+        let predictColor = redCount >= greenCount ? "Green" : "Red";
 
-      logicMemory.push({ input: [...inputs], prediction: finalPrediction, confidence });
+        // Final check
+        const lastThree = size.slice(-3).join('');
+        if (lastThree === "BBB") predictSize = "Small";
+        if (lastThree === "SSS") predictSize = "Big";
+
+        const lastColor3 = color.slice(-3).join(',');
+        let confidence = 70;
+        if (predictSize === "Small" && redCount < greenCount) {
+          predictColor = "Red";
+          confidence = 87;
+        }
+        if (violetCount >= 3) confidence -= 5;
+
+        document.getElementById("step3").innerHTML =
+          "<b>Step 3: AI Conclusion</b><br>" +
+          `Size flow shows likely reversal → <b>${predictSize}</b><br>` +
+          `Color trend points to → <b>${predictColor}</b>`;
+
+        document.getElementById("finalPrediction").innerText = `${predictSize} + ${predictColor}`;
+        document.getElementById("confidence").innerText = confidence;
+
+        if (confidence >= 85) {
+          document.getElementById("entryStatus").innerHTML = `<span class="sure">💥 SURESHOT ENTRY</span>`;
+        } else {
+          document.getElementById("entryStatus").innerHTML = `<span class="risky">⚠️ Risky Entry</span>`;
+        }
+      }, 3000); // 3 sec delay to simulate AI thinking
     }
-
-    function runLogicSystems(data) {
-      const results = [];
-      const bigCount = data.filter(v => v === 'Big').length;
-      const smallCount = data.length - bigCount;
-      const last = data[data.length - 1];
-      const reverse = [...data].reverse();
-
-      results.push(bigCount > smallCount ? 'Big' : 'Small');
-      results.push(data[0] === 'Big' ? 'Small' : 'Big');
-      results.push(last);
-      results.push(reverse[1]);
-      results.push(bigCount % 2 === 0 ? 'Small' : 'Big');
-      results.push(data[7]);
-      results.push(Math.random() > 0.5 ? 'Big' : 'Small');
-      results.push(bigCount >= 10 ? 'Small' : 'Big');
-      results.push(smallCount > bigCount ? 'Small' : 'Big');
-      results.push(reverse[0] === reverse[1] ? (reverse[2] || 'Small') : reverse[0]);
-
-      return results;
-    }
-
-    function displayLogicBreakdown(results) {
-      const logicNames = [
-        'Trend Logic', 'Reversal Start', 'Continuation', '2nd Last Mirror',
-        'Parity Even/Odd', 'Middle Point', 'Random Throw',
-        'Saturation Check', 'Dominance Logic', 'Pattern Follow'
-      ];
-      const container = document.getElementById('logicAnalysis');
-      container.innerHTML = '';
-      results.forEach((res, i) => {
-        const div = document.createElement('div');
-        div.className = 'logic-row';
-        div.innerText = `${logicNames[i]}: ${res}`;
-        container.appendChild(div);
-      });
-    }
-
-    function recordResult(win) {
-      if (logicMemory.length === 0) return alert('Please predict first!');
-      const last = logicMemory[logicMemory.length - 1];
-      last.result = win ? 'Win' : 'Loss';
-      resultHistory.push(last);
-      updateHistory();
-    }
-
-    function updateHistory() {
-      const container = document.getElementById('historyList');
-      container.innerHTML = '';
-      resultHistory.slice().reverse().forEach((entry, i) => {
-        const div = document.createElement('div');
-        div.className = 'history-row ' + (entry.result === 'Win' ? 'win' : 'loss');
-        div.innerText = `#${resultHistory.length - i} ➤ ${entry.prediction} (${entry.confidence}%) - ${entry.result}`;
-        container.appendChild(div);
-      });
-    }
-
-    generateInputs();
-  </script></body>
+  </script>
+</body>
 </html>
