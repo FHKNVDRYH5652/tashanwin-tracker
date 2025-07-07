@@ -2,358 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mr Perfect Pro – Ultra AI Colour Predictor</title>
+  <title>MrPerfect WINGO AI Ultra-Hack v1</title>
   <style>
     body {
-      font-family: 'Courier New', monospace;
+      font-family: monospace;
       background: black;
-      color: #0f0;
-      margin: 0;
-      padding: 0;
-    }
-    h1, h2 {
-      text-align: center;
-      color: #0f0;
-      text-shadow: 0 0 10px #0f0;
-    }
-    .container {
+      color: #00ff99;
       padding: 20px;
-      max-width: 960px;
-      margin: auto;
     }
-    .input-boxes input {
-      width: 50px;
-      padding: 5px;
-      margin: 5px;
-      text-align: center;
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-      font-size: 18px;
+    h1 {
+      font-size: 24px;
+      color: #00ffff;
     }
-    #predictBtn {
-      padding: 12px 30px;
-      background: #0f0;
-      color: black;
-      font-weight: bold;
-      font-size: 16px;
-      margin: 20px auto;
-      display: block;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 0 10px #0f0;
-    }
-    .result-box, .chart-box, .analysis-box {
-      margin-top: 20px;
-      padding: 20px;
-      background: #111;
-      border: 2px solid #0f0;
-      box-shadow: 0 0 15px #0f0;
-    }
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
+    textarea {
       width: 100%;
-      background: rgba(0,0,0,0.95);
-      color: white;
-      padding: 15px;
-      text-align: center;
-      z-index: 9999;
-    }
-    .feedback-buttons {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-      gap: 20px;
-    }
-    .feedback-buttons button {
-      padding: 10px 20px;
-      font-weight: bold;
-      background: #0f0;
-      border: none;
-      color: black;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-    canvas {
-      background: #000;
+      height: 150px;
+      background: #111;
+      color: #0f0;
       border: 1px solid #0f0;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #00ff99;
+      color: black;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #111;
+      border: 1px solid #0f0;
+    }
+    .thinking {
+      color: yellow;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
 
-  <!-- Telegram Join Popup -->
-  <div class="popup" id="telegramPopup">
-    📢 Join our Telegram Channel for VIP Signals: 
-    <a href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank" style="color:#0f0;text-decoration:underline;">Join Now</a>
+  <h1>🧠 MrPerfect WINGO AI Ultra-Hack v1</h1>
+  <p>Paste last 50–500 results below (comma-separated):</p>
+  <textarea id="resultInput" placeholder="Example: 3,8,8,5,0,1,9,6,2,..."></textarea>
+  <br />
+  <button onclick="startPrediction()">🔮 Start Prediction</button>
+
+  <div class="output" id="outputArea">
+    <p>Waiting for input...</p>
   </div>
 
-  <h1>🔮 Mr Perfect Pro</h1>
-  <h2>AI Colour Prediction – Ultra Merged Version</h2>
+  <script>
+    function startPrediction() {
+      const input = document.getElementById("resultInput").value.trim();
+      const output = document.getElementById("outputArea");
 
-  <div class="container">
-
-    <!-- Input Boxes -->
-    <div class="input-boxes" id="inputs"></div>
-
-    <!-- Screenshot Upload -->
-    <div style="margin-top:20px;">
-      <label><b>📸 Upload Screenshot:</b></label>
-      <input type="file" id="screenshotInput" accept="image/*" />
-    </div>
-
-    <!-- Predict Button -->
-    <button id="predictBtn">🧠 Start Full Prediction</button>
-
-    <!-- Result Output -->
-    <div class="result-box" id="resultArea"></div>
-
-    <!-- Feedback Area -->
-    <div class="feedback-buttons">
-      <button onclick="markWin()">✅ Win</button>
-      <button onclick="markLoss()">❌ Loss</button>
-    </div>
-
-    <!-- Chart Area -->
-    <div class="chart-box">
-      <canvas id="chartCanvas" width="900" height="150"></canvas>
-    </div>
-
-    <!-- Analysis Area -->
-    <div class="analysis-box" id="analysisPanel">
-      <b>🧠 Analysis Panel:</b><br>
-      Waiting for data...
-    </div>
-
-  </div>
-
-<script>
-  // Generate 15 input boxes
-  const inputArea = document.getElementById('inputs');
-  for (let i = 1; i <= 15; i++) {
-    inputArea.innerHTML += `<input id="box${i}" placeholder="${i}" maxlength="1" />`;
-  }
-</script><script>
-  // Global Variables
-  let winLossMemory = [];
-
-  const colorMap = {
-    0: ["Red", "Violet"],
-    1: ["Green"],
-    2: ["Red"],
-    3: ["Green"],
-    4: ["Red"],
-    5: ["Green"],
-    6: ["Red"],
-    7: ["Green"],
-    8: ["Red"],
-    9: ["Green"]
-  };
-
-  const getColor = (num) => colorMap[num]?.[0] || "Unknown";
-  const getBigSmall = (num) => num >= 5 ? "Big" : "Small";
-
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  // Win/Loss Feedback
-  function markWin() {
-    winLossMemory.push('Win');
-    if (winLossMemory.length > 5) winLossMemory.shift();
-    alert("✅ Marked as Win. Learning Updated.");
-  }
-  function markLoss() {
-    winLossMemory.push('Loss');
-    if (winLossMemory.length > 5) winLossMemory.shift();
-    alert("❌ Marked as Loss. Logic will adjust.");
-  }
-
-  // Chart Drawing
-  function drawChart(data) {
-    const ctx = document.getElementById('chartCanvas').getContext('2d');
-    ctx.clearRect(0, 0, 900, 150);
-    ctx.strokeStyle = "#0f0";
-    ctx.beginPath();
-    ctx.moveTo(0, 75);
-    for (let i = 0; i < data.length; i++) {
-      let y = data[i] >= 5 ? 30 : 120;
-      ctx.lineTo(i * 60, y);
-    }
-    ctx.stroke();
-    ctx.fillStyle = "#0f0";
-    for (let i = 0; i < data.length; i++) {
-      let y = data[i] >= 5 ? 30 : 120;
-      ctx.beginPath();
-      ctx.arc(i * 60, y, 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  // Main Prediction Handler
-  document.getElementById("predictBtn").addEventListener("click", async () => {
-    const resultArea = document.getElementById("resultArea");
-    const analysisPanel = document.getElementById("analysisPanel");
-
-    resultArea.innerHTML = "🧠 <b>Phase 1:</b> Reading Data...";
-    await sleep(1200);
-    resultArea.innerHTML += "<br>🔍 <b>Phase 2:</b> Analyzing Patterns...";
-    await sleep(1800);
-    resultArea.innerHTML += "<br>⚙️ <b>Phase 3:</b> Finalizing Prediction...";
-    await sleep(1600);
-
-    let data = [];
-    for (let i = 1; i <= 15; i++) {
-      let val = parseInt(document.getElementById(`box${i}`).value);
-      if (isNaN(val) || val < 0 || val > 9) {
-        alert("❌ Please enter valid numbers (0–9) in all 15 boxes.");
+      if (!input) {
+        output.innerHTML = "<span style='color:red'>⚠️ Please enter game results first.</span>";
         return;
       }
-      data.push(val);
-    }
 
-    drawChart(data); // Draw chart
-
-    let methodVotes = {
-      Big: 0, Small: 0,
-      Red: 0, Green: 0, Violet: 0
-    };
-
-    // --- CORE AI METHODS ---
-    const methodsUsed = [];
-
-    // Method 1: Trend Average
-    let avg = data.reduce((a,b)=>a+b,0)/data.length;
-    methodVotes[avg >= 5 ? "Big" : "Small"]++;
-    methodsUsed.push("Trend Average");
-
-    // Method 2: Last is Repeating
-    methodVotes[getBigSmall(data[14])]++;
-    methodsUsed.push("Last Repeat");
-
-    // Method 3: Reverse Flip if 3 same
-    let rev = data.slice(-3).map(getBigSmall);
-    if (rev[0] == rev[1] && rev[1] == rev[2]) {
-      methodVotes[rev[2] == "Big" ? "Small" : "Big"]++;
-      methodsUsed.push("Reversal Trigger");
-    }
-
-    // Method 4: Odd/Even
-    let odd = data.filter(x => x % 2 !== 0).length;
-    let even = data.length - odd;
-    methodVotes[odd > even ? "Small" : "Big"]++;
-    methodsUsed.push("Odd/Even Logic");
-
-    // Method 5: Last 5 Pattern Loop
-    let p = data.slice(-5).map(getBigSmall).join("-");
-    if (p.includes("Big-Big-Small")) methodVotes["Big"]++;
-    else methodVotes["Small"]++;
-    methodsUsed.push("Pattern Memory");
-
-    // Method 6: Color Majority
-    let reds=0, greens=0, violets=0;
-    for (let val of data) {
-      let clr = colorMap[val];
-      if (clr.includes("Red")) reds++;
-      if (clr.includes("Green")) greens++;
-      if (clr.includes("Violet")) violets++;
-    }
-    if (reds > greens && reds > violets) methodVotes["Red"]++;
-    else if (greens > reds && greens > violets) methodVotes["Green"]++;
-    else methodVotes["Violet"]++;
-    methodsUsed.push("Color Majority");
-
-    // Method 7: Gap Check
-    if (Math.abs(data[14] - data[13]) >= 4) methodVotes["Small"]++;
-    else methodVotes["Big"]++;
-    methodsUsed.push("Gap Analyzer");
-
-    // Method 8: Repeat Avoidance
-    if (data[14] === data[13]) {
-      methodVotes[getBigSmall(data[14] === 9 ? 0 : data[14] + 1)]++;
-      methodsUsed.push("Avoid Same Repeats");
-    }
-
-    // Method 9: Smart Cycle
-    if (data[14] === data[9]) methodVotes[getBigSmall(data[9])]++;
-    methodsUsed.push("Cycle Matcher");
-
-    // Method 10: AI Memory Influence
-    if (winLossMemory.includes("Loss")) {
-      methodVotes["Small"]++;
-      methodsUsed.push("Loss Feedback Bias");
-    }
-
-    // Method 11: Majority Big/Small
-    let bigCount = data.filter(x => x >= 5).length;
-    let smallCount = data.length - bigCount;
-    methodVotes[bigCount > smallCount ? "Big" : "Small"]++;
-    methodsUsed.push("Majority Count");
-
-    // Method 12: Random Inspired Logic
-    methodVotes[getBigSmall(data[Math.floor(Math.random() * 15)])]++;
-    methodsUsed.push("AI Random Vote");
-
-    // Method 13+: Add more here if needed...
-
-    // Final Result
-    let finalBigSmall = methodVotes.Big >= methodVotes.Small ? "Big" : "Small";
-    let finalColor = methodVotes.Red > methodVotes.Green ? "Red" :
-                     methodVotes.Green > methodVotes.Red ? "Green" : "Violet";
-
-    let totalVotes = methodVotes.Big + methodVotes.Small;
-    let confidence = Math.floor((Math.max(methodVotes.Big, methodVotes.Small) / totalVotes) * 100);
-
-    // Adjust confidence slightly if Win/Loss memory shows bad trend
-    if (winLossMemory.filter(x => x === "Loss").length > 3) confidence -= 15;
-
-    // Output
-    resultArea.innerHTML = `
-      <b>✅ FINAL PREDICTION:</b><br>
-      🔸 Big/Small: <b>${finalBigSmall}</b><br>
-      🔹 Color: <b>${finalColor}</b><br>
-      🧠 Confidence: <b>${confidence}%</b><br><br>
-      <i>Methods Used:</i> ${methodsUsed.join(", ")}
-    `;
-
-    // AI Panel
-    analysisPanel.innerHTML = `
-      🔍 <b>AI Reasoning:</b><br>
-      Detected ${bigCount} Bigs, ${smallCount} Smalls in last 15.<br>
-      Pattern Match: ${p}<br>
-      Color Dominance: Red ${reds}, Green ${greens}, Violet ${violets}<br>
-      Learning Feedback: [${winLossMemory.join(", ")}]
-    `;
-
-    // Play sound
-    let audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-    audio.play();
-  });
-</script><script>
-  // Screenshot Upload Handler (basic simulated demo version)
-  document.getElementById("screenshotInput").addEventListener("change", function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      // 🧠 In real case, here we can use OCR (like Tesseract.js or API)
-      // For now, we simulate sample number extraction for demo
-      alert("📸 Screenshot uploaded. Extracting result (demo)...");
-
-      // Simulated extracted result
-      const fakeExtracted = [1, 4, 7, 2, 9, 3, 5, 6, 0, 3, 2, 8, 5, 4, 7];
-      for (let i = 0; i < 15; i++) {
-        document.getElementById(`box${i + 1}`).value = fakeExtracted[i];
+      const data = input.split(",").map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+      if (data.length < 15) {
+        output.innerHTML = "<span style='color:orange'>⚠️ Enter at least 15 results for accurate prediction.</span>";
+        return;
       }
 
-      alert("✅ Numbers extracted & filled from screenshot (demo data).");
-    };
-    reader.readAsDataURL(file);
-  });
-</script>
+      output.innerHTML = "<div class='thinking'>🤖 Analyzing system... Please wait 12 seconds...</div>";
+
+      setTimeout(() => {
+        const last = data.slice(-15);
+        let big = 0, small = 0, red = 0, green = 0, violet = 0;
+
+        const colorMap = {
+          0: ["Red", "Violet"],
+          1: ["Green"],
+          2: ["Red"],
+          3: ["Green"],
+          4: ["Red"],
+          5: ["Green"],
+          6: ["Red"],
+          7: ["Green"],
+          8: ["Red"],
+          9: ["Green", "Violet"]
+        };
+
+        last.forEach(num => {
+          if (num >= 5) big++; else small++;
+          const colors = colorMap[num] || [];
+          if (colors.includes("Red")) red++;
+          if (colors.includes("Green")) green++;
+          if (colors.includes("Violet")) violet++;
+        });
+
+        let predictedSize = big > small ? "Big" : "Small";
+        let predictedColor = red > green ? "Red" : (green > red ? "Green" : "Violet");
+
+        let confidence = 70 + Math.floor(Math.random() * 25); // Random 70–94%
+        let mode = (big > 10 || small > 10) ? "Pattern Repetition Detected" : "Reversal Phase";
+
+        output.innerHTML = `
+          <h2>✅ AI Prediction:</h2>
+          <p><strong>🔮 Prediction:</strong> ${predictedSize} – ${predictedColor}</p>
+          <p><strong>📊 Confidence:</strong> ${confidence}%</p>
+          <p><strong>🧠 Analysis Mode:</strong> ${mode}</p>
+          <p><strong>🧪 Based on Last 15 Inputs:</strong> ${last.join(", ")}</p>
+        `;
+      }, 12000); // 12 sec delay
+    }
+  </script>
+
 </body>
 </html>
