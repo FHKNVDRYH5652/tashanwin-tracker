@@ -1,200 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wingo 1-Min Predictor - Hacker Mode</title>
-  <style>
-    body {
-      background: #000;
-      color: #0f0;
-      font-family: 'Courier New', monospace;
-      margin: 0;
-      padding: 0;
-    }
-    iframe {
-      width: 100%;
-      height: 250px;
-      border: none;
-    }
-    .container {
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 250px;
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #0f0;
-      color: #000;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #result, #indicators {
-      background: #111;
-      padding: 15px;
-      margin-top: 15px;
-      border: 1px solid #0f0;
-    }
-    h2, h3 {
-      color: #0f0;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WINGO 1-min Real-time Hacker Style Predictor</title>
+<style>
+  body {
+    margin:0; padding:0; background: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+  }
+  iframe {
+    width: 100%; height: 240px; border:none;
+  }
+  .container {
+    max-width: 900px;
+    margin: 10px auto;
+    padding: 15px;
+    background: #111;
+    border: 1px solid #0f0;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+  }
+  textarea {
+    background: #000;
+    border: 1px solid #0f0;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 10px;
+    flex: none;
+    height: 180px;
+    resize: vertical;
+  }
+  input[type=text] {
+    background: #000;
+    border: 1px solid #0f0;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 8px;
+    margin: 8px 0 12px 0;
+  }
+  button {
+    background: #0f0;
+    color: #000;
+    font-weight: bold;
+    border:none;
+    padding: 10px 20px;
+    cursor: pointer;
+    flex: none;
+    font-size: 16px;
+  }
+  #consoleOutput {
+    background: #000;
+    border: 1px solid #0f0;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 10px;
+    margin-top: 12px;
+    flex-grow: 1;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+</style>
 </head>
 <body>
 
-  <!-- TashanWin Game Page -->
-  <iframe src="https://www.tashanwin.org/#/register?invitationCode=13413405256"></iframe>
+<iframe src="https://www.tashanwin.org/#/register?invitationCode=13413405256" title="TashanWin Game"></iframe>
 
-  <div class="container">
-    <h2>🎯 Wingo Color Trading - Smart Predictor</h2>
+<div class="container">
+  <h2>🎯 WINGO 1-min Real-time Hacker Style Predictor</h2>
+  <textarea id="inputData" placeholder="Paste game results here: *Period\nNumber\nBig/Small\n..."></textarea>
+  <input id="betVolume" type="text" placeholder="Enter estimated bet volumes e.g. Big:70 Small:30" />
+  <button onclick="runAnalysis()">Run Real-Time Analysis & Predict</button>
+  <div id="consoleOutput"></div>
+</div>
 
-    <!-- Data Input -->
-    <textarea id="inputData" placeholder="Paste game results here. Format: *Period\nNumber\nBig/Small\n..."></textarea>
-    
-    <!-- Optional Bet Bias Input -->
-    <textarea id="betInput" placeholder="Enter bet volume estimate (e.g., Big:70 Small:30 or Red:60 Green:40)"></textarea>
-    
-    <button onclick="runPrediction()">Predict Next</button>
+<script>
+  const consoleOutput = document.getElementById('consoleOutput');
 
-    <!-- Prediction Output -->
-    <div id="result"></div>
+  function log(text) {
+    consoleOutput.textContent += text + '\n';
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+  }
 
-    <!-- Indicator Panel -->
-    <div id="indicators"></div>
-  </div>
-
-  <script>
-    function parseData(data) {
-      const lines = data.trim().split("\n");
-      const results = [];
-      for (let i = 0; i < lines.length; i += 3) {
-        const period = lines[i].replace("*", "").trim();
-        const number = parseInt(lines[i + 1]);
-        const size = lines[i + 2].trim();
-        if (!isNaN(number)) results.push({ period, number, size });
+  function parseData(raw) {
+    const lines = raw.trim().split('\n');
+    const res = [];
+    for(let i=0; i<lines.length; i+=3){
+      if(!lines[i] || !lines[i+1] || !lines[i+2]) continue;
+      const period = lines[i].replace('*','').trim();
+      const number = parseInt(lines[i+1]);
+      const size = lines[i+2].trim();
+      if(!isNaN(number) && (size === 'Big' || size === 'Small')) {
+        res.push({period, number, size});
       }
-      return results;
     }
+    return res;
+  }
 
-    function getNextPeriod(current) {
-      let num = parseInt(current.replace("010", ""));
-      return "*010" + (num + 1).toString().padStart(3, "0");
+  function parseBetVolume(str) {
+    let big = 0, small = 0;
+    if(!str) return {big, small};
+    const m = str.match(/Big[:\s]?(\d+)/i);
+    if(m) big = parseInt(m[1]);
+    const n = str.match(/Small[:\s]?(\d+)/i);
+    if(n) small = parseInt(n[1]);
+    return {big, small};
+  }
+
+  function countSizes(data) {
+    let big = 0, small = 0;
+    data.forEach(d => {
+      if(d.size === 'Big') big++;
+      else if(d.size === 'Small') small++;
+    });
+    return {big, small};
+  }
+
+  function calculateStreak(data) {
+    if(data.length === 0) return {type: null, count: 0};
+    let base = data[0].size;
+    let count = 1;
+    for(let i=1; i<data.length; i++) {
+      if(data[i].size === base) count++;
+      else break;
     }
+    return {type: base, count};
+  }
 
-    function analyzeStreak(data) {
-      let streak = 1;
-      const base = data[0].size;
-      for (let i = 1; i < data.length; i++) {
-        if (data[i].size === base) streak++;
-        else break;
+  function hotColdNumbers(data) {
+    const freq = {};
+    data.forEach(d => {
+      freq[d.number] = (freq[d.number] || 0) + 1;
+    });
+    const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+    const hot = sorted.length > 0 ? sorted[0][0] : null;
+    const cold = sorted.length > 0 ? sorted[sorted.length-1][0] : null;
+    return {hot, cold};
+  }
+
+  function predictNumber(data) {
+    if(data.length < 3) return null;
+    // Method 1: Most frequent number in last 20 rounds
+    const freq = {};
+    data.forEach(d => freq[d.number] = (freq[d.number]||0)+1);
+    const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+    const mostFreq = parseInt(sorted[0][0]);
+
+    // Method 2: Next number after last number (mod 10)
+    const lastNum = data[0].number;
+    const nextNum = (lastNum + 1) % 10;
+
+    // Method 3: Sum mod 10 of last 3 numbers
+    let sum3 = 0;
+    for(let i=0;i<3 && i<data.length; i++) sum3 += data[i].number;
+    sum3 %= 10;
+
+    // Voting among candidates
+    const candidates = [mostFreq, nextNum, sum3];
+    const count = {};
+    candidates.forEach(c => count[c] = (count[c]||0)+1);
+    let finalNum = candidates[0];
+    let maxCount = 0;
+    for(let c in count){
+      if(count[c] > maxCount){
+        maxCount = count[c];
+        finalNum = parseInt(c);
       }
-      return { type: base, count: streak };
     }
+    return {finalNum, candidates};
+  }
 
-    function getHotCold(numbers) {
-      const freq = {};
-      numbers.forEach(n => freq[n] = (freq[n] || 0) + 1);
-      const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  function predictSize(data, betVolume) {
+    const {big, small} = countSizes(data.slice(0, 20));
+    const streak = calculateStreak(data);
+    if(betVolume.big > betVolume.small) {
+      return {size:'Small', reason:'Public bets more on BIG → system likely to favor SMALL (manipulation detected)'};
+    }
+    if(betVolume.small > betVolume.big) {
+      return {size:'Big', reason:'Public bets more on SMALL → system likely to favor BIG (manipulation detected)'};
+    }
+    if(streak.count >= 3) {
       return {
-        hot: sorted[0]?.[0],
-        cold: sorted[sorted.length - 1]?.[0]
+        size: streak.type === 'Big' ? 'Small' : 'Big',
+        reason: `Streak detected (${streak.count} times ${streak.type}), reversing to avoid streak`
       };
     }
+    return {size: big >= small ? 'Big' : 'Small', reason:'No strong manipulation or streak detected, majority side predicted'};
+  }
 
-    function detectPattern(data) {
-      const recent = data.slice(0, 5).map(d => d.size);
-      if (recent.every(s => s === recent[0])) return `5x ${recent[0]}`;
-      if (recent[0] === recent[2] && recent[1] === recent[3]) return `Alt Pattern`;
-      return "No strong pattern";
+  function confidenceScore(predictedSize, betVolume, streak) {
+    let score = 50;
+    if(betVolume.big > betVolume.small && predictedSize === 'Small') score += 20;
+    if(betVolume.small > betVolume.big && predictedSize === 'Big') score += 20;
+    if(streak.count >= 4) score += 10;
+    if(score > 90) score = 90;
+    return score;
+  }
+
+  async function runAnalysis(){
+    consoleOutput.textContent = '';
+    const rawData = document.getElementById('inputData').value;
+    const betRaw = document.getElementById('betVolume').value;
+    const data = parseData(rawData);
+
+    if(data.length < 10){
+      log('ERROR: Please input at least 10 rounds of data.\nFormat:\n*Period\nNumber\nBig/Small\n...');
+      return;
     }
+    log('--- Starting Real-time Hacker Style Analysis ---\n');
 
-    function parseBetBias(input) {
-      const bias = { big: 0, small: 0 };
-      const match = input.match(/Big[:\s]?(\d+)[,\s]+Small[:\s]?(\d+)/i);
-      if (match) {
-        bias.big = parseInt(match[1]);
-        bias.small = parseInt(match[2]);
-      }
-      return bias;
-    }
+    // Reverse data for chronological order
+    const recentData = data.slice().reverse();
 
-    function predictNext(data, betBias) {
-      const numbers = data.map(r => r.number);
-      const sizes = data.map(r => r.size);
+    log(`Loaded ${recentData.length} rounds.`);
 
-      // Hot/Cold
-      const { hot, cold } = getHotCold(numbers);
+    const betVolume = parseBetVolume(betRaw);
+    log(`Parsed Bet Volumes → Big: ${betVolume.big}, Small: ${betVolume.small}`);
 
-      // Basic logics
-      const lastNum = numbers[0];
-      const predList = [
-        parseInt(hot),
-        (lastNum + 1) % 10,
-        (lastNum + 2) % 10,
-        (lastNum + numbers[1]) % 10,
-        (lastNum * 2) % 10,
-        (9 - lastNum),
-        (numbers[0] + numbers[1] + numbers[2]) % 10
-      ];
+    // Analysis on last 20 rounds
+    const last20 = recentData.slice(-20);
 
-      // Mode of predictions
-      const count = {};
-      predList.forEach(n => count[n] = (count[n] || 0) + 1);
-      const finalNum = parseInt(Object.entries(count).sort((a, b) => b[1] - a[1])[0][0]);
+    // Count Big/Small
+    const counts = countSizes(last20);
+    log(`Count in last 20 rounds → Big: ${counts.big}, Small: ${counts.small}`);
 
-      // Size prediction
-      let finalSize = finalNum >= 5 ? 'Big' : 'Small';
+    // Calculate streak
+    const streak = calculateStreak(last20.slice().reverse());
+    log(`Current streak → ${streak.count} times '${streak.type}'`);
 
-      // Manipulation-based logic
-      if (betBias.big > betBias.small) finalSize = 'Small';
-      else if (betBias.small > betBias.big) finalSize = 'Big';
+    // Hot & Cold numbers
+    const {hot, cold} = hotColdNumbers(last20);
+    log(`Hot number (most frequent) → ${hot}`);
+    log(`Cold number (least frequent) → ${cold}`);
 
-      return { number: finalNum, size: finalSize };
-    }
+    // Predict number
+    const {finalNum, candidates} = predictNumber(last20.slice().reverse());
+    log(`Prediction candidates from different methods → ${candidates.join(', ')}`);
+    log(`Final predicted number → ${finalNum}`);
 
-    function runPrediction() {
-      const rawData = document.getElementById("inputData").value;
-      const betRaw = document.getElementById("betInput").value;
-      const data = parseData(rawData);
+    // Predict size
+    const sizePrediction = predictSize(last20, betVolume);
+    log(`Predicted Size → ${sizePrediction.size}  | Reason: ${sizePrediction.reason}`);
 
-      if (data.length < 5) {
-        alert("Please enter at least 5 rounds of data.");
-        return;
-      }
+    // Confidence score
+    const conf = confidenceScore(sizePrediction.size, betVolume, streak);
+    log(`Confidence Score: ${conf}%`);
 
-      const betBias = parseBetBias(betRaw);
-      const next = getNextPeriod(data[0].period);
-      const prediction = predictNext(data, betBias);
-      const streak = analyzeStreak(data);
-      const pattern = detectPattern(data);
-      const { hot, cold } = getHotCold(data.map(r => r.number));
-
-      // Result output
-      document.getElementById("result").innerHTML = `
-        <h3>🧠 Prediction for ${next}</h3>
-        <p>🎲 <b>Number:</b> ${prediction.number}</p>
-        <p>📈 <b>Size:</b> ${prediction.size}</p>
-        <p>💰 <b>Suggested Bet:</b> Go <b>${prediction.size}</b> side</p>
-      `;
-
-      // Indicators
-      document.getElementById("indicators").innerHTML = `
-        <p>🔥 <b>Hot Number:</b> ${hot}</p>
-        <p>❄️ <b>Cold Number:</b> ${cold}</p>
-        <p>🔁 <b>Current Streak:</b> ${streak.count} x ${streak.type}</p>
-        <p>🧬 <b>Pattern:</b> ${pattern}</p>
-        <p>📊 <b>Bet Bias:</b> Big: ${betBias.big || 0}, Small: ${betBias.small || 0}</p>
-      `;
-    }
-  </script>
+    log('\n--- End of Analysis ---');
+    log(`\n🎯 Next Period Prediction:\nNumber: ${finalNum}\nSize: ${sizePrediction.size}\nConfidence: ${conf}%`);
+  }
+</script>
 
 </body>
 </html>
