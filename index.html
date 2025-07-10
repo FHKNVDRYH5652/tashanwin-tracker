@@ -2,179 +2,182 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mr Perfect Pro 2-Digit Predictor</title>
+  <title>Mr Perfect Pro - Prediction Access</title>
   <style>
     body {
-      background-color: #000;
-      color: #00ff00;
-      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      background: black;
+      color: lime;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+    }
+    h1, h2, h3 {
       text-align: center;
-      padding: 40px;
+      text-shadow: 0 0 10px lime;
     }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px #00ff00;
+    .container {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      margin-top: 50px;
     }
-    input[type="number"] {
+    input {
+      background: black;
+      border: 2px solid lime;
+      color: lime;
+      font-size: 18px;
       padding: 10px;
-      font-size: 20px;
-      width: 80px;
       margin: 5px;
-      background: #111;
-      border: 2px solid #00ff00;
-      color: #00ff00;
-      border-radius: 5px;
+      text-align: center;
     }
     button {
-      margin-top: 20px;
-      padding: 12px 30px;
-      font-size: 20px;
-      background: #00ff00;
-      color: #000;
+      background: lime;
+      color: black;
+      padding: 10px 20px;
       border: none;
-      border-radius: 5px;
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 0 10px lime;
       cursor: pointer;
+      margin-top: 10px;
     }
-    button:hover {
-      background-color: #00cc00;
+    .hidden {
+      display: none;
     }
-    #result {
-      margin-top: 30px;
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .prediction {
       font-size: 24px;
-      text-shadow: 0 0 5px #00ff00;
+      margin-top: 20px;
+      text-shadow: 0 0 8px lime;
     }
   </style>
 </head>
 <body>
-  <h1>🎯 Mr Perfect Pro 2-Digit Predictor</h1>
-  <p>Enter last 2 numbers:</p>
-  <input type="number" id="num1" min="0" max="9" />
-  <input type="number" id="num2" min="0" max="9" />
-  <br />
-  <button onclick="predict()">Get Prediction</button>
-  <div id="result"></div>
+  <canvas id="bg"></canvas>
+  <h1>🔐 Mr Perfect Pro</h1>
+  <div class="container" id="keySection">
+    <h2>Enter Access Key</h2>
+    <input type="text" id="accessKey" placeholder="Enter key here">
+    <br>
+    <button onclick="checkKey()">Unlock</button>
+    <div id="keyMsg" class="prediction"></div>
+  </div>
+
+  <div class="container hidden" id="predictSection">
+    <h2>🎯 Enter Last 2 Numbers</h2>
+    <input type="number" id="num1" min="0" max="9" placeholder="0-9">
+    <input type="number" id="num2" min="0" max="9" placeholder="0-9">
+    <br>
+    <button onclick="predict()">Get Prediction</button>
+    <div class="prediction" id="result">🧠 Prediction: --</div>
+  </div>
 
   <script>
-    // Define combination logic (sample patterns)
-    const logicMap = {
-      "00": "Small",
-      "01": "Small",
-      "02": "Big",
-      "03": "Small",
-      "04": "Big",
-      "05": "Small",
-      "06": "Big",
-      "07": "Big",
-      "08": "Big",
-      "09": "Small",
-      "10": "Small",
-      "11": "Big",
-      "12": "Small",
-      "13": "Big",
-      "14": "Big",
-      "15": "Small",
-      "16": "Big",
-      "17": "Small",
-      "18": "Big",
-      "19": "Small",
-      "20": "Big",
-      "21": "Small",
-      "22": "Small",
-      "23": "Big",
-      "24": "Big",
-      "25": "Small",
-      "26": "Small",
-      "27": "Big",
-      "28": "Big",
-      "29": "Small",
-      "30": "Small",
-      "31": "Big",
-      "32": "Big",
-      "33": "Small",
-      "34": "Big",
-      "35": "Small",
-      "36": "Big",
-      "37": "Small",
-      "38": "Big",
-      "39": "Small",
-      "40": "Big",
-      "41": "Small",
-      "42": "Big",
-      "43": "Small",
-      "44": "Big",
-      "45": "Small",
-      "46": "Big",
-      "47": "Big",
-      "48": "Small",
-      "49": "Big",
-      "50": "Small",
-      "51": "Big",
-      "52": "Big",
-      "53": "Small",
-      "54": "Small",
-      "55": "Big",
-      "56": "Small",
-      "57": "Big",
-      "58": "Big",
-      "59": "Small",
-      "60": "Big",
-      "61": "Small",
-      "62": "Big",
-      "63": "Big",
-      "64": "Small",
-      "65": "Big",
-      "66": "Big",
-      "67": "Small",
-      "68": "Big",
-      "69": "Small",
-      "70": "Big",
-      "71": "Big",
-      "72": "Small",
-      "73": "Big",
-      "74": "Big",
-      "75": "Small",
-      "76": "Big",
-      "77": "Small",
-      "78": "Big",
-      "79": "Small",
-      "80": "Big",
-      "81": "Small",
-      "82": "Big",
-      "83": "Small",
-      "84": "Big",
-      "85": "Small",
-      "86": "Big",
-      "87": "Small",
-      "88": "Big",
-      "89": "Small",
-      "90": "Big",
-      "91": "Big",
-      "92": "Small",
-      "93": "Big",
-      "94": "Small",
-      "95": "Big",
-      "96": "Small",
-      "97": "Big",
-      "98": "Small",
-      "99": "Big"
+    const predictionMap = {
+      "00":"Small","01":"Small","02":"Big","03":"Big","04":"Small",
+      "05":"Big","06":"Big","07":"Big","08":"Small","09":"Big",
+      "10":"Small","11":"Small","12":"Small","13":"Big","14":"Big",
+      "15":"Small","16":"Big","17":"Big","18":"Small","19":"Small",
+      "20":"Small","21":"Big","22":"Small","23":"Small","24":"Big",
+      "25":"Big","26":"Small","27":"Big","28":"Small","29":"Big",
+      "30":"Small","31":"Big","32":"Small","33":"Big","34":"Big",
+      "35":"Small","36":"Small","37":"Big","38":"Small","39":"Big",
+      "40":"Small","41":"Small","42":"Small","43":"Small","44":"Big",
+      "45":"Small","46":"Big","47":"Big","48":"Big","49":"Small",
+      "50":"Small","51":"Big","52":"Big","53":"Small","54":"Big",
+      "55":"Small","56":"Small","57":"Big","58":"Big","59":"Small",
+      "60":"Big","61":"Big","62":"Small","63":"Big","64":"Big",
+      "65":"Small","66":"Big","67":"Small","68":"Big","69":"Small",
+      "70":"Big","71":"Small","72":"Big","73":"Small","74":"Big",
+      "75":"Big","76":"Small","77":"Big","78":"Big","79":"Small",
+      "80":"Big","81":"Small","82":"Big","83":"Small","84":"Big",
+      "85":"Small","86":"Big","87":"Small","88":"Big","89":"Big",
+      "90":"Small","91":"Big","92":"Small","93":"Big","94":"Small",
+      "95":"Big","96":"Small","97":"Big","98":"Small","99":"Big"
     };
+
+    const keys = {
+      "MRP30MIN": 30,
+      "MRP1DAY": 1440,
+      "MRP2DAY": 2880,
+      "MRP3DAY": 4320,
+      "MRP7DAY": 10080
+    };
+
+    function checkKey() {
+      const enteredKey = document.getElementById("accessKey").value.trim();
+      const mins = keys[enteredKey];
+      if (mins) {
+        const expiry = new Date().getTime() + mins * 60000;
+        localStorage.setItem("accessUntil", expiry);
+        document.getElementById("keySection").classList.add("hidden");
+        document.getElementById("predictSection").classList.remove("hidden");
+      } else {
+        document.getElementById("keyMsg").innerText = "❌ Invalid or Expired Key";
+      }
+    }
+
+    function validateAccess() {
+      const now = new Date().getTime();
+      const accessUntil = localStorage.getItem("accessUntil");
+      if (accessUntil && now < parseInt(accessUntil)) {
+        document.getElementById("keySection").classList.add("hidden");
+        document.getElementById("predictSection").classList.remove("hidden");
+      }
+    }
 
     function predict() {
       const n1 = document.getElementById("num1").value;
       const n2 = document.getElementById("num2").value;
-      const key = n1 + n2;
-      const prediction = logicMap[key];
-
-      if (prediction) {
-        document.getElementById("result").innerHTML =
-          `🧠 Prediction: <strong>${prediction}</strong>`;
-      } else {
-        document.getElementById("result").innerHTML =
-          `❌ Invalid Input or No Pattern Found`;
+      if (n1 === "" || n2 === "") {
+        document.getElementById("result").innerText = "🧠 Prediction: Invalid Input";
+        return;
       }
+      const key = n1 + n2;
+      const prediction = predictionMap[key] || "Unknown";
+      document.getElementById("result").innerText = `🧠 Prediction: ${prediction}`;
     }
+
+    // Animate background balls
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const balls = [];
+    for (let i = 0; i < 60; i++) {
+      balls.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 1.5,
+        dy: (Math.random() - 0.5) * 1.5
+      });
+    }
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let b of balls) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = "lime";
+        ctx.fill();
+        b.x += b.dx;
+        b.y += b.dy;
+        if (b.x < 0 || b.x > canvas.width) b.dx *= -1;
+        if (b.y < 0 || b.y > canvas.height) b.dy *= -1;
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+    window.onresize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    validateAccess();
   </script>
 </body>
 </html>
