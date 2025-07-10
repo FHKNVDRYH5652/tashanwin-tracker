@@ -3,128 +3,178 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mr Perfect Pro - Period Number Predictor</title>
+  <title>Mr Perfect Pro 2-Digit Predictor</title>
   <style>
     body {
-      margin: 0;
-      background: black;
-      color: limegreen;
-      font-family: 'Courier New', monospace;
-      overflow: hidden;
+      background-color: #000;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+      padding: 40px;
     }
     h1 {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 26px;
-      text-shadow: 0 0 8px limegreen;
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00ff00;
     }
-    .container {
-      text-align: center;
-      margin-top: 30px;
-    }
-    input[type="text"] {
+    input[type="number"] {
       padding: 10px;
-      border: 2px solid limegreen;
-      background: black;
-      color: limegreen;
-      font-size: 16px;
-      width: 200px;
-      text-align: center;
+      font-size: 20px;
+      width: 80px;
+      margin: 5px;
+      background: #111;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      border-radius: 5px;
     }
     button {
-      margin-top: 15px;
-      padding: 10px 25px;
-      background: limegreen;
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 20px;
+      background: #00ff00;
+      color: #000;
       border: none;
-      color: black;
-      font-weight: bold;
-      font-size: 16px;
+      border-radius: 5px;
       cursor: pointer;
-      box-shadow: 0 0 10px limegreen;
+    }
+    button:hover {
+      background-color: #00cc00;
     }
     #result {
-      margin-top: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      text-shadow: 0 0 6px limegreen;
-    }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
+      margin-top: 30px;
+      font-size: 24px;
+      text-shadow: 0 0 5px #00ff00;
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <h1>Mr Perfect Pro – Period Number Predictor</h1>
-  <div class="container">
-    <label for="period">Enter Last 3 Digits of Period Number:</label><br><br>
-    <input type="text" id="period" maxlength="3" placeholder="e.g. 543" /><br>
-    <button onclick="predict()">🔍 Predict</button>
-    <div id="result"></div>
-  </div>
+  <h1>🎯 Mr Perfect Pro 2-Digit Predictor</h1>
+  <p>Enter last 2 numbers:</p>
+  <input type="number" id="num1" min="0" max="9" />
+  <input type="number" id="num2" min="0" max="9" />
+  <br />
+  <button onclick="predict()">Get Prediction</button>
+  <div id="result"></div>
 
   <script>
-    const predictions = {};
-    function predict() {
-      const input = document.getElementById('period').value.trim();
-      if (!/^\d{3}$/.test(input)) {
-        document.getElementById('result').innerText = "❌ Enter 3 digit period number.";
-        return;
-      }
-      if (!predictions[input]) {
-        const rand = Math.random();
-        if (rand < 0.4) {
-          predictions[input] = "🔴 BIG";
-        } else if (rand < 0.8) {
-          predictions[input] = "🟢 SMALL";
-        } else {
-          predictions[input] = Math.random() > 0.5 ? "🔴 BIG" : "🟢 SMALL";
-        }
-      }
-      document.getElementById('result').innerText = `Prediction: ${predictions[input]}`;
-    }
-
-    // Floating balls
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-    const balls = [];
-
-    for (let i = 0; i < 60; i++) {
-      balls.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: Math.random() * 4 + 2,
-        dx: (Math.random() - 0.5) * 1.5,
-        dy: (Math.random() - 0.5) * 1.5
-      });
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      balls.forEach(ball => {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'limegreen';
-        ctx.fill();
-        ball.x += ball.dx;
-        ball.y += ball.dy;
-
-        if (ball.x < 0 || ball.x > width) ball.dx *= -1;
-        if (ball.y < 0 || ball.y > height) ball.dy *= -1;
-      });
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-    window.onresize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    // Define combination logic (sample patterns)
+    const logicMap = {
+      "00": "Small",
+      "01": "Small",
+      "02": "Big",
+      "03": "Small",
+      "04": "Big",
+      "05": "Small",
+      "06": "Big",
+      "07": "Big",
+      "08": "Big",
+      "09": "Small",
+      "10": "Small",
+      "11": "Big",
+      "12": "Small",
+      "13": "Big",
+      "14": "Big",
+      "15": "Small",
+      "16": "Big",
+      "17": "Small",
+      "18": "Big",
+      "19": "Small",
+      "20": "Big",
+      "21": "Small",
+      "22": "Small",
+      "23": "Big",
+      "24": "Big",
+      "25": "Small",
+      "26": "Small",
+      "27": "Big",
+      "28": "Big",
+      "29": "Small",
+      "30": "Small",
+      "31": "Big",
+      "32": "Big",
+      "33": "Small",
+      "34": "Big",
+      "35": "Small",
+      "36": "Big",
+      "37": "Small",
+      "38": "Big",
+      "39": "Small",
+      "40": "Big",
+      "41": "Small",
+      "42": "Big",
+      "43": "Small",
+      "44": "Big",
+      "45": "Small",
+      "46": "Big",
+      "47": "Big",
+      "48": "Small",
+      "49": "Big",
+      "50": "Small",
+      "51": "Big",
+      "52": "Big",
+      "53": "Small",
+      "54": "Small",
+      "55": "Big",
+      "56": "Small",
+      "57": "Big",
+      "58": "Big",
+      "59": "Small",
+      "60": "Big",
+      "61": "Small",
+      "62": "Big",
+      "63": "Big",
+      "64": "Small",
+      "65": "Big",
+      "66": "Big",
+      "67": "Small",
+      "68": "Big",
+      "69": "Small",
+      "70": "Big",
+      "71": "Big",
+      "72": "Small",
+      "73": "Big",
+      "74": "Big",
+      "75": "Small",
+      "76": "Big",
+      "77": "Small",
+      "78": "Big",
+      "79": "Small",
+      "80": "Big",
+      "81": "Small",
+      "82": "Big",
+      "83": "Small",
+      "84": "Big",
+      "85": "Small",
+      "86": "Big",
+      "87": "Small",
+      "88": "Big",
+      "89": "Small",
+      "90": "Big",
+      "91": "Big",
+      "92": "Small",
+      "93": "Big",
+      "94": "Small",
+      "95": "Big",
+      "96": "Small",
+      "97": "Big",
+      "98": "Small",
+      "99": "Big"
     };
+
+    function predict() {
+      const n1 = document.getElementById("num1").value;
+      const n2 = document.getElementById("num2").value;
+      const key = n1 + n2;
+      const prediction = logicMap[key];
+
+      if (prediction) {
+        document.getElementById("result").innerHTML =
+          `🧠 Prediction: <strong>${prediction}</strong>`;
+      } else {
+        document.getElementById("result").innerHTML =
+          `❌ Invalid Input or No Pattern Found`;
+      }
+    }
   </script>
 </body>
 </html>
