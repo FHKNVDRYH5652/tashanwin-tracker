@@ -1,183 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mr Perfect Pro - Prediction Access</title>
+  <meta charset="UTF-8">
+  <title>Mr Perfect PRO Version - Server Hack</title>
   <style>
     body {
       margin: 0;
-      background: black;
-      color: lime;
-      font-family: 'Courier New', monospace;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       overflow: hidden;
     }
-    h1, h2, h3 {
+    .access-container {
       text-align: center;
-      text-shadow: 0 0 10px lime;
-    }
-    .container {
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      margin-top: 50px;
+      background: rgba(255,255,255,0.05);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0,255,255,0.3);
     }
     input {
-      background: black;
-      border: 2px solid lime;
-      color: lime;
-      font-size: 18px;
-      padding: 10px;
-      margin: 5px;
-      text-align: center;
+      padding: 12px;
+      width: 250px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 15px;
     }
     button {
-      background: lime;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      font-weight: bold;
-      font-size: 18px;
-      box-shadow: 0 0 10px lime;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .hidden {
-      display: none;
-    }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1;
-    }
-    .prediction {
-      font-size: 24px;
       margin-top: 20px;
-      text-shadow: 0 0 8px lime;
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00ffc3;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffc3;
+    }
+    .error {
+      color: #ff4b4b;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #mainContent {
+      display: none;
+      text-align: center;
+      font-size: 28px;
+      color: #00ffc3;
+      animation: fadeIn 1.5s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
     }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <h1>🔐 Mr Perfect Pro</h1>
-  <div class="container" id="keySection">
-    <h2>Enter Access Key</h2>
-    <input type="text" id="accessKey" placeholder="Enter key here">
+
+  <div class="access-container" id="accessBox">
+    <h1>🔐 Mr Perfect PRO Version - Server Hack</h1>
+    <p>Enter Access Key to Continue</p>
+    <input type="password" id="accessKey" placeholder="Enter Key...">
     <br>
     <button onclick="checkKey()">Unlock</button>
-    <div id="keyMsg" class="prediction"></div>
+    <div class="error" id="errorMsg"></div>
   </div>
 
-  <div class="container hidden" id="predictSection">
-    <h2>🎯 Enter Last 2 Numbers</h2>
-    <input type="number" id="num1" min="0" max="9" placeholder="0-9">
-    <input type="number" id="num2" min="0" max="9" placeholder="0-9">
-    <br>
-    <button onclick="predict()">Get Prediction</button>
-    <div class="prediction" id="result">🧠 Prediction: --</div>
+  <div id="mainContent">
+    <h1>✅ Access Granted</h1>
+    <p>Welcome to Mr Perfect Pro - Server Hack</p>
+    <p>The system is now unlocked. All features active.</p>
   </div>
 
   <script>
-    const predictionMap = {
-      "00":"Small","01":"Small","02":"Big","03":"Big","04":"Small",
-      "05":"Big","06":"Big","07":"Big","08":"Small","09":"Big",
-      "10":"Small","11":"Small","12":"Small","13":"Big","14":"Big",
-      "15":"Small","16":"Big","17":"Big","18":"Small","19":"Small",
-      "20":"Small","21":"Big","22":"Small","23":"Small","24":"Big",
-      "25":"Big","26":"Small","27":"Big","28":"Small","29":"Big",
-      "30":"Small","31":"Big","32":"Small","33":"Big","34":"Big",
-      "35":"Small","36":"Small","37":"Big","38":"Small","39":"Big",
-      "40":"Small","41":"Small","42":"Small","43":"Small","44":"Big",
-      "45":"Small","46":"Big","47":"Big","48":"Big","49":"Small",
-      "50":"Small","51":"Big","52":"Big","53":"Small","54":"Big",
-      "55":"Small","56":"Small","57":"Big","58":"Big","59":"Small",
-      "60":"Big","61":"Big","62":"Small","63":"Big","64":"Big",
-      "65":"Small","66":"Big","67":"Small","68":"Big","69":"Small",
-      "70":"Big","71":"Small","72":"Big","73":"Small","74":"Big",
-      "75":"Big","76":"Small","77":"Big","78":"Big","79":"Small",
-      "80":"Big","81":"Small","82":"Big","83":"Small","84":"Big",
-      "85":"Small","86":"Big","87":"Small","88":"Big","89":"Big",
-      "90":"Small","91":"Big","92":"Small","93":"Big","94":"Small",
-      "95":"Big","96":"Small","97":"Big","98":"Small","99":"Big"
-    };
-
-    const keys = {
-      "MRP30MIN": 30,
-      "MRP1DAY": 1440,
-      "MRP2DAY": 2880,
-      "MRP3DAY": 4320,
-      "MRP7DAY": 10080
-    };
+    const correctKey = "Mrperfect456";
 
     function checkKey() {
-      const enteredKey = document.getElementById("accessKey").value.trim();
-      const mins = keys[enteredKey];
-      if (mins) {
-        const expiry = new Date().getTime() + mins * 60000;
-        localStorage.setItem("accessUntil", expiry);
-        document.getElementById("keySection").classList.add("hidden");
-        document.getElementById("predictSection").classList.remove("hidden");
+      const enteredKey = document.getElementById("accessKey").value;
+      if (enteredKey === correctKey) {
+        document.getElementById("accessBox").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
       } else {
-        document.getElementById("keyMsg").innerText = "❌ Invalid or Expired Key";
+        document.getElementById("errorMsg").innerText = "❌ Incorrect key! Try again.";
       }
     }
-
-    function validateAccess() {
-      const now = new Date().getTime();
-      const accessUntil = localStorage.getItem("accessUntil");
-      if (accessUntil && now < parseInt(accessUntil)) {
-        document.getElementById("keySection").classList.add("hidden");
-        document.getElementById("predictSection").classList.remove("hidden");
-      }
-    }
-
-    function predict() {
-      const n1 = document.getElementById("num1").value;
-      const n2 = document.getElementById("num2").value;
-      if (n1 === "" || n2 === "") {
-        document.getElementById("result").innerText = "🧠 Prediction: Invalid Input";
-        return;
-      }
-      const key = n1 + n2;
-      const prediction = predictionMap[key] || "Unknown";
-      document.getElementById("result").innerText = `🧠 Prediction: ${prediction}`;
-    }
-
-    // Animate background balls
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const balls = [];
-    for (let i = 0; i < 60; i++) {
-      balls.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2 + 1,
-        dx: (Math.random() - 0.5) * 1.5,
-        dy: (Math.random() - 0.5) * 1.5
-      });
-    }
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let b of balls) {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.fillStyle = "lime";
-        ctx.fill();
-        b.x += b.dx;
-        b.y += b.dy;
-        if (b.x < 0 || b.x > canvas.width) b.dx *= -1;
-        if (b.y < 0 || b.y > canvas.height) b.dy *= -1;
-      }
-      requestAnimationFrame(animate);
-    }
-    animate();
-    window.onresize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    validateAccess();
   </script>
+
 </body>
 </html>
