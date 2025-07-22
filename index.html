@@ -47,17 +47,6 @@
       margin-top: 15px;
       font-weight: bold;
     }
-    #mainContent {
-      display: none;
-      text-align: center;
-      font-size: 28px;
-      color: #00ffc3;
-      animation: fadeIn 1.5s ease-in-out forwards;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0; transform: scale(0.9);}
-      to {opacity: 1; transform: scale(1);}
-    }
   </style>
 </head>
 <body>
@@ -71,20 +60,14 @@
     <div class="error" id="errorMsg"></div>
   </div>
 
-  <div id="mainContent">
-    <h1>✅ Access Granted</h1>
-    <p>Welcome to Mr Perfect Pro - Server Hack</p>
-    <p>The system is now unlocked. All features active.</p>
-  </div>
-
   <script>
     const correctKey = "Mrperfect456";
 
     function checkKey() {
       const enteredKey = document.getElementById("accessKey").value;
       if (enteredKey === correctKey) {
-        document.getElementById("accessBox").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
+        // Redirect to the target website
+        window.location.href = "http://dj.wingoanalyst.com";
       } else {
         document.getElementById("errorMsg").innerText = "❌ Incorrect key! Try again.";
       }
