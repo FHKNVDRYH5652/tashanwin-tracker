@@ -1,78 +1,390 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mr Perfect PRO Version - Server Hack</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mr Perfect Pro – Crowd‑Bias Strategy (Educational Tool)</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      overflow: hidden;
+    :root{
+      --bg:#0b0f1a; --panel:#0f1526; --accent:#7c5cff; --accent2:#27e1a3; --danger:#ff5c7a; --soft:#d0d8ff;
     }
-    .access-container {
-      text-align: center;
-      background: rgba(255,255,255,0.05);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 0 30px rgba(0,255,255,0.3);
-    }
-    input {
-      padding: 12px;
-      width: 250px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px 25px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #00ffc3;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 10px #00ffc3;
-    }
-    .error {
-      color: #ff4b4b;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 700px at 80% -10%, #1a2040 0%, #0b0f1a 55%, #070b14 100%);
+      color:#e8ecff;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px}
+    header{display:flex;gap:18px;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo-badge{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#00b3ff);box-shadow:0 0 32px #694fff88 inset, 0 6px 30px #623dff55}
+    h1{font-size:22px;margin:0}
+    .sub{opacity:.8;font-size:13px}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+    .card{grid-column:span 12;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    @media(min-width:900px){.span-6{grid-column:span 6}.span-4{grid-column:span 4}.span-8{grid-column:span 8}}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    label{font-size:12px;opacity:.85}
+    input,select,button,textarea{background:#0c1224;color:#f0f4ff;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;font:inherit}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,255,.25)}
+    button{cursor:pointer;background:linear-gradient(135deg,var(--accent),#00c7b7);border:none}
+    button.secondary{background:#111831}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.15);font-size:12px}
+    .tag{padding:4px 8px;border-radius:999px;background:#111731;border:1px solid rgba(255,255,255,.12);font-size:12px}
+    .muted{opacity:.75}
+    .kpi{display:flex;gap:16px}
+    .kpi .box{flex:1;background:#0d1429;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px}
+    .kpi .val{font-size:22px;font-weight:700}
+    .glow{filter:drop-shadow(0 0 22px rgba(124,92,255,.55));}
+    .good{color:var(--accent2)}
+    .bad{color:var(--danger)}
+    .warn{color:#ffd166}
+    .blink{animation:blink 1.1s infinite alternate}
+    @keyframes blink{from{opacity:.55}to{opacity:1}}
+    .sep{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);margin:12px 0}
+    .flex-between{display:flex;justify-content:space-between;align-items:center}
+    .list{display:flex;gap:8px;flex-wrap:wrap}
+    .result-box{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .badge{padding:8px;border-radius:12px;background:#0d1328;border:1px solid rgba(255,255,255,.07);text-align:center}
+    .color-chip{display:inline-block;min-width:60px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12)}
+    .chip-red{background:linear-gradient(135deg,#ff5c7a33,#ff5c7a18)}
+    .chip-green{background:linear-gradient(135deg,#27e1a333,#27e1a318)}
+    .chip-violet{background:linear-gradient(135deg,#7c5cff33,#7c5cff18)}
+    .small{font-size:12px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .footer{opacity:.6;font-size:12px;margin-top:24px}
+    .danger-box{border:1px solid #ff5c7a66;background:#3a0f2240;padding:10px;border-radius:12px}
+    .ok-box{border:1px solid #27e1a377;background:#0c2c2640;padding:10px;border-radius:12px}
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="logo-badge"></div>
+        <div>
+          <h1 class="glow">Mr Perfect Pro – <span class="muted">Crowd‑Bias Strategy</span></h1>
+          <div class="sub">Educational Analysis Tool for Colour/Big‑Small Games (No guaranteed wins)</div>
+        </div>
+      </div>
+      <div class="pill">Status: <span id="status">Idle</span></div>
+    </header><div class="grid">
+  <!-- Inputs Panel -->
+  <section class="card span-8" id="inputs">
+    <div class="flex-between">
+      <h2>1) Recent Results (last 15 numbers)</h2>
+      <div class="list">
+        <span class="tag">Rules: 0 → R+V | 1,3,7,9 → G | 2,4,6,8 → R | 5 → G+V</span>
+        <span class="tag">Big: 5–9, Small: 0–4</span>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <input id="nums" placeholder="e.g. 2,8,5,1,3,0,7,2,9,4,6,5,1,0,8" style="flex:1" />
+      <button id="btnDemo">Fill Demo</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label>Manual Crowd Estimate (your guess / poll / channel noise)</label>
+      <input id="crowdGreen" type="number" min="0" max="100" value="45" style="width:120px"/> <span class="small">% on <b>Green</b></span>
+      <input id="crowdRed" type="number" min="0" max="100" value="45" style="width:120px"/> <span class="small">% on <b>Red</b></span>
+      <input id="crowdViolet" type="number" min="0" max="100" value="10" style="width:120px"/> <span class="small">% on <b>Violet</b></span>
+      <button class="secondary" id="btnNormalize">Normalize 100%</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label>Risk Controls</label>
+      <input id="bankroll" type="number" min="0" value="1000" style="width:140px"/> <span class="small">Bankroll</span>
+      <input id="kellyEdge" type="number" step="0.01" value="0.08" style="width:120px"/> <span class="small">Edge (est.)</span>
+      <input id="kellyOdds" type="number" step="0.01" value="1.9" style="width:120px"/> <span class="small">Payout Multiplier</span>
+      <button id="btnKelly">Calc Stake</button>
+      <span class="small" id="kellyOut" style="opacity:.85"></span>
+    </div>
+    <div class="sep"></div>
+    <div class="row">
+      <button id="btnAnalyze" class="glow">Analyze & Predict</button>
+      <button id="btnReset" class="secondary">Reset</button>
+      <span class="small muted">Simulated analysis delay ~3–5s for realism</span>
+    </div>
+  </section>
 
-  <div class="access-container" id="accessBox">
-    <h1>🔐 Mr Perfect PRO Version - Server Hack</h1>
-    <p>Enter Access Key to Continue</p>
-    <input type="password" id="accessKey" placeholder="Enter Key...">
-    <br>
-    <button onclick="checkKey()">Unlock</button>
-    <div class="error" id="errorMsg"></div>
-  </div>
+  <!-- Quick KPIs -->
+  <section class="card span-4">
+    <h2>Quick Stats</h2>
+    <div class="kpi">
+      <div class="box"><div class="muted small">Confidence</div><div class="val" id="conf">–</div></div>
+      <div class="box"><div class="muted small">Signal</div><div class="val" id="sig">–</div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="result-box">
+      <div class="badge"><div class="muted small">Red% crowd</div><div id="kRed">–</div></div>
+      <div class="badge"><div class="muted small">Green% crowd</div><div id="kGreen">–</div></div>
+      <div class="badge"><div class="muted small">Violet% crowd</div><div id="kViolet">–</div></div>
+    </div>
+    <div class="sep"></div>
+    <div class="danger-box small">
+      <b>Disclaimer:</b> Ye tool sirf educational analysis ke liye hai. Real‑money guarantees <u>possible nahi</u>. Crowd‑bias guess galat ho sakta hai.
+    </div>
+  </section>
 
-  <script>
-    const correctKey = "Mrperfect456";
+  <!-- Logic Breakdown -->
+  <section class="card span-6">
+    <h2>2) Logic Breakdown (10 Methods, Majority Voting)</h2>
+    <ol id="logicList" class="small"></ol>
+  </section>
 
-    function checkKey() {
-      const enteredKey = document.getElementById("accessKey").value;
-      if (enteredKey === correctKey) {
-        // Redirect to the target website
-        window.location.href = "http://dj.wingoanalyst.com";
-      } else {
-        document.getElementById("errorMsg").innerText = "❌ Incorrect key! Try again.";
-      }
+  <!-- Colour Map & Trends -->
+  <section class="card span-6">
+    <h2>3) Trend Viewer</h2>
+    <div id="trend" class="mono small"></div>
+    <div class="sep"></div>
+    <div class="row">
+      <span class="color-chip chip-red">Red</span>
+      <span class="color-chip chip-green">Green</span>
+      <span class="color-chip chip-violet">Violet</span>
+      <span class="tag">Big: 5–9</span>
+      <span class="tag">Small: 0–4</span>
+    </div>
+  </section>
+
+  <!-- Final Recommendation -->
+  <section class="card span-12">
+    <div class="flex-between">
+      <h2>4) Final Recommendation</h2>
+      <span class="pill" id="sureshot">No‑Bet</span>
+    </div>
+    <div class="row">
+      <div class="ok-box" id="finalBox">
+        Awaiting analysis…
+      </div>
+    </div>
+  </section>
+
+  <!-- How to use -->
+  <section class="card span-12">
+    <h2>How to use (fast)</h2>
+    <ul class="small">
+      <li>Last 10–15 numbers paste kijiye. (Agar sirf colours pata hain to approximate numbers se fill karein.)</li>
+      <li>Apni <b>crowd estimate</b> set karein (Telegram polls / channel noise / app lobby / friends ke bets).</li>
+      <li>Analyze button dabayein. Tool 10 logic methods run karega, crowd‑contrarian bias apply karega, aur betting <b>size</b> ke liye Kelly suggestion dega.</li>
+      <li>Agar confidence low ho ya crowd split balanced ho, tool <b>No‑Bet</b> suggest karega.</li>
+    </ul>
+  </section>
+
+  <!-- Educational Notes -->
+  <section class="card span-12">
+    <h2>Important Notes</h2>
+    <ul class="small">
+      <li>“Crowd‑loses” hypothesis har platform par valid nahi hota. Agar kabhi backend payouts skewed ho, to bhi <b>future rounds independent</b> ho sakte hain.</li>
+      <li>Real‑time crowd data ke bina sirf <b>proxies</b> se guess hota hai (polls, chat activity, timing, referral pushes). Yeh unreliable ho sakte hain.</li>
+      <li>Bankroll management bina kisi strategy ke bhi zaroori hai; losses cap karo, no chase.</li>
+    </ul>
+  </section>
+</div>
+
+<div class="footer">© Mr Perfect Pro – Educational tool. Not affiliated with any platform. No guarantees.</div>
+
+  </div>  <script>
+    const m = {0:['R','V'],1:['G'],2:['R'],3:['G'],4:['R'],5:['G','V'],6:['R'],7:['G'],8:['R'],9:['G']};
+    const byNum = n => m[n]||[];
+    const bigSmall = n => n>=5? 'Big':'Small';
+
+    const el = id=>document.getElementById(id);
+
+    function parseNums(){
+      const raw = el('nums').value.trim();
+      if(!raw) return [];
+      return raw.split(/[,\s]+/).map(x=>parseInt(x,10)).filter(x=>!isNaN(x) && x>=0 && x<=9).slice(-15);
     }
-  </script>
 
-</body>
+    function colorOf(n){
+      const c = byNum(n);
+      // Prefer single color where applicable (R/G). If dual, mark as Violet special.
+      if(c.length===2 && c.includes('V')) return 'V';
+      return c[0]||'?';
+    }
+
+    function summarize(nums){
+      const colors = nums.map(colorOf);
+      const bs = nums.map(bigSmall);
+      const counts = {R:0,G:0,V:0,Big:0,Small:0};
+      colors.forEach(c=>counts[c]++);
+      bs.forEach(b=>counts[b]++);
+      return {colors, bs, counts};
+    }
+
+    function normalizeCrowd(){
+      let g = Number(el('crowdGreen').value)||0;
+      let r = Number(el('crowdRed').value)||0;
+      let v = Number(el('crowdViolet').value)||0;
+      const total = g+r+v;
+      if(total<=0){ g=45;r=45;v=10; }
+      else { g = (g/total*100); r=(r/total*100); v=(v/total*100); }
+      el('crowdGreen').value = g.toFixed(1);
+      el('crowdRed').value = r.toFixed(1);
+      el('crowdViolet').value = v.toFixed(1);
+      el('kGreen').textContent = g.toFixed(1)+'%';
+      el('kRed').textContent = r.toFixed(1)+'%';
+      el('kViolet').textContent = v.toFixed(1)+'%';
+      return {G:g,R:r,V:v};
+    }
+
+    function kellyStake(){
+      const B = Number(el('bankroll').value)||0;
+      const e = Number(el('kellyEdge').value)||0; // expected edge in decimal
+      const o = Number(el('kellyOdds').value)||1.9; // payout multiplier
+      // Basic Kelly fraction: f* = (bp - q)/b ; here approximate p from edge: edge ≈ p*b - q; assume b=o-1
+      const b = Math.max(0.01,o-1);
+      // Assume conservative p from edge: edge = p*b - (1-p)  => p = (edge+1)/(b+1)
+      let p = (e+1)/(b+1);
+      p = Math.min(Math.max(p,0.01),0.99);
+      const q = 1-p;
+      const f = (b*p - q)/b; // fraction of bankroll
+      const fAdj = Math.max(0, Math.min(f, 0.25)); // cap 25%
+      const stake = B * fAdj;
+      el('kellyOut').textContent = `Suggested stake ≈ ${stake.toFixed(2)} (fraction ${(fAdj*100).toFixed(1)}%)`;
+      return {stake, f:fAdj, p};
+    }
+
+    function majorityVote(votes){
+      const tally = {};
+      votes.forEach(v=>{tally[v]=(tally[v]||0)+1});
+      let best=null, max=-1;
+      Object.entries(tally).forEach(([k,c])=>{ if(c>max){max=c;best=k} });
+      const conf = max / votes.length;
+      return {pick:best, conf, tally};
+    }
+
+    function logicEngines(nums, crowd){
+      const {colors, bs, counts} = summarize(nums);
+      const engines = [];
+
+      // 1) Recent Streak Reversal (if long streak, expect flip)
+      const lastC = colors[colors.length-1];
+      const streakLen = (()=>{let s=1; for(let i=colors.length-2;i>=0;i--){ if(colors[i]===lastC) s++; else break; } return s;})();
+      engines.push(streakLen>=3 ? (lastC==='R'?'G':'R') : lastC);
+
+      // 2) Mean Reversion on color counts (favor the underrepresented among R/G)
+      engines.push(counts.R>counts.G? 'G' : (counts.G>counts.R? 'R' : (lastC==='R'?'G':'R')));
+
+      // 3) Momentum carry (if streak 2, continue; else flip)
+      engines.push(streakLen===2 ? lastC : (lastC==='R'?'G':'R'));
+
+      // 4) Big/Small alternation bias (if last three alternate, continue alt vs last)
+      const alt = bs.slice(-4).every((v,i,a)=> i===0 || v!==a[i-1]);
+      engines.push(alt ? (lastC==='R'?'G':'R') : lastC);
+
+      // 5) Position parity (odd indices bias to G, even to R) – toy heuristic
+      const nextIndex = nums.length+1;
+      engines.push(nextIndex%2? 'G':'R');
+
+      // 6) Last 5 majority color (contrarian): choose minority in last 5
+      const last5 = colors.slice(-5);
+      const r5 = last5.filter(x=>'R'===x).length;
+      const g5 = last5.filter(x=>'G'===x).length;
+      engines.push(r5>g5?'G': (g5>r5?'R': (lastC==='R'?'G':'R')));
+
+      // 7) Gap since Violet (if long since V, tiny chance to V else ignore) – but we still output R/G
+      const sinceV = (()=>{let s=0; for(let i=colors.length-1;i>=0;i--){ if(colors[i]==='V') break; s++; } return s;})();
+      engines.push(sinceV>=8 ? (Math.random()<0.15? 'V' : (lastC==='R'?'G':'R')) : (lastC==='R'?'G':'R'));
+
+      // 8) Big/Small bias mapping to color (more Big → favor R, more Small → favor G)
+      engines.push(counts.Big>counts.Small? 'R':'G');
+
+      // 9) Crowd‑contrarian (invert the highest crowd color if difference > 10%)
+      const entries = Object.entries(crowd).sort((a,b)=>b[1]-a[1]);
+      const [maxC,maxV] = entries[0];
+      let contr = maxC;
+      if(entries.length>1 && (maxV - entries[1][1]) >= 10){
+        contr = (maxC==='R'?'G': maxC==='G'?'R': (Math.random()<0.5?'R':'G'));
+      }
+      engines.push(contr);
+
+      // 10) Weighted ensemble of 1–9 (map V to nearest based on counts)
+      const mapped = engines.map(x=> x==='V' ? (counts.R>counts.G? 'R':'G') : x);
+      const {pick} = majorityVote(mapped);
+      engines.push(pick);
+
+      return engines;
+    }
+
+    function analyze(){
+      el('status').textContent='Analyzing…';
+      const nums = parseNums();
+      if(nums.length<5){
+        el('finalBox').innerHTML = 'Please enter at least 5 recent numbers (0–9).';
+        el('status').textContent='Need data';
+        return;
+      }
+      const crowd = normalizeCrowd();
+      const {colors, bs, counts} = summarize(nums);
+      el('trend').textContent = `Nums: ${nums.join(', ')}\nColors: ${colors.join(' ')}\nBig/Small: ${bs.join(' ')}`;
+
+      // Simulated analysis delay 3–5 seconds
+      const delay = 2800 + Math.random()*1800;
+      setTimeout(()=>{
+        const engines = logicEngines(nums, crowd);
+        const mapped = engines.map(x=> x==='V' ? (counts.R>counts.G? 'R':'G') : x);
+        const vote = majorityVote(mapped);
+
+        // Confidence adjusted by crowd split & streak strength
+        const crowdSpread = Math.abs(crowd.R - crowd.G);
+        const adj = Math.min(0.15, crowdSpread/400); // + up to 0.15
+        let conf = Math.min(0.95, Math.max(0.5, vote.conf + adj));
+
+        // No‑bet conditions
+        const noBet = (Math.abs(counts.R - counts.G)<=1 && conf<0.62) || crowdSpread<6;
+
+        // Final text
+        const pick = vote.pick;
+        el('conf').textContent = (conf*100).toFixed(1)+'%';
+        el('sig').textContent = pick||'–';
+
+        const tallyStr = Object.entries(vote.tally).map(([k,v])=>`${k}:${v}`).join(' | ');
+        const bsHint = `Bias: Big ${counts.Big} vs Small ${counts.Small}`;
+        el('logicList').innerHTML = '';
+        const engines = logicEngines(nums, crowd);
+        engines.forEach((e,i)=>{
+          const li = document.createElement('li');
+          li.textContent = `Engine ${i+1}: ${e}`;
+          el('logicList').appendChild(li);
+        });
+
+        el('kRed').textContent = crowd.R.toFixed(1)+'%';
+        el('kGreen').textContent = crowd.G.toFixed(1)+'%';
+        el('kViolet').textContent = crowd.V.toFixed(1)+'%';
+
+        if(noBet){
+          el('sureshot').textContent = 'NO‑BET';
+          el('sureshot').className = 'pill warn blink';
+          el('finalBox').innerHTML = `<b>No‑Bet advised.</b> Confidence low or crowd not skewed. (${tallyStr})<br>${bsHint}`;
+        } else {
+          const stakeInfo = kellyStake();
+          el('sureshot').textContent = conf>0.78 ? 'SURESHOT SIGNAL*' : 'ENTRY POSSIBLE';
+          el('sureshot').className = conf>0.78 ? 'pill good blink' : 'pill good';
+          el('finalBox').innerHTML = `
+            <div><b>Pick:</b> <span class="color-chip ${pick==='R'?'chip-red':'chip-green'}">${pick==='R'?'Red':'Green'}</span></div>
+            <div><b>Confidence:</b> ${(conf*100).toFixed(1)}%</div>
+            <div><b>Crowd Spread (R vs G):</b> ${Math.abs(crowd.R-crowd.G).toFixed(1)}%</div>
+            <div><b>Votes:</b> ${tallyStr}</div>
+            <div class="small muted">*"SURESHOT" label is heuristic, not a guarantee.</div>
+            <div class="sep"></div>
+            <div class="small">${bsHint}</div>
+            <div class="small">Suggested stake: ${(stakeInfo.stake||0).toFixed(2)} (cap 25% bankroll)</div>
+          `;
+        }
+        el('status').textContent='Done';
+      }, delay);
+    }
+
+    // Events
+    el('btnAnalyze').addEventListener('click', analyze);
+    el('btnDemo').addEventListener('click', ()=>{
+      el('nums').value = '2,8,5,1,3,0,7,2,9,4,6,5,1,0,8';
+    });
+    el('btnReset').addEventListener('click', ()=>{
+      el('nums').value=''; el('logicList').innerHTML='';
+      el('trend').textContent=''; el('conf').textContent='–'; el('sig').textContent='–';
+      el('finalBox').textContent='Awaiting analysis…'; el('status').textContent='Idle';
+    });
+    el('btnNormalize').addEventListener('click', normalizeCrowd);
+    el('btnKelly').addEventListener('click', kellyStake);
+
+    // Init
+    normalizeCrowd();
+  </script></body>
 </html>
