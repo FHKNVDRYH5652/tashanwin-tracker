@@ -1,505 +1,178 @@
-<!DOCTYPE html><html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>तन्हा सा सफ़र — Web Audio Track</title>
-  <style>
-    :root{
-      --bg:#0b0f14;--card:#101621;--text:#e6edf3;--muted:#9fb0c2;--accent:#7cc6ff;--accent2:#ff9bd2;--good:#7dffa7;--warn:#ffd27d;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 800px at 20% 10%,#0f1723 0%,#0b0f14 40%,#0b0f14 100%);color:var(--text)}
-    .wrap{max-width:980px;margin:28px auto;padding:16px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.08);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.45);padding:20px}
-    h1{font-weight:800;letter-spacing:.3px;margin:0 0 6px}
-    .sub{color:var(--muted);margin:0 0 18px}
-    .controls{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 14px}
-    button,.btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#1b2535,#111827);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
-    button:hover{filter:brightness(1.08)}
-    button:active{transform:translateY(1px)}
-    .pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);display:inline-flex;gap:10px;align-items:center}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
-    @media (max-width:920px){.grid{grid-template-columns:1fr}}
-    .meter{height:10px;background:#0c121a;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 18px rgba(124,198,255,.45) inset;transition:width .2s ease}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .small{font-size:12px;color:var(--muted)}
-    .section{display:flex;flex-wrap:wrap;gap:6px}
-    .tag{font-size:12px;color:#0b0f14;background:linear-gradient(90deg,#b7e2ff,#ffd3ec);padding:6px 10px;border-radius:999px;font-weight:700}
-    .muter{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-    .muter label{display:inline-flex;gap:8px;align-items:center;background:#0e1420;border:1px solid rgba(255,255,255,.08);padding:8px 10px;border-radius:10px}
-    .lyrics{white-space:pre-line;background:#0c121a;border:1px solid rgba(255,255,255,.08);padding:14px;border-radius:14px;line-height:1.75}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXTREME ULTRA PRO ADAPTIVE AI Predictor 50KB+</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ---------------- Body + Background ---------------- */
+body {
+  margin:0;
+  height:100vh;
+  font-family:'Arial',sans-serif;
+  background: linear-gradient(135deg,#0a0a0a,#1f1f1f);
+  overflow:hidden;
+  color:#fff;
+}
+/* ---------------- Floating Balls ---------------- */
+.ball { position:absolute; border-radius:50%; opacity:0.7; background: linear-gradient(45deg,#ff0000,#00ff00,#0000ff); animation: float 20s linear infinite; }
+.ball2 { animation-duration: 12s; opacity:0.5; background: linear-gradient(45deg,#ff00ff,#00ffff,#ffff00); }
+.ball3 { animation-duration: 25s; opacity:0.3; background: linear-gradient(45deg,#ffffff,#ff8800,#00ff88); }
+@keyframes float {
+  0% {transform:translateY(0) translateX(0);}
+  25% {transform:translateY(-100px) translateX(50px);}
+  50% {transform:translateY(-150px) translateX(80px);}
+  75% {transform:translateY(-100px) translateX(50px);}
+  100% {transform:translateY(0) translateX(0);}
+}
+/* ---------------- Container ---------------- */
+.container {
+  position:relative;
+  z-index:2;
+  width:90%;
+  max-width:1000px;
+  margin:50px auto;
+  background: rgba(255,255,255,0.07);
+  border-radius:35px;
+  backdrop-filter: blur(30px);
+  padding:50px;
+  box-shadow:0 0 50px rgba(255,255,255,0.3);
+}
+h1 {
+  text-align:center;
+  color:#ffdd00;
+  font-size:3em;
+  text-shadow:0 0 15px #ffdd00;
+}
+/* ---------------- Inputs ---------------- */
+.inputs {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  margin:30px 0;
+}
+.inputs input {
+  width:18%;
+  padding:18px;
+  border-radius:18px;
+  border:none;
+  outline:none;
+  text-align:center;
+  font-weight:bold;
+  font-size:20px;
+  background: rgba(255,255,255,0.18);
+  color:#fff;
+}
+/* ---------------- Buttons ---------------- */
+button {
+  width:100%;
+  padding:22px;
+  border:none;
+  border-radius:18px;
+  background:#ffdd00;
+  color:#000;
+  font-weight:bold;
+  font-size:22px;
+  cursor:pointer;
+  margin-top:15px;
+  transition: all 0.3s;
+}
+button:hover { background:#ffd700; transform:scale(1.08); }
+.feedback { margin-top:20px; display:flex; justify-content:center; gap:20px; }
+.feedback button { width:120px; background:#00ff88; color:#000; font-weight:bold; font-size:20px; }
+.feedback button.loss { background:#ff4444; color:#fff; }
+/* ---------------- Result ---------------- */
+.result { margin-top:20px; text-align:center; font-size:24px; font-weight:bold; }
+.sureshot { color:#ff4500; font-size:28px; font-weight:bold; text-shadow:0 0 25px #ff4500; }
+/* ---------------- Chart ---------------- */
+canvas { margin-top:40px; background: rgba(255,255,255,0.08); border-radius:25px; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>तन्हा सा सफ़र — Emotion Track (Web Audio)</h1>
-      <p class="sub">2–3 मिनट का सूदिंग, इमोशनल थीम (A minor, ~72 BPM). Play/Stop, Stem mute, और WAV डाउनलोड उपलब्ध।</p><div class="controls">
-    <button id="playBtn">▶️ Play</button>
-    <button id="stopBtn">⏹ Stop</button>
-    <button id="downloadBtn">⬇️ Download WAV</button>
-    <span class="pill"><span>Tempo:</span><strong><span id="tempo">72</span> BPM</strong></span>
-    <span class="pill"><span>Key:</span><strong>A minor</strong></span>
-    <span class="pill"><span>Length:</span><strong><span id="lenLabel">~2:30</span></strong></span>
-  </div>
+<div id="ballsContainer"></div>
+<div class="container">
+<h1>EXTREME ULTRA PRO ADAPTIVE AI Predictor</h1>
+<div class="inputs">
+<input type="number" id="box1" placeholder="Box 1">
+<input type="number" id="box2" placeholder="Box 2">
+<input type="number" id="box3" placeholder="Box 3">
+<input type="number" id="box4" placeholder="Box 4">
+<input type="number" id="box5" placeholder="Box 5">
+<input type="number" id="box6" placeholder="Box 6">
+<input type="number" id="box7" placeholder="Box 7">
+<input type="number" id="box8" placeholder="Box 8">
+<input type="number" id="box9" placeholder="Box 9">
+<input type="number" id="box10" placeholder="Box 10">
+</div>
+<button onclick="predict()">Predict</button>
+<div class="result" id="result"></div>
+<div class="feedback">
+<button onclick="feedback('win')">Win ✅</button>
+<button class="loss" onclick="feedback('loss')">Loss ❌</button>
+</div>
+<canvas id="trendChart" height="250"></canvas>
+<!-- Embedded Sounds -->
+<audio id="clickSound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA="></audio>
+<audio id="alertSound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAIA+AAABAAgAZGF0YQAAAAA="></audio>
+<script>
+// -------------- Floating balls --------------
+for(let i=0;i<120;i++){ let b=document.createElement('div'); b.className=(i%3==0)?'ball':(i%3==1)?'ball2':'ball3'; b.style.width=b.style.height=Math.random()*30+10+'px'; b.style.left=Math.random()*100+'%'; document.body.appendChild(b);}
 
-  <div class="grid">
-    <div class="left">
-      <div class="row"><div>Progress</div><div class="small" id="timeLabel">0:00</div></div>
-      <div class="meter" aria-label="Progress meter"><div class="bar" id="bar"></div></div>
+// -------------- AI Pattern Memory --------------
+let patternMemory=[];
+let confidenceMemory=50;
+let lastPrediction={pred:'',seq:[]};
 
-      <div style="margin-top:12px">
-        <div class="row"><div>Song Structure</div><div class="small">Intro → Verse 1 → Pre → Chorus → Verse 2 → Bridge → Chorus</div></div>
-        <div class="section" id="sectionTags"></div>
-        <div class="muter">
-          <label><input type="checkbox" class="mute" data-stem="pad">Pad</label>
-          <label><input type="checkbox" class="mute" data-stem="piano">Piano</label>
-          <label><input type="checkbox" class="mute" data-stem="bass">Bass</label>
-          <label><input type="checkbox" class="mute" data-stem="melody">Lead</label>
-          <label><input type="checkbox" class="mute" data-stem="drums">Drums</label>
-          <label><input type="checkbox" class="mute" data-stem="fx">FX</label>
-        </div>
-      </div>
-    </div>
-    <div class="right">
-      <div class="row"><div>Lyrics (हिंदी)</div><div class="small">कॉपी करके इस्तेमाल करें</div></div>
-      <div class="lyrics" id="lyrics">
+function sequenceSimilarity(seq1,seq2){ let score=0; for(let i=0;i<seq1.length;i++){ if(seq1[i]==seq2[i]) score++; } return score; }
+function calculateTrendScore(seq){ let score=0, streak=0; for(let i=1;i<seq.length;i++){ if(seq[i]==seq[i-1]){ score += (seq[i]=='B')?1.5:-1.5; streak++; } else { score += (seq[i]=='B')?0.9:-0.9; } } return {score, streak}; }
 
-इंट्रो: तन्हा… तन्हा… तन्हा सा सफर…
+// -------------- Predict Function --------------
+function predict(){
+document.getElementById('clickSound').play();
+const boxes=[];
+for(let i=1;i<=10;i++){ let val=parseInt(document.getElementById('box'+i).value); if(isNaN(val)||val<0||val>9){ alert('Enter numbers 0-9 in all boxes'); return; } boxes.push(val);}
+let last10=boxes.slice(-10);
+let seq=last10.map(n=> n>=5?'B':'S');
 
-वर्स 1: छत पे बैठ के मैं, तारों से बातें करता हूँ, कोई ना साथ हो, बस यादों के साए में जीता हूँ, दिल के कोने में खामोशी, हर धड़कन में उदासी है।
+let {score:trendScore, streak:streakScore}=calculateTrendScore(seq);
+let memScore=0;
+patternMemory.forEach(mem=>{ let sim=sequenceSimilarity(seq,mem.seq); if(sim>=7) memScore+=mem.weight; });
 
-प्री-कोरस: जो भी था मेरा अपना, आज वो दूर जा चुका है, रोकें ना ये जज़्बात, हर पल खुद से ही बातें।
+let finalScore=trendScore + memScore;
+let prediction=(finalScore>0)?'Big':'Small';
 
-कोरस: तन्हा सा सफर, तन्हा सा रास्ता, आँखों में आँसू, दिल के साथ बसा, क्या मैंने ही दिल को धोखा दिया, या दुनिया ने मुझे छोड़ दिया?
+let colorCount={Red:0,Green:0,Violet:0};
+last10.forEach(num=>{ if(num==0){colorCount.Red++;colorCount.Violet++;} else if(num==1) colorCount.Green++; else if(num==2) colorCount.Red++; else if(num==3) colorCount.Violet++; else if(num==4) colorCount.Green++; else if(num==5) colorCount.Red++; else if(num==6) colorCount.Green++; else if(num==7) colorCount.Violet++; else if(num==8) colorCount.Red++; else colorCount.Green++; });
+let colorPrediction=Object.keys(colorCount).reduce((a,b)=>colorCount[a]>colorCount[b]?a:b);
 
-वर्स 2: शहर की रोशनी में भी, अंधेरा ही दिखाई देता है, हर चेहरे पर नकाब, दिल का दर्द कौन समझेगा? हर खुशी जो थी, अब यादों का बोझ है, हँसी भी अब बस एक सन्नाटा है।
+let confidence=Math.min(100, Math.max(50, Math.abs(finalScore)*12 + streakScore*2 + confidenceMemory));
+let sureshot='';
+if(confidence>=85){ sureshot='🔥 EXTREME ULTRA SURESHOT ENTRY'; document.getElementById('alertSound').play(); }
 
-ब्रिज: बेख़ुदी में खुद को ढूँढता, तन्हाई का दर्द मैं ही समझूँ, आँसू मेरी आवाज़ हैं, और रात मेरी साथी।
+document.getElementById('result').innerHTML=`Prediction: ${prediction} | Color: ${colorPrediction} | Confidence: ${confidence}% <br><span class="sureshot">${sureshot}</span>`;
+lastPrediction={pred:prediction, seq:[...seq]};
+drawChart(last10);
+}
 
-कोरस (रीप्राइज): तन्हा सा सफर, तन्हा सा रास्ता… </div> </div> </div> </div>
+// -------------- Feedback Function --------------
+function feedback(result){
+if(lastPrediction.seq.length===0){ alert("Make a prediction first!"); return;}
+if(result==='win'){ patternMemory.push({seq:lastPrediction.seq, weight:2}); confidenceMemory=Math.min(100, confidenceMemory+3); }
+else{ patternMemory.push({seq:lastPrediction.seq, weight:-1.5}); confidenceMemory=Math.max(10, confidenceMemory-5); }
+if(patternMemory.length>50) patternMemory.shift();
+alert("AI memory updated based on feedback!");
+}
 
-  </div><script>
-(() => {
-  // --- Config ---
-  const BPM = 72; // slow & emotional
-  const SECS_PER_BEAT = 60 / BPM;
-  const SONG_SECS = 150; // ~2:30
-  const KEY = 'A'; // A minor
-  const sectionPlan = [
-    {name:'Intro', len:8},      // beats
-    {name:'Verse 1', len:16},
-    {name:'Pre', len:8},
-    {name:'Chorus', len:16},
-    {name:'Verse 2', len:16},
-    {name:'Bridge', len:8},
-    {name:'Chorus', len:16},
-  ];
-
-  // Fill tags UI
-  const tags = document.getElementById('sectionTags');
-  sectionPlan.forEach(s=>{const e=document.createElement('span');e.className='tag';e.textContent=`${s.name}`;tags.appendChild(e)});
-
-  // --- Web Audio ---
-  let ctx, master, limiter, reverb, delayBus, gain = {}, running=false, startTime=0, timer;
-
-  const mutes = { pad:false, piano:false, bass:false, melody:false, drums:false, fx:false };
-  document.querySelectorAll('.mute').forEach(cb=>{
-    cb.addEventListener('change', e=>{ mutes[e.target.dataset.stem] = e.target.checked; });
-  });
-
-  function dbToGain(db){return Math.pow(10, db/20)}
-  function noteToFreq(n){ // MIDI -> Hz
-    return 440 * Math.pow(2, (n-69)/12);
-  }
-  const NOTES = {
-    'A3':57,'B3':59,'C4':60,'D4':62,'E4':64,'F4':65,'G4':67,'A4':69,'C5':72,'E5':76,'G5':79,
-    'A2':45,'E2':40,'D3':50,'C3':48,'G2':43,'F2':41
-  };
-
-  function createContext(){
-    ctx = new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
-
-    master = ctx.createGain();
-    master.gain.value = dbToGain(-4);
-
-    // gentle limiter via DynamicsCompressor
-    limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -10;
-    limiter.knee.value = 12;
-    limiter.ratio.value = 8;
-    limiter.attack.value = 0.003;
-    limiter.release.value = 0.25;
-
-    // Simple reverb via generated impulse
-    const convolver = ctx.createConvolver();
-    convolver.buffer = makeImpulse(ctx, 3.2, 0.6);
-
-    // Subtle stereo delay
-    const delayL = ctx.createDelay(0.8); delayL.delayTime.value = 0.28;
-    const feedbackL = ctx.createGain(); feedbackL.gain.value = 0.25;
-    delayL.connect(feedbackL).connect(delayL);
-    const delayR = ctx.createDelay(0.8); delayR.delayTime.value = 0.36;
-    const feedbackR = ctx.createGain(); feedbackR.gain.value = 0.22;
-    delayR.connect(feedbackR).connect(delayR);
-    const merger = ctx.createChannelMerger(2);
-    delayL.connect(merger,0,0); delayR.connect(merger,0,1);
-
-    const delayMix = ctx.createGain(); delayMix.gain.value = 0.18;
-
-    // Buses
-    gain.pad = ctx.createGain(); gain.pad.gain.value = 0.45;
-    gain.piano = ctx.createGain(); gain.piano.gain.value = 0.7;
-    gain.bass = ctx.createGain(); gain.bass.gain.value = 0.5;
-    gain.melody = ctx.createGain(); gain.melody.gain.value = 0.55;
-    gain.drums = ctx.createGain(); gain.drums.gain.value = 0.28;
-    gain.fx = ctx.createGain(); gain.fx.gain.value = 0.22;
-
-    // Sends to FX
-    const revSend = ctx.createGain(); revSend.gain.value = 0.25;
-    const delSend = ctx.createGain(); delSend.gain.value = 0.22;
-
-    const mix = ctx.createGain();
-
-    // Route stems -> master + FX sends
-    Object.values(gain).forEach(g=>{
-      g.connect(mix);
-      g.connect(revSend);
-      g.connect(delSend);
-    });
-    revSend.connect(convolver);
-    delSend.connect(delayL); delSend.connect(delayR);
-
-    const fxSum = ctx.createGain(); fxSum.gain.value = 0.8;
-    convolver.connect(fxSum);
-    merger.connect(fxSum);
-
-    mix.connect(master);
-    fxSum.connect(master);
-
-    master.connect(limiter).connect(ctx.destination);
-
-    return ctx;
-  }
-
-  function makeImpulse(context, duration, decay){
-    const rate = context.sampleRate;
-    const len = rate * duration;
-    const impulse = context.createBuffer(2, len, rate);
-    for(let ch=0; ch<2; ch++){
-      const data = impulse.getChannelData(ch);
-      for(let i=0;i<len;i++){
-        data[i] = (Math.random()*2-1) * Math.pow(1 - i/len, decay);
-      }
-    }
-    return impulse;
-  }
-
-  // --- Instruments ---
-  function envGain(t0, a=0.01, d=0.2, s=0.7, r=0.6){
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, t0);
-    g.gain.linearRampToValueAtTime(1, t0+a);
-    g.gain.linearRampToValueAtTime(s, t0+a+d);
-    g.stopTime = (t0+a+d+r+0.01);
-    g.release = (tEnd)=>{
-      g.gain.cancelScheduledValues(tEnd);
-      g.gain.setTargetAtTime(0, tEnd, r/4);
-    };
-    return g;
-  }
-
-  function pianoVoice(freq, t, dur, vel=0.9){
-    const o1 = ctx.createOscillator(); o1.type='triangle'; o1.frequency.value=freq;
-    const o2 = ctx.createOscillator(); o2.type='sine'; o2.frequency.value=freq*2;
-    const g = envGain(t, 0.003, 0.22, 0.35, 0.8);
-    const v = ctx.createGain(); v.gain.value = vel;
-    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.setValueAtTime(2200, t);
-    o1.connect(lp); o2.connect(lp); lp.connect(g).connect(gain.piano);
-    o1.start(t); o2.start(t);
-    g.release(t+dur*0.9);
-    o1.stop(t+dur+0.5); o2.stop(t+dur+0.5);
-  }
-
-  function padChord(frequencies, t, dur){
-    frequencies.forEach((f,i)=>{
-      const o = ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f*(1+[0, -0.5/1200, 0.5/1200][i] ? f : 1);
-      const det = ctx.createOscillator(); det.type='sawtooth'; det.frequency.value=f*0.997 + i*0.2;
-      const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.setValueAtTime(1400, t);
-      const g = envGain(t, 0.4, 1.2, 0.6, 1.6);
-      o.connect(lp); det.connect(lp); lp.connect(g).connect(gain.pad);
-      o.start(t); det.start(t);
-      g.release(t+dur*0.95);
-      o.stop(t+dur+2); det.stop(t+dur+2);
-    });
-  }
-
-  function bassNote(freq, t, dur, vel=0.7){
-    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=freq/2; // sub
-    const g = envGain(t, 0.005, 0.12, 0.6, 0.5);
-    const sat = ctx.createWaveShaper(); sat.curve = makeSaturationCurve(2.2);
-    o.connect(sat).connect(g).connect(gain.bass);
-    o.start(t);
-    g.release(t+dur*0.85);
-    o.stop(t+dur+0.4);
-  }
-  function makeSaturationCurve(amount){
-    const n=44100, curve=new Float32Array(n); const k=amount; const deg=Math.PI/180;
-    for(let i=0;i<n;i++){const x=i*2/n-1;curve[i]=(1+k)*x/(1+k*Math.abs(x));} return curve;
-  }
-
-  function noiseBurst(t, dur, tone=800){
-    const buffer = ctx.createBuffer(1, ctx.sampleRate*dur, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<data.length;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 2); }
-    const src = ctx.createBufferSource(); src.buffer=buffer;
-    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=tone; bp.Q.value=0.8;
-    const g = envGain(t, 0.003, 0.08, 0.0, 0.12);
-    src.connect(bp).connect(g).connect(gain.drums);
-    src.start(t);
-  }
-  function kick(t){
-    const o = ctx.createOscillator(); o.type='sine';
-    const g = envGain(t, 0.001, 0.05, 0.0, 0.12);
-    o.connect(g).connect(gain.drums);
-    o.frequency.setValueAtTime(120, t);
-    o.frequency.exponentialRampToValueAtTime(45, t+0.12);
-    o.start(t); g.release(t+0.1); o.stop(t+0.25);
-  }
-
-  function shimmerFX(t){
-    // gentle reverse swell
-    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value= noteToFreq(NOTES['A4']);
-    const g = envGain(t-0.8, 0.7, 0.2, 0.0, 0.2);
-    o.connect(g).connect(gain.fx);
-    o.start(t-0.8); o.stop(t);
-  }
-
-  // --- Composition ---
-  // A minor progression palette: Am, F, C, G (i: Am = A C E)
-  const chords = {
-    'Am': [NOTES['A3'], NOTES['C4'], NOTES['E4']].map(n=>noteToFreq(n)),
-    'F' : [NOTES['F4'], NOTES['A4'], NOTES['C5']].map(n=>noteToFreq(n-12)),
-    'C' : [NOTES['C4'], NOTES['E4'], NOTES['G5']].map(n=>noteToFreq(n-12)),
-    'G' : [NOTES['G5'], NOTES['B3'], NOTES['D4']].map(n=>noteToFreq(n-12)),
-  };
-  const prog = ['Am','F','C','G'];
-
-  function scheduleSong(t0){
-    // Drums pattern (very sparse)
-    let beatCursor = 0;
-    const beatsTotal = sectionPlan.reduce((a,b)=>a+b.len,0);
-
-    sectionPlan.forEach((sec, si)=>{
-      for(let b=0; b<sec.len; b+=4){
-        const chord = prog[Math.floor(((beatCursor+b)/4)%prog.length)];
-        const chordTime = t0 + (beatCursor + b) * SECS_PER_BEAT;
-        if(!mutes.pad) padChord(chords[chord], chordTime, 4*SECS_PER_BEAT);
-        if(!mutes.bass){
-          const root = chords[chord][0];
-          bassNote(root, chordTime, 1.9*SECS_PER_BEAT, 0.7);
-          bassNote(root, chordTime+2*SECS_PER_BEAT, 1.9*SECS_PER_BEAT, 0.7);
-        }
-        if(!mutes.drums){
-          kick(chordTime);
-          noiseBurst(chordTime+2*SECS_PER_BEAT, 0.12, 1000);
-        }
-        if(!mutes.fx && (si===0||si===5)) shimmerFX(chordTime+3.8*SECS_PER_BEAT);
-      }
-
-      // Piano arps within the section
-      for(let b=0;b<sec.len;b++){
-        const localBeat = beatCursor + b;
-        const chord = prog[Math.floor((localBeat/4)%prog.length)];
-        const t = t0 + localBeat * SECS_PER_BEAT;
-        if(!mutes.piano){
-          const notes = chords[chord].map(f=>f*2); // up an octave
-          const pick = notes[(b%3)];
-          pianoVoice(pick, t, 0.55*SECS_PER_BEAT, 0.85);
-        }
-      }
-
-      // Melody lead in Pre/Chorus/Bridge
-      if(!mutes.melody){
-        if(sec.name==='Pre' || sec.name==='Chorus' || sec.name==='Bridge'){
-          const motif = [NOTES['A4'], NOTES['C4'], NOTES['E4'], NOTES['G5']];
-          for(let i=0;i<sec.len;i+=2){
-            const tt = t0 + (beatCursor+i+0.02)*SECS_PER_BEAT;
-            const f = noteToFreq(motif[(i/2)%motif.length]);
-            leadVoice(f, tt, 1.4*SECS_PER_BEAT, 0.5 + (sec.name==='Chorus'?0.15:0));
-          }
-        }
-      }
-
-      beatCursor += sec.len;
-    });
-  }
-
-  function leadVoice(freq, t, dur, vel=0.6){
-    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
-    const v = ctx.createGain(); v.gain.value = vel;
-    const g = envGain(t, 0.01, 0.25, 0.5, 0.5);
-    const vib = ctx.createOscillator(); vib.type='sine'; vib.frequency.value=5.2;
-    const vibGain = ctx.createGain(); vibGain.gain.value = 7; // cents
-    vib.connect(vibGain);
-    const det = ctx.createConstantSource(); det.offset.value = 0;
-    vibGain.connect(det.offset);
-    det.connect(o.detune);
-    o.connect(g).connect(gain.melody);
-    vib.start(t); det.start(t); o.start(t);
-    g.release(t+dur*0.9);
-    o.stop(t+dur+0.4); vib.stop(t+dur+0.5); det.stop(t+dur+0.5);
-  }
-
-  // --- Transport ---
-  const playBtn = document.getElementById('playBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const bar = document.getElementById('bar');
-  const timeLabel = document.getElementById('timeLabel');
-
-  playBtn.addEventListener('click', async ()=>{
-    if(running) return;
-    if(!ctx) createContext();
-    running = true; startTime = ctx.currentTime + 0.05;
-    scheduleSong(startTime);
-    tick();
-  });
-  stopBtn.addEventListener('click', ()=>{
-    if(!ctx) return; running=false; clearTimeout(timer); bar.style.width='0%'; timeLabel.textContent='0:00';
-    // closing context keeps memory sane; user can Play again
-    try{ ctx.close(); }catch(e){}
-    ctx = null;
-  });
-
-  function tick(){
-    if(!ctx || !running){return}
-    const t = Math.max(0, ctx.currentTime - startTime);
-    const pct = Math.min(1, t/SONG_SECS);
-    bar.style.width = (pct*100).toFixed(2)+"%";
-    const m = Math.floor(t/60), s = Math.floor(t%60).toString().padStart(2,'0');
-    timeLabel.textContent = `${m}:${s}`;
-    if(t < SONG_SECS){ timer = setTimeout(tick, 120); }
-    else { running=false; }
-  }
-
-  // --- Offline Render & Download WAV ---
-  const downloadBtn = document.getElementById('downloadBtn');
-  downloadBtn.addEventListener('click', async ()=>{
-    const sr = 44100; const duration = SONG_SECS; const offline = new OfflineAudioContext(2, sr*duration, sr);
-    // recreate a mini mix graph offline
-    const buses = {
-      pad: offline.createGain(), piano: offline.createGain(), bass: offline.createGain(), melody: offline.createGain(), drums: offline.createGain(), fx: offline.createGain()
-    };
-    Object.values(buses).forEach(g=>g.gain.value=0.8);
-
-    const limiter = offline.createDynamicsCompressor();
-    limiter.threshold.value = -10; limiter.knee.value=12; limiter.ratio.value=8; limiter.attack.value=0.003; limiter.release.value=0.25;
-
-    const convolver = offline.createConvolver();
-    convolver.buffer = makeImpulse(offline, 3.2, 0.6);
-    const delayL = offline.createDelay(0.8); delayL.delayTime.value=0.28;
-    const fbL = offline.createGain(); fbL.gain.value=0.25; delayL.connect(fbL).connect(delayL);
-    const delayR = offline.createDelay(0.8); delayR.delayTime.value=0.36;
-    const fbR = offline.createGain(); fbR.gain.value=0.22; delayR.connect(fbR).connect(delayR);
-    const merger = offline.createChannelMerger(2);
-    delayL.connect(merger,0,0); delayR.connect(merger,0,1);
-    const mix = offline.createGain(); const fxSum = offline.createGain(); fxSum.gain.value=0.8;
-
-    Object.values(buses).forEach(g=>{ g.connect(mix); g.connect(convolver); g.connect(delayL); g.connect(delayR); });
-    convolver.connect(fxSum); merger.connect(fxSum);
-    mix.connect(limiter); fxSum.connect(limiter); limiter.connect(offline.destination);
-
-    function env(off, t0, a=0.01,d=0.2,s=0.7,r=0.6){ const g=off.createGain(); g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(1,t0+a); g.gain.linearRampToValueAtTime(s,t0+a+d); g.release=(tEnd)=>g.gain.setTargetAtTime(0,tEnd,r/4); return g; }
-    function osc(off, type, f){ const o=off.createOscillator(); o.type=type; o.frequency.value=f; return o; }
-    function piano(off,f,t,d,v=0.9){ const o1=osc(off,'triangle',f), o2=osc(off,'sine',f*2); const lp=off.createBiquadFilter(); lp.type='lowpass'; lp.frequency.setValueAtTime(2200,t); const g=env(off,t,0.003,0.22,0.35,0.8); o1.connect(lp); o2.connect(lp); lp.connect(g).connect(buses.piano); o1.start(t); o2.start(t); g.release(t+d*0.9); o1.stop(t+d+0.5); o2.stop(t+d+0.5);}    
-    function pad(off, freqs, t, d){ freqs.forEach((f,i)=>{ const o=osc(off,'sawtooth',f), d2=osc(off,'sawtooth',f*0.997+i*0.2); const lp=off.createBiquadFilter(); lp.type='lowpass'; lp.frequency.setValueAtTime(1400,t); const g=env(off,t,0.4,1.2,0.6,1.6); o.connect(lp); d2.connect(lp); lp.connect(g).connect(buses.pad); o.start(t); d2.start(t); g.release(t+d*0.95); o.stop(t+d+2); d2.stop(t+d+2); }); }
-    function bass(off,f,t,d){ const o=osc(off,'sine',f/2); const g=env(off,t,0.005,0.12,0.6,0.5); o.connect(g).connect(buses.bass); o.start(t); g.release(t+d*0.85); o.stop(t+d+0.4);}    
-    function snare(off,t,d){ const b=off.createBuffer(1,off.sampleRate*d,off.sampleRate); const data=b.getChannelData(0); for(let i=0;i<data.length;i++){ data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2);} const s=off.createBufferSource(); s.buffer=b; const bp=off.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1000; bp.Q.value=0.8; const g=env(off,t,0.003,0.08,0.0,0.12); s.connect(bp).connect(g).connect(buses.drums); s.start(t);} 
-    function k(off,t){ const o=osc(off,'sine',120); const g=env(off,t,0.001,0.05,0.0,0.12); o.connect(g).connect(buses.drums); o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12); o.start(t); g.release(t+0.1); o.stop(t+0.25);}    
-    function lead(off,f,t,d){ const o=osc(off,'sine',f); const g=env(off,t,0.01,0.25,0.5,0.5); o.connect(g).connect(buses.melody); o.start(t); g.release(t+d*0.9); o.stop(t+d+0.4);}    
-
-    const midi = {A3:57,C4:60,E4:64,F4:65,G5:79,B3:59,D4:62};
-    const nt = (n)=>440*Math.pow(2,(n-69)/12);
-    const chords = {
-      Am:[nt(midi.A3), nt(midi.C4), nt(midi.E4)],
-      F: [nt(midi.F4-12), nt(midi.A3+12), nt(midi.C4)],
-      C: [nt(midi.C4), nt(midi.E4), nt(midi.G5-12)],
-      G: [nt(midi.G5-12), nt(midi.B3), nt(midi.D4)]
-    };
-    const prog = ['Am','F','C','G'];
-
-    let beatCursor = 0; const SECS = 60/72;
-    sectionPlan.forEach((sec,si)=>{
-      for(let b=0; b<sec.len; b+=4){
-        const ch = prog[Math.floor(((beatCursor+b)/4)%prog.length)];
-        const t = (beatCursor+b)*SECS;
-        pad(offline, chords[ch], t, 4*SECS);
-        const root = chords[ch][0];
-        bass(offline, root, t, 1.9*SECS);
-        bass(offline, root, t+2*SECS, 1.9*SECS);
-        k(offline, t); snare(offline, t+2*SECS, 0.12);
-      }
-      for(let b=0;b<sec.len;b++){
-        const local = beatCursor+b; const ch = prog[Math.floor((local/4)%prog.length)]; const t = local*SECS; const notes = chords[ch].map(f=>f*2); const pick = notes[(b%3)];
-        piano(offline, pick, t, 0.55*SECS);
-      }
-      if(sec.name==='Pre' || sec.name==='Chorus' || sec.name==='Bridge'){
-        const motif = [57+12,60,64,79];
-        for(let i=0;i<sec.len;i+=2){ const tt=(beatCursor+i+0.02)*SECS; const f=nt(motif[(i/2)%motif.length]); lead(offline, f, tt, 1.4*SECS); }
-      }
-      beatCursor += sec.len;
-    });
-
-    const buffer = await offline.startRendering();
-    const wav = encodeWAV(buffer);
-    const url = URL.createObjectURL(new Blob([wav], {type:'audio/wav'}));
-    const a = document.createElement('a'); a.href=url; a.download='Tanha-Sa-Safar.wav'; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 8000);
-  });
-
-  function encodeWAV(audioBuffer){
-    const numChannels = audioBuffer.numberOfChannels;
-    const sampleRate = audioBuffer.sampleRate;
-    const length = audioBuffer.length * numChannels * 2 + 44;
-    const buffer = new ArrayBuffer(length);
-    const view = new DataView(buffer);
-
-    // RIFF header
-    writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + audioBuffer.length * numChannels * 2, true);
-    writeString(view, 8, 'WAVE');
-    writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true); // PCM
-    view.setUint16(20, 1, true);  // audio format
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * 2, true);
-    view.setUint16(32, numChannels * 2, true);
-    view.setUint16(34, 16, true); // bits per sample
-    writeString(view, 36, 'data');
-    view.setUint32(40, audioBuffer.length * numChannels * 2, true);
-
-    // PCM samples
-    let offset = 44;
-    const tmp = new Float32Array(audioBuffer.length * numChannels);
-    for (let ch = 0; ch < numChannels; ch++){
-      audioBuffer.copyFromChannel(tmp.subarray(ch*audioBuffer.length, (ch+1)*audioBuffer.length), ch);
-    }
-    // Interleave
-    const l = audioBuffer.getChannelData(0);
-    const r = numChannels>1 ? audioBuffer.getChannelData(1) : l;
-    for(let i=0;i<audioBuffer.length;i++){
-      view.setInt16(offset, to16(l[i]), true); offset+=2;
-      view.setInt16(offset, to16(r[i]), true); offset+=2;
-    }
-    return buffer;
-  }
-  function to16(sample){
-    const s = Math.max(-1, Math.min(1, sample));
-    return s<0 ? s*0x8000 : s*0x7FFF;
-  }
-  function writeString(view, offset, str){ for(let i=0;i<str.length;i++){ view.setUint8(offset+i, str.charCodeAt(i)); } }
-})();
-</script></body>
+// -------------- Chart.js --------------
+let chartInstance;
+function drawChart(data){
+let labels=data.map((v,i)=>`Box ${i+1}`);
+let colors=data.map(n=>{ if(n==0) return 'red'; else if(n==1) return 'green'; else if(n==2) return 'red'; else if(n==3) return 'violet'; else if(n==4) return 'green'; else if(n==5) return 'red'; else if(n==6) return 'green'; else if(n==7) return 'violet'; else if(n==8) return 'red'; else return 'green'; });
+if(chartInstance) chartInstance.destroy();
+const ctx=document.getElementById('trendChart').getContext('2d');
+chartInstance=new Chart(ctx,{ type:'bar', data:{ labels:labels, datasets:[{ label:'Trend (Big/Small)', data:data, backgroundColor:colors, borderRadius:6 }] }, options:{ responsive:true, scales:{ y:{beginAtZero:true,max:9,ticks:{stepSize:1}} } } });
+}
+</script>
+</body>
 </html>
