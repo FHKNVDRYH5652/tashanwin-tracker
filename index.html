@@ -1,664 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MrPerfect ULTRA — Pro Colour Trading Predictor</title>
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-/* =======================
-   ULTRA PRO STYLE (Hacker Lab)
-   ======================= */
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SURESORT Prediction</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+    }
 
-/* Root / Theme */
-:root{
-  --bg1: #050608;
-  --bg2: #121216;
-  --glass: rgba(255,255,255,0.06);
-  --accent: #ffdd00;
-  --danger: #ff4a4a;
-  --card: rgba(255,255,255,0.04);
-  --muted: rgba(255,255,255,0.6);
-}
+    /* Matrix hacker background */
+    body::before {
+      content: "0101010101010101";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 18px;
+      color: rgba(0, 255, 0, 0.15);
+      animation: matrix 5s linear infinite;
+      white-space: pre;
+    }
 
-/* Basic */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  background: linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:#fff;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  overflow:hidden;
-}
+    @keyframes matrix {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(100%); }
+    }
 
-/* Many decorative comments below intentionally to inflate file size,
-   provide premium visual polish, and embed extra styles for animations.
-   (This block repeats various decorative style rules and spacing.)
-*/
+    .box {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00ffcc;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 0 20px #00ffcc;
+      width: 90%;
+      max-width: 400px;
+      color: #00ffcc;
+    }
 
-/* ---------- Floating balls (3 layers) ---------- */
-#ball-wrap{position:fixed; inset:0; z-index:0; pointer-events:none;}
-.ball, .ball2, .ball3{
-  position:absolute;
-  border-radius:50%;
-  filter: blur(8px) saturate(130%);
-  mix-blend-mode: screen;
-  opacity:0.85;
-  transform: translate3d(0,0,0);
-}
-.ball{ background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff4757 50%, rgba(255,69,0,0.55)); animation:floatA linear infinite; }
-.ball2{ background: radial-gradient(circle at 30% 30%, #7bed9f, #2ed573 50%, rgba(0,255,136,0.12)); animation:floatB linear infinite; opacity:0.6; }
-.ball3{ background: radial-gradient(circle at 30% 30%, #70a1ff, #5352ed 50%, rgba(0,112,255,0.12)); animation:floatC linear infinite; opacity:0.45; }
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
+      margin-bottom: 20px;
+    }
 
-@keyframes floatA{ 0%{transform:translate(0,0) } 50%{transform:translate(60px,-180px) } 100%{transform:translate(0,0)} }
-@keyframes floatB{ 0%{transform:translate(0,0)} 50%{transform:translate(-100px,-120px)} 100%{transform:translate(0,0)} }
-@keyframes floatC{ 0%{transform:translate(0,0)} 50%{transform:translate(120px,-220px)} 100%{transform:translate(0,0)} }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      outline: none;
+    }
 
-/* ---------- App container ---------- */
-.app{
-  position:relative;
-  z-index:2;
-  width:94%;
-  max-width:1200px;
-  margin:28px auto;
-  padding:28px;
-  border-radius:18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-  backdrop-filter: blur(18px) saturate(120%);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.03);
-  min-height:calc(100vh - 56px);
-  display:flex;
-  gap:18px;
-  align-items:flex-start;
-}
+    button {
+      background: #00ffcc;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
 
-/* ---------- Left: main controls ---------- */
-.left{
-  flex: 0 0 560px;
-  padding:18px;
-  border-radius:14px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
+    button:hover {
+      background: #00e5ff;
+      box-shadow: 0 0 15px #00e5ff;
+    }
 
-/* Title */
-.title{
-  display:flex;align-items:center;gap:14px;margin-bottom:12px;
-}
-.logo{
-  width:54px;height:54px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ffaa00);display:flex;align-items:center;justify-content:center;color:#111;font-weight:900;font-size:18px;box-shadow:0 8px 20px rgba(255,221,0,0.12);
-}
-.title h1{ margin:0;font-size:20px; color:var(--accent); letter-spacing:0.6px;}
-.title p{ margin:0;color:var(--muted); font-size:12px; }
+    .hidden { display: none; }
 
-/* ---------- Inputs grid (15 boxes) ---------- */
-.inputs-grid{
-  display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;
-}
-.inputs-grid input{
-  width: calc(20% - 8px);
-  min-width:78px;
-  padding:14px;
-  border-radius:10px;
-  border:0;
-  outline:0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-  color:#fff;
-  font-weight:800;
-  text-align:center;
-  font-size:18px;
-  box-shadow: inset 0 -6px 14px rgba(0,0,0,0.45);
-}
-
-/* ---------- Predict / Controls ---------- */
-.controls{ margin-top:14px; display:flex; gap:10px; align-items:center; }
-.btn{
-  background:var(--accent);
-  border:0;padding:12px 18px;border-radius:10px;font-weight:900;cursor:pointer;color:#111; box-shadow:0 10px 30px rgba(255,221,0,0.12);
-}
-.small{ padding:10px 12px;font-size:14px;border-radius:8px; }
-
-/* ---------- Right: analysis panel ---------- */
-.right{
-  flex: 1 1 480px;
-  padding:18px;
-  border-radius:14px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-  display:flex;flex-direction:column;
-}
-
-/* Analysis blocks */
-.block{ background:var(--card); padding:12px;border-radius:10px;margin-bottom:12px; }
-.block h3{margin:0;font-size:14px;color:var(--accent)}
-.block p{ margin:8px 0 0 0; color:var(--muted); font-size:13px; }
-
-/* Result header */
-.resultBig{ font-size:20px; font-weight:900; color:#fff; margin-top:6px; }
-.confidence{ font-size:16px; color:var(--muted); margin-top:6px; }
-
-/* sureshot */
-.sureshot{ margin-top:8px; font-size:18px; color:var(--danger); font-weight:900; text-shadow:0 0 12px rgba(255,74,74,0.18); }
-
-/* Chart area */
-.chart-area{ margin-top:8px; }
-
-/* Telegram popup (simple modal) */
-#tgPopup{
-  position:fixed; left:50%; top:16px; transform:translateX(-50%); z-index:9999;
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-  color:#fff; padding:10px 14px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.5); display:none; align-items:center; gap:10px;
-  border:1px solid rgba(255,255,255,0.03);
-}
-#tgPopup a{ color:var(--accent); font-weight:900; text-decoration:none; }
-
-/* Access key modal */
-#accessModal{
-  position:fixed; inset:0; background:rgba(0,0,0,0.72); display:flex; align-items:center; justify-content:center; z-index:99999;
-}
-.accessCard{ width:360px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:22px; border-radius:12px; text-align:center; }
-.accessCard h2{ margin:0 0 10px 0; color:var(--accent); }
-.accessCard input{ width:100%; padding:12px; border-radius:8px; border:0; outline:0; background: rgba(255,255,255,0.03); color:#fff; font-weight:800; text-align:center; font-size:16px; }
-.accessCard .unlock{ margin-top:12px; padding:10px 14px; border-radius:8px; background:var(--accent); color:#111; font-weight:900; border:0; cursor:pointer; }
-
-/* Small responsive tweaks */
-@media (max-width: 980px){
-  .app{ flex-direction:column; padding:16px; min-height:100vh; }
-  .left{ width:100%; }
-  .right{ width:100%; }
-  .inputs-grid input{ width: calc(33% - 8px); }
-}
-
-/* Extra filler comments & blocks to increase file size for premium delivery */
-/* ---------- END OF STYLE ---------- */
-</style>
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff007f;
+      text-shadow: 0 0 15px #ff007f, 0 0 30px #ff007f;
+    }
+  </style>
 </head>
 <body>
-<!-- Floating balls wrapper -->
-<div id="ball-wrap"></div>
 
-<!-- Telegram popup (shown on first load) -->
-<div id="tgPopup">
-  <div style="font-weight:800">Join Telegram for updates →</div>
-  <a id="tgLink" href="https://t.me/+hzN8Ci0F7aYzMmY9" target="_blank">Open Channel</a>
-  <button id="tgClose" style="margin-left:10px;padding:8px;border-radius:8px;border:0;background:#333;color:#fff;cursor:pointer">Close</button>
-</div>
-
-<!-- Access Key modal -->
-<div id="accessModal" aria-hidden="false" role="dialog">
-  <div class="accessCard">
-    <h2>Enter Access Key</h2>
-    <div style="color:var(--muted);margin-bottom:8px;font-size:13px">Enter key to unlock the MrPerfect ULTRA tool</div>
-    <input id="accessKey" placeholder="Enter key here" autocomplete="off" />
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
-      <button class="unlock" id="unlockBtn">Unlock (Enter)</button>
-    </div>
-    <div style="margin-top:12px;color:var(--muted);font-size:12px">Hint: Use the exact key provided to you.</div>
-  </div>
-</div>
-
-<!-- Main UI -->
-<div class="app" aria-hidden="true" id="mainApp">
-  <div class="left">
-    <div class="title">
-      <div class="logo">MP</div>
-      <div>
-        <h1>MrPerfect ULTRA — Pro Predictor</h1>
-        <p style="margin:2px 0 0 0">Advanced pattern AI • Auto-learn • 15-box input</p>
-      </div>
-    </div>
-
-    <div style="font-size:13px;color:var(--muted)">Enter the last <strong>15</strong> results (0–9). Box1 = oldest, Box15 = newest.</div>
-
-    <div class="inputs-grid" id="inputsGrid" style="margin-top:8px;">
-      <!-- 15 boxes -->
-      <input id="n1" placeholder="Box 1" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n2" placeholder="Box 2" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n3" placeholder="Box 3" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n4" placeholder="Box 4" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n5" placeholder="Box 5" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n6" placeholder="Box 6" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n7" placeholder="Box 7" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n8" placeholder="Box 8" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n9" placeholder="Box 9" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n10" placeholder="Box 10" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n11" placeholder="Box 11" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n12" placeholder="Box 12" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n13" placeholder="Box 13" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n14" placeholder="Box 14" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-      <input id="n15" placeholder="Box 15" inputmode="numeric" pattern="[0-9]*" maxlength="2">
-    </div>
-
-    <div class="controls">
-      <button id="manualPredict" class="btn">Manual Predict (Enter)</button>
-      <button id="clearAll" class="btn small" style="background:#444;color:#fff">Clear</button>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)">
-        <input type="checkbox" id="autoPredict" checked> Auto-Predict
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)">
-        <input type="checkbox" id="autoLearn" checked> Auto-Learn
-      </label>
-      <button id="resetMemory" class="btn small" style="background:#6b6b6b;color:#fff">Reset Memory</button>
-    </div>
-
-    <div style="margin-top:14px;font-size:13px;color:var(--muted)">
-      <strong>How to auto-learn:</strong> When a new round arrives, shift Box1..Box14 left and put the newest number in Box15. The system will auto-evaluate and learn.
-    </div>
-
+  <!-- Step 1: Register & Deposit -->
+  <div class="box" id="step1">
+    <div class="title">Register & Deposit</div>
+    <button onclick="window.open('https://www.tashanwin.org/#/register?invitationCode=13413405256','_blank');showStep2()">Continue</button>
   </div>
 
-  <div class="right">
-    <div class="block">
-      <h3>Prediction</h3>
-      <div class="resultBig" id="mainPrediction">—</div>
-      <div class="confidence" id="mainConfidence">Confidence: —%</div>
-      <div class="sureshot" id="mainSureshot" style="display:none">🔥 SURESHOT ENTRY</div>
-    </div>
-
-    <div class="block">
-      <h3>Step-by-step Analysis</h3>
-      <div id="analysisText" style="font-size:13px;color:var(--muted);line-height:1.45">
-        Analysis will appear here after prediction — trend detection, streaks, memory matches, and reasoning.
-      </div>
-    </div>
-
-    <div class="block chart-area">
-      <h3>Trend Graph (Last 15)</h3>
-      <canvas id="trendChart" height="200"></canvas>
-    </div>
-
-    <div class="block">
-      <h3>Memory Status</h3>
-      <p id="memoryInfo" style="color:var(--muted);font-size:13px">Stored patterns: 0 • Confidence bias: 50</p>
-      <div style="margin-top:8px">
-        <button id="exportMemory" class="btn small" style="background:#222;color:#fff">Export Memory</button>
-        <button id="importMemory" class="btn small" style="background:#222;color:#fff">Import Memory</button>
-      </div>
-    </div>
-
+  <!-- Step 2: UID Input -->
+  <div class="box hidden" id="step2">
+    <div class="title">Enter UID</div>
+    <input type="number" id="uidInput" placeholder="Enter 7 digit UID" maxlength="7">
+    <br>
+    <button onclick="processUID()">Submit</button>
   </div>
-</div>
 
-<!-- Embedded sounds (base64) -->
-<!-- Click sound (short) -->
-<audio id="clickSnd" preload="auto" src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
-<!-- Analysis beep -->
-<audio id="analysisSnd" preload="auto" src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
-<!-- Sureshot (strong) -->
-<audio id="sureshotSnd" preload="auto" src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="></audio>
+  <!-- Step 3: Processing -->
+  <div class="box hidden" id="processing">
+    <div class="title">Processing...</div>
+  </div>
+
+  <!-- Step 4: Prediction Panel -->
+  <div class="box hidden" id="predictionBox">
+    <div class="title">🔥 SURESORT Prediction 🔥</div>
+    <div id="period">Period: Loading...</div>
+    <div id="signal">Signal: --</div>
+    <div id="numbers">Predicted Numbers: --</div>
+    <div id="liveResult" class="result">LIVE: --</div>
+    <div style="margin-top:10px;font-size:12px;color:#00ffcc;">Auto-refresh every 10 sec</div>
+  </div>
 
 <script>
-/* =========================
-   Utility & Visual Setup
-   ========================= */
-
-/* Build many floating balls to give heavy visuals & larger file weight */
-(function spawnBalls(){
-  const wrap = document.getElementById('ball-wrap');
-  const total = 160;
-  for(let i=0;i<total;i++){
-    const el = document.createElement('div');
-    el.className = (i%3===0)?'ball':(i%3===1)?'ball2':'ball3';
-    const size = 10 + Math.floor(Math.random()*60);
-    el.style.width = el.style.height = size + 'px';
-    el.style.left = (Math.random()*100) + '%';
-    el.style.top = (Math.random()*100) + '%';
-    el.style.animationDuration = (8 + Math.random()*28) + 's';
-    el.style.opacity = (0.2 + Math.random()*0.8);
-    wrap.appendChild(el);
-  }
-})();
-
-/* =========================
-   Predictor Logic (15 boxes)
-   ========================= */
-
-/* Pattern memory storage:
-   Each entry: { seq: ['B','S',...15], weight: number, lastSeen: timestamp }
-*/
-let patternMemory = [];
-let memoryBias = 50; // starting bias for confidence
-let lastPrediction = { pred: null, seq: [], finalScore: 0, timestamp: 0 };
-
-// helpers to read boxes
-function readAllBoxes(){
-  const arr = [];
-  for(let i=1;i<=15;i++){
-    const v = document.getElementById('n'+i).value.trim();
-    arr.push(v === '' ? null : parseInt(v,10));
-  }
-  return arr;
-}
-function allValid(nums){
-  return nums.every(n => n !== null && !isNaN(n) && n>=0 && n<=9);
-}
-function toSeq(nums){
-  return nums.map(n => n>=5 ? 'B' : 'S');
-}
-
-/* Trend scoring with stronger continuation weight */
-function calculateTrendScore(seq){
-  let score=0, streak=0;
-  for(let i=1;i<seq.length;i++){
-    if(seq[i] === seq[i-1]){
-      score += (seq[i]==='B')?1.7:-1.7;
-      streak++;
-    } else {
-      score += (seq[i]==='B')?1.0:-1.0;
-    }
-  }
-  return { score, streak };
-}
-
-/* Sequence similarity */
-function similarity(a,b){
-  if(!a || !b) return 0;
-  let s=0;
-  for(let i=0;i<a.length;i++) if(a[i]===b[i]) s++;
-  return s;
-}
-
-/* Color prediction mapping (example rules) */
-function colorFromNums(nums){
-  const c = { Red:0, Green:0, Violet:0 };
-  nums.forEach(n=>{
-    if(n===0){ c.Red++; c.Violet++; }
-    else if(n===1) c.Green++;
-    else if(n===2) c.Red++;
-    else if(n===3) c.Violet++;
-    else if(n===4) c.Green++;
-    else if(n===5) c.Red++;
-    else if(n===6) c.Green++;
-    else if(n===7) c.Violet++;
-    else if(n===8) c.Red++;
-    else c.Green++;
-  });
-  let max='Red';
-  if(c.Green>c[max]) max='Green';
-  if(c.Violet>c[max]) max='Violet';
-  return max;
-}
-
-/* Main compute function */
-function computePrediction(nums){
-  // nums = array length 15 validated
-  const last15 = nums.slice(-15);
-  const seq = toSeq(last15);
-  const { score:trendScore, streak } = calculateTrendScore(seq);
-
-  // memory matching
-  const now = Date.now();
-  let memScore = 0;
-  patternMemory.forEach(mem=>{
-    const sim = similarity(seq, mem.seq);
-    if(sim >= 10) {
-      const ageFactor = 1 - Math.min(1, (now - (mem.lastSeen || now)) / (1000*60*60*24*90));
-      memScore += mem.weight * (0.8 + 0.4*ageFactor);
-    }
-  });
-
-  const finalScore = trendScore + memScore;
-  const pred = finalScore > 0 ? 'Big' : 'Small';
-  const colorPred = colorFromNums(last15);
-
-  // confidence
-  let confidence = Math.min(100, Math.max(40, Math.abs(finalScore)*10 + streak*2 + memoryBias*0.6));
-  return { pred, colorPred, confidence, seq, finalScore, streak, memScore };
-}
-
-/* =========================
-   Auto-learn detection
-   =========================
-   Detects when a 'new round' is added: if current[0..13] === prev[1..14] (shift)
-   then current[14] is newest result. We compare it with previous prediction and auto-update memory.
-*/
-let prevNums = null;
-function detectAndAutoLearn(prev, curr){
-  if(!prev || !curr) return;
-  // check shift-left: prev[1..14] == curr[0..13]
-  let shifted = true;
-  for(let i=0;i<14;i++){
-    if(prev[i+1] !== curr[i]){ shifted = false; break; }
-  }
-  if(shifted){
-    const newVal = curr[14];
-    const actual = (newVal >= 5) ? 'Big' : 'Small';
-    if(lastPrediction && lastPrediction.pred){
-      const was = lastPrediction.pred;
-      const win = (was === actual);
-      if(document.getElementById('autoLearn').checked){
-        // add to memory (positive or negative)
-        const weight = win ? 2.4 : -1.8;
-        patternMemory.push({ seq: [...lastPrediction.seq], weight, lastSeen: Date.now() });
-        // adjust memoryBias
-        memoryBias = Math.max(8, Math.min(100, memoryBias + (win ? 4 : -6)));
-        // trim
-        if(patternMemory.length > 300) patternMemory.shift();
-        // play sound & flash
-        if(win) try{ document.getElementById('sureshotSnd').play(); }catch(e){}
-        flashApp(win ? '#00ff88' : '#ff5577');
-      }
-    }
-  }
-}
-
-/* subtle UI flash */
-function flashApp(color){
-  const el = document.querySelector('.app');
-  const prev = el.style.boxShadow;
-  el.style.boxShadow = `0 0 28px ${color}, inset 0 1px 0 rgba(255,255,255,0.03)`;
-  setTimeout(()=> el.style.boxShadow = prev, 420);
-}
-
-/* =========================
-   UI & Chart
-   ========================= */
-
-let chartInst = null;
-function drawChart(nums){
-  const ctx = document.getElementById('trendChart').getContext('2d');
-  const labels = nums.map((v,i)=> 'Box ' + (i+1));
-  const colors = nums.map(n=>{
-    if(n===0) return 'red';
-    if(n===1) return 'green';
-    if(n===2) return 'red';
-    if(n===3) return 'violet';
-    if(n===4) return 'green';
-    if(n===5) return 'red';
-    if(n===6) return 'green';
-    if(n===7) return 'violet';
-    if(n===8) return 'red';
-    return 'green';
-  });
-  if(chartInst) chartInst.destroy();
-  chartInst = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Last 15 numbers', data: nums, backgroundColor: colors, borderRadius:6 }] },
-    options: { responsive:true, animation:{duration:350}, scales:{ y:{ beginAtZero:true, max:9, ticks:{ stepSize:1 } } } }
-  });
-}
-
-/* update analysis panel with reasoning */
-function updateAnalysis(info){
-  const box = document.getElementById('analysisText');
-  let html = '';
-  html += `<div><strong>Trend Score:</strong> ${info.trendScore.toFixed(2)} • <strong>Streaks:</strong> ${info.streak}</div>`;
-  html += `<div style="margin-top:8px"><strong>Memory match score:</strong> ${info.memScore.toFixed(2)} (patterns stored: ${patternMemory.length})</div>`;
-  html += `<div style="margin-top:8px"><strong>Final score:</strong> ${info.finalScore.toFixed(2)}</div>`;
-  html += `<div style="margin-top:8px"><strong>Reasoning:</strong> ${info.reason}</div>`;
-  box.innerHTML = html;
-  document.getElementById('memoryInfo').innerText = `Stored patterns: ${patternMemory.length} • Confidence bias: ${Math.round(memoryBias)}`;
-}
-
-/* =========================
-   Main predict runner
-   ========================= */
-function runPredict(auto=false){
-  const nums = readAllBoxes();
-  // fill blanks with 0 for chart visual
-  const chartNums = nums.map(n => (n===null ? 0 : n));
-  if(!allValid(nums)){
-    document.getElementById('mainPrediction').innerText = '—';
-    document.getElementById('mainConfidence').innerText = 'Confidence: —%';
-    document.getElementById('mainSureshot').style.display = 'none';
-    drawChart(chartNums);
-    return;
+  function showStep2() {
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
   }
 
-  // detect new round and auto-learn comparing prevNums -> nums
-  detectAndAutoLearn(prevNums, nums);
-
-  const res = computePrediction(nums);
-  lastPrediction = { pred: res.pred, seq: [...res.seq], finalScore: res.finalScore, timestamp: Date.now() };
-
-  document.getElementById('mainPrediction').innerText = `${res.pred} • ${res.colorPred}`;
-  document.getElementById('mainConfidence').innerText = `Confidence: ${Math.round(res.confidence)}%`;
-  if(res.confidence >= 86){
-    document.getElementById('mainSureshot').style.display = 'block';
-    try{ document.getElementById('sureshotSnd').play(); }catch(e){}
-  } else {
-    document.getElementById('mainSureshot').style.display = 'none';
-  }
-
-  // play analysis sound if manual or auto (if allowed)
-  if(auto){
-    if(document.getElementById('autoPredict').checked){
-      try{ document.getElementById('analysisSnd').play(); }catch(e){}
-    }
-  } else {
-    try{ document.getElementById('clickSnd').play(); }catch(e){}
-  }
-
-  // update analysis panel
-  const reason = `Detected ${res.streak} continuation(s). Memory contribution ${res.memScore.toFixed(2)}. Using stronger continuation bias to prefer streak continuation over alternation.`;
-  updateAnalysis({ trendScore: res.finalScore - res.memScore, memScore: res.memScore, finalScore: res.finalScore, streak: res.streak, reason });
-
-  // update chart
-  drawChart(chartNums);
-
-  prevNums = [...nums];
-}
-
-/* =========================
-   Event binding & persistence
-   ========================= */
-
-(function bind(){
-  // manual predict button
-  document.getElementById('manualPredict').addEventListener('click', ()=> runPredict(false));
-  // clear
-  document.getElementById('clearAll').addEventListener('click', ()=>{
-    for(let i=1;i<=15;i++) document.getElementById('n'+i).value='';
-    runPredict(false);
-  });
-  // reset memory
-  document.getElementById('resetMemory').addEventListener('click', ()=>{
-    if(confirm('Reset AI memory and bias?')){ patternMemory=[]; memoryBias=50; localStorage.removeItem('mp_ultra_mem_v2'); alert('Memory reset.'); runPredict(false); }
-  });
-
-  // export / import memory
-  document.getElementById('exportMemory').addEventListener('click', ()=>{
-    const dump = { patternMemory, memoryBias, ts: Date.now() };
-    const blob = new Blob([JSON.stringify(dump)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'mp_ultra_memory.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  });
-  document.getElementById('importMemory').addEventListener('click', ()=>{
-    const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
-    inp.onchange = e => {
-      const f = e.target.files[0];
-      if(!f) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try{
-          const parsed = JSON.parse(evt.target.result);
-          if(parsed.patternMemory){ patternMemory = parsed.patternMemory; memoryBias = parsed.memoryBias || memoryBias; localStorage.setItem('mp_ultra_mem_v2', JSON.stringify({patternMemory, memoryBias})); alert('Memory imported'); runPredict(false); }
-        }catch(err){ alert('Import failed'); }
-      };
-      reader.readAsText(f);
-    };
-    inp.click();
-  });
-
-  // auto predict on input change (debounced)
-  const inputs = [];
-  for(let i=1;i<=15;i++){
-    const el = document.getElementById('n'+i);
-    inputs.push(el);
-    el.addEventListener('input', ()=>{
-      if(window._mpTimer) clearTimeout(window._mpTimer);
-      window._mpTimer = setTimeout(()=> { if(document.getElementById('autoPredict').checked) runPredict(true); }, 240);
-    });
-    el.addEventListener('keydown', (ev)=>{
-      if(ev.key === 'Enter'){
-        runPredict(false);
-      }
-    });
-  }
-
-  // access key handling (modal)
-  const accessModal = document.getElementById('accessModal');
-  const keyInput = document.getElementById('accessKey');
-  const unlockBtn = document.getElementById('unlockBtn');
-  function tryUnlock(){
-    const v = keyInput.value.trim();
-    if(v === 'Mrperfect456'){
-      // success
-      accessModal.style.display = 'none';
-      document.getElementById('mainApp').setAttribute('aria-hidden','false');
-      // show telegram popup once (if not shown)
-      if(!localStorage.getItem('mp_ultra_tg_shown')){
-        document.getElementById('tgPopup').style.display = 'flex';
-        localStorage.setItem('mp_ultra_tg_shown','1');
-      }
-      // restore memory
-      try{
-        const s = localStorage.getItem('mp_ultra_mem_v2');
-        if(s){ const parsed = JSON.parse(s); if(parsed.patternMemory) { patternMemory = parsed.patternMemory; memoryBias = parsed.memoryBias || memoryBias; } }
-      }catch(e){}
-      runPredict(false);
+  function processUID() {
+    let uid = document.getElementById("uidInput").value;
+    if(uid.length !== 7) {
+      alert("Please enter exactly 7 digits UID");
       return;
-    } else {
-      alert('Wrong access key.');
+    }
+    document.getElementById("step2").classList.add("hidden");
+    document.getElementById("processing").classList.remove("hidden");
+    setTimeout(() => {
+      document.getElementById("processing").classList.add("hidden");
+      document.getElementById("predictionBox").classList.remove("hidden");
+      fetchPrediction();
+      setInterval(fetchPrediction, 10000);
+    }, 5000);
+  }
+
+  async function fetchPrediction() {
+    try {
+      let response = await fetch("https://api.bdg88zf.com/api/webapi/GetGameIssue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "typeId": 1,
+          "language": 0,
+          "random": "e7fe6c090da2495ab8290dac551ef1ed",
+          "signature": "1F390E2B2D8A55D693E57FD905AE73A7",
+          "timestamp": 1723726679
+        })
+      });
+      let data = await response.json();
+      if(data && data.data && data.data[0]) {
+        let period = data.data[0].issueNumber;
+        document.getElementById("period").innerText = "Period: " + period;
+
+        let digits = period.split("").map(Number);
+        let sum = digits.reduce((a,b)=>a+b,0);
+        let signal = (sum % 2 === 0) ? "BIG" : "SMALL";
+        document.getElementById("signal").innerText = "Signal: " + signal;
+
+        let num1 = Math.floor(Math.random()*10);
+        let num2 = Math.floor(Math.random()*10);
+        document.getElementById("numbers").innerText = "Predicted Numbers: " + num1 + " , " + num2;
+
+        document.getElementById("liveResult").innerText = "LIVE: ✅";
+      }
+    } catch (e) {
+      document.getElementById("liveResult").innerText = "Error fetching data";
     }
   }
-  unlockBtn.addEventListener('click', tryUnlock);
-  keyInput.addEventListener('keydown', (ev)=>{ if(ev.key === 'Enter') tryUnlock(); });
-
-  // allow pressing Enter on page for unlock if modal active
-  document.addEventListener('keydown', (ev)=>{
-    if(accessModal.style.display !== 'none' && ev.key === 'Enter') tryUnlock();
-  });
-
-  // telegram popup close
-  document.getElementById('tgClose').addEventListener('click', ()=> document.getElementById('tgPopup').style.display = 'none');
-
-  // save memory periodically
-  setInterval(()=> {
-    try{
-      localStorage.setItem('mp_ultra_mem_v2', JSON.stringify({ patternMemory, memoryBias, ts: Date.now() }));
-    }catch(e){}
-  }, 4000);
-
-  // initial draw
-  drawChart(Array.from({length:15}, ()=>0));
-})();
-
-/* =========================
-   End of main script block.
-   file includes many inline comments & helper functions
-   to make the delivered code heavy and feature-rich.
-   ========================= */
 </script>
-
-<!-- extra hidden audio id used in some flows, placeholder base64 for compatibility -->
-<audio id="sureshotSnd" src="data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" preload="auto"></audio>
 
 </body>
 </html>
