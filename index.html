@@ -1,78 +1,384 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Offline Manga Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live Colour Trading Predictor (MrPerfect Style)</title>
   <style>
-    body { background:#111; color:#fff; font-family:Arial; text-align:center; }
-    textarea { width:80%; height:120px; margin:10px; padding:10px; font-size:16px; }
-    button { padding:10px 20px; margin:10px; font-size:18px; cursor:pointer; }
-    .manga-panel { 
-      background:#fff; 
-      color:#000; 
-      margin:20px auto; 
-      width:600px; 
-      height:300px; 
-      border:4px solid #000; 
-      position:relative; 
-    }
-    .character { 
-      width:100px; height:200px; background:#ccc; 
-      position:absolute; bottom:0; left:20px; 
-      border:2px solid #000;
-    }
-    .speech { 
-      position:absolute; top:20px; left:150px; 
-      background:#fff; border:2px solid #000; 
-      padding:10px; border-radius:10px; 
-      max-width:400px;
-    }
+    :root{--bg:#0b1020;--card:#0f1724;--accent:#ffd166;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:linear-gradient(135deg,#030418 0%, #061022 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:20px}
+    .app{width:980px;max-width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}
+    header{display:flex;align-items:center;gap:12px}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:8px;margin-top:12px;align-items:center}
+    input[type=text]{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:inherit}
+    button{background:linear-gradient(90deg,var(--accent),#ffb703);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:16px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .history{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding-right:6px}
+    .row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px}
+    .chip{padding:6px 10px;border-radius:999px;font-weight:700}
+    .big{background:rgba(0,0,0,0.2)}
+    .prediction{font-size:28px;font-weight:800;display:flex;gap:10px;align-items:center}
+    .muted{color:var(--muted);font-size:13px}
+    .conf{font-weight:700}
+    .mapping{display:flex;gap:6px;flex-wrap:wrap}
+    textarea{width:100%;height:80px;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:6px}
+    footer{margin-top:12px;font-size:13px;color:var(--muted)}
+    .warn{color:#ff8b8b}
+    .ok{color:#8fffd1}
   </style>
 </head>
 <body>
-  <h1>Offline Manga Generator</h1>
-  <textarea id="story" placeholder="Yahan apni story likho..."></textarea><br>
-  <button onclick="generateManga()">Generate Manga</button>
-  <button onclick="downloadManga()">Download Manga</button>
-  
-  <div id="mangaArea"></div>
-  
-  <script>
-    function generateManga() {
-      let story = document.getElementById("story").value;
-      let lines = story.split(/[.!?]/).filter(l => l.trim().length > 0);
-      let area = document.getElementById("mangaArea");
-      area.innerHTML = "";
-      
-      lines.forEach((line, i) => {
-        let panel = document.createElement("div");
-        panel.className = "manga-panel";
-        
-        let char = document.createElement("div");
-        char.className = "character";
-        char.style.background = ["#ccc","#f99","#9f9","#99f"][i % 4]; // random char color
-        panel.appendChild(char);
-        
-        let speech = document.createElement("div");
-        speech.className = "speech";
-        speech.innerText = line.trim();
-        panel.appendChild(speech);
-        
-        area.appendChild(panel);
-      });
+  <div class="app">
+    <header>
+      <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(180deg,#132033,#0b1624);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)">MP</div>
+      <div>
+        <h1>Live Colour Trading Predictor</h1>
+        <div class="muted">Fetches history from the API you provided & shows next-period prediction (Big/Small + confidence). Use responsibly — no guarantees.</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <label class="muted">API URL</label>
+      <input id="apiUrl" type="text" value="https://draw.ar-lottery01.com/D5/D5_1M/GetHistoryIssuePage.json?r=1756242028187" style="flex:1" />
+      <button id="startBtn">Start</button>
+      <button id="fetchBtn">Fetch Now</button>
+      <div style="margin-left:6px" class="muted">Poll: <span id="pollStatus">stopped</span></div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted">Latest Prediction</div>
+              <div class="prediction" id="predictionBox">--</div>
+              <div class="muted">Confidence: <span id="confidence">--</span></div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Last fetch</div>
+              <div id="lastFetch">-</div>
+              <div class="muted">Auto-poll interval (s)</div>
+              <input id="intervalInput" type="text" value="5" style="width:48px;margin-top:6px" />
+            </div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+          <div class="muted">Trend Analysis (last 15 numbers)</div>
+          <div id="trendBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
+
+          <div style="margin-top:12px">
+            <div class="muted">Interpretation</div>
+            <div id="interpret" style="margin-top:6px">--</div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <div class="muted">Manual / Fallback</div>
+          <div style="margin-top:8px">
+            <label class="muted">Paste last results (comma separated, newest first):</label>
+            <textarea id="manualInput" placeholder="e.g. 3,7,1,5,0,2,6,8,9,4"></textarea>
+            <div style="margin-top:8px;display:flex;gap:8px"><button id="useManual">Use These</button><button id="clearManual">Clear</button></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="muted">Fetched History (newest first)</div>
+          <div class="history" id="historyList"></div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <div class="muted">Settings & Color Mapping</div>
+          <div style="margin-top:8px">
+            <div class="muted">Map digits to colours (editable). Format: digit=Colour. One per line.</div>
+            <textarea id="mappingInput">0=Red
+1=Green
+2=Red
+3=Violet
+4=Green
+5=Red
+6=Green
+7=Violet
+8=Red
+9=Green</textarea>
+            <div style="margin-top:8px;display:flex;gap:8px"><button id="applyMap">Apply Map</button><button id="resetMap">Reset</button></div>
+            <div style="margin-top:10px" class="muted">CORS: If the API blocks cross-origin requests, open using a local server or use a CORS proxy.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="muted">Notes: This tool fetches the API and tries to infer the next result by simple pattern heuristics (majority, streak detection, last-result flip). No guaranteed wins. Use responsibly.</div>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  const apiUrlEl = document.getElementById('apiUrl');
+  const startBtn = document.getElementById('startBtn');
+  const fetchBtn = document.getElementById('fetchBtn');
+  const historyList = document.getElementById('historyList');
+  const trendBar = document.getElementById('trendBar');
+  const predictionBox = document.getElementById('predictionBox');
+  const confidenceEl = document.getElementById('confidence');
+  const lastFetch = document.getElementById('lastFetch');
+  const pollStatus = document.getElementById('pollStatus');
+  const intervalInput = document.getElementById('intervalInput');
+  const manualInput = document.getElementById('manualInput');
+  const useManual = document.getElementById('useManual');
+  const applyMap = document.getElementById('applyMap');
+  const mappingInput = document.getElementById('mappingInput');
+
+  let map = {}; function parseMap(){
+    map = {};
+    mappingInput.value.split('\n').forEach(line => {
+      const parts = line.split('=');
+      if(parts.length>=2){
+        const d = parts[0].trim(); const c = parts.slice(1).join('=').trim();
+        if(d!=='' ) map[d] = c;
+      }
+    })
+  }
+  parseMap();
+
+  applyMap.addEventListener('click', ()=>{ parseMap(); alert('Mapping applied') })
+
+  function safeFetch(url){
+    // try raw fetch, fallback to CORS proxy suggestion
+    return fetch(url, {cache:'no-store'}).then(r=>{
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+  }
+
+  function tryExtractNumbers(json){
+    // Try several common shapes: list in json.data or json.rows or json.list or json.issues
+    const tries = [];
+    if(Array.isArray(json)) tries.push(json);
+    if(json && typeof json === 'object'){
+      ['data','rows','list','issues','result','history'].forEach(k=>{
+        if(json[k]) tries.push(json[k]);
+      })
     }
-    
-    function downloadManga() {
-      let element = document.getElementById("mangaArea");
-      let opt = {
-        margin: 0.5,
-        filename: "manga.pdf",
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-      };
-      html2pdf().from(element).set(opt).save();
+    // flatten arrays and look for numeric fields
+    for(const candidate of tries){
+      if(Array.isArray(candidate)){
+        // candidate may be array of objects or numbers
+        const out = [];
+        for(const item of candidate){
+          if(item==null) continue;
+          if(typeof item === 'number') out.push(item);
+          else if(typeof item === 'string'){
+            // maybe a comma-separated numbers string
+            const m = item.match(/\d/);
+            if(m) out.push(parseInt(item));
+          } else if(typeof item === 'object'){
+            // try common fields: Result, Number, OpenNumber, OpenCode, WinCode, ResultNumber
+            const keys = ['Result','Number','OpenNumber','OpenCode','WinCode','result','number','openNumber','openCode','winCode','issue'];
+            let found = false;
+            for(const k of keys){
+              if(item[k]!=null){
+                const v = item[k];
+                if(typeof v === 'number') { out.push(v); found=true; break }
+                if(typeof v === 'string' && v.match(/\d/)) { out.push(parseInt(v)); found=true; break }
+              }
+            }
+            // sometimes the number is inside a 'value' array or 'num' etc
+            if(!found){
+              for(const k in item){
+                const v = item[k];
+                if(typeof v === 'number') { out.push(v); found=true; break }
+                if(typeof v === 'string' && v.length<=3 && v.match(/^\d+$/)) { out.push(parseInt(v)); found=true; break }
+              }
+            }
+          }
+          if(out.length>=50) break;
+        }
+        if(out.length>0) return out;
+      }
     }
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    return [];
+  }
+
+  function toBigSmall(n){
+    if(n==null) return null;
+    return (n>=5)?'Big':'Small';
+  }
+
+  function predictFromHistory(nums){
+    // nums: newest-first array of digits 0-9
+    if(!nums || nums.length===0) return {pred:null,conf:0,explain:'no data'};
+    const last15 = nums.slice(0,15);
+    // majority big/small
+    const bsCounts = {Big:0,Small:0};
+    last15.forEach(n=> bsCounts[toBigSmall(n)]++);
+    const majority = (bsCounts.Big>=bsCounts.Small)?'Big':'Small';
+    const majorityPct = Math.round((Math.max(bsCounts.Big,bsCounts.Small)/last15.length)*100);
+
+    // streak detection (newest first)
+    let streak=1;
+    for(let i=1;i<last15.length;i++){
+      if(toBigSmall(last15[i])===toBigSmall(last15[0])) streak++; else break;
+    }
+
+    // last number
+    const last = last15[0];
+
+    // simple pattern: if there is a strong majority OR long streak, predict flip with lower confidence (systems often flip after streak), else predict majority
+    let pred = majority;
+    let conf = majorityPct;
+    let explain = `Majority ${majority} ${majorityPct}% over last ${last15.length}. Streak: ${streak}. Last:${last} (${toBigSmall(last)}).`;
+
+    if(streak>=4){
+      // if very long streak, many systems flip -> predict flip with moderate confidence
+      pred = (toBigSmall(last)==='Big')? 'Small':'Big';
+      conf = Math.max(40, Math.round(50 - (streak-4)*5));
+      explain += ' Long streak detected → expecting possible flip.';
+    } else if(majorityPct>=70){
+      // strong majority
+      pred = majority; conf = Math.min(95, majorityPct + 5);
+      explain += ' Strong majority → follow majority.';
+    } else {
+      // check recent 3 pattern (e.g., X Y X suggests X repeat)
+      if(last15.length>=3){
+        const a = toBigSmall(last15[0]); const b = toBigSmall(last15[1]); const c = toBigSmall(last15[2]);
+        if(a===c && a!==b){ pred = a; conf = Math.max(conf, 60); explain += ' Pattern XYX observed → repeat of X likely.' }
+      }
+    }
+
+    // confidence adjust by recency: if majority is based on recent 5, boost
+    const recent5 = last15.slice(0,5); const recCounts = {Big:0,Small:0}; recent5.forEach(n=> recCounts[toBigSmall(n)]++);
+    if(Math.max(recCounts.Big,recCounts.Small)>=4) { conf = Math.max(conf, 70); explain += ' Recent 4/5 agrees.' }
+
+    // Ensure conf 1..99
+    conf = Math.max(10, Math.min(99, conf));
+
+    return {pred,conf,explain};
+  }
+
+  function renderHistory(nums){
+    historyList.innerHTML = '';
+    nums.slice(0,50).forEach((n,idx)=>{
+      const row = document.createElement('div'); row.className='row';
+      const left = document.createElement('div'); left.textContent = `#${idx+1}`;
+      const chip = document.createElement('div'); chip.className='chip'; chip.textContent = n;
+      // colour from map
+      const col = map[String(n)] || '';
+      chip.title = String(col);
+      chip.style.background = 'rgba(255,255,255,0.02)';
+      chip.style.border = '1px solid rgba(255,255,255,0.03)';
+      chip.style.minWidth='46px'; chip.style.textAlign='center';
+      row.appendChild(left); row.appendChild(chip);
+      const right = document.createElement('div'); right.textContent = toBigSmall(n) + (col?(' • '+col):''); right.className='muted';
+      row.appendChild(right);
+      historyList.appendChild(row);
+    })
+  }
+
+  function renderTrend(nums){
+    trendBar.innerHTML='';
+    nums.slice(0,15).reverse().forEach(n=>{ // oldest -> newest left->right
+      const el = document.createElement('div'); el.style.padding='8px 10px'; el.style.borderRadius='8px'; el.style.minWidth='46px'; el.style.textAlign='center'; el.style.fontWeight='700';
+      el.textContent = n + '\n' + toBigSmall(n);
+      const col = map[String(n)] || '';
+      if(col) el.title = col;
+      el.style.background = 'rgba(255,255,255,0.02)';
+      trendBar.appendChild(el);
+    })
+  }
+
+  let pollTimer = null;
+  function startPolling(){
+    if(pollTimer) clearInterval(pollTimer);
+    const sec = Math.max(2, parseInt(intervalInput.value)||5);
+    pollStatus.textContent = 'running';
+    pollTimer = setInterval(()=>{ fetchAndUpdate(); }, sec*1000);
+  }
+  function stopPolling(){ if(pollTimer) clearInterval(pollTimer); pollTimer=null; pollStatus.textContent='stopped' }
+
+  startBtn.addEventListener('click', ()=>{
+    if(pollTimer){ stopPolling(); startBtn.textContent='Start'; }
+    else { startPolling(); startBtn.textContent='Stop'; }
+  })
+
+  fetchBtn.addEventListener('click', ()=> fetchAndUpdate());
+
+  useManual.addEventListener('click', ()=>{
+    const v = manualInput.value.trim(); if(!v) return alert('Paste some numbers');
+    const arr = v.split(',').map(x=>parseInt(x.trim())).filter(x=>!Number.isNaN(x));
+    if(arr.length===0) return alert('No numbers parsed');
+    onNewNumbers(arr);
+  })
+
+  document.getElementById('clearManual').addEventListener('click', ()=>{ manualInput.value=''; })
+
+  function onNewNumbers(arr){
+    // arr expected newest-first
+    renderHistory(arr);
+    renderTrend(arr);
+    const res = predictFromHistory(arr);
+    predictionBox.textContent = res.pred + '  ';
+    confidenceEl.textContent = res.conf + '%';
+    lastFetch.textContent = new Date().toLocaleString();
+    document.getElementById('interpret').textContent = res.explain;
+  }
+
+  async function fetchAndUpdate(){
+    const url = apiUrlEl.value.trim(); if(!url) return alert('Set API URL');
+    const finalUrl = url + (url.includes('?')?('&'):'?') + 'r=' + Date.now();
+    try{
+      const json = await safeFetch(finalUrl);
+      const nums = tryExtractNumbers(json);
+      if(nums.length===0){
+        // try to parse embedded text
+        const txt = JSON.stringify(json);
+        const found = txt.match(/\d/g);
+        if(found){
+          // not reliable; skip
+        }
+      }
+      if(nums.length===0){
+        predictionBox.textContent='--'; confidenceEl.textContent='--'; document.getElementById('interpret').textContent='Could not extract numbers from API response. Check structure or CORS.';
+        lastFetch.textContent = new Date().toLocaleString();
+        console.warn('Could not parse numbers from API JSON', json);
+        return;
+      }
+      // ensure digits 0-9 only (if values >9, try to split string digits)
+      let clean = nums.map(x=>{
+        if(typeof x==='number' && x>=0 && x<=9) return x;
+        if(typeof x==='string' && x.length===1 && /\d/.test(x)) return parseInt(x);
+        // if number is like 12, maybe it's issue id; skip
+        return null;
+      }).filter(x=>x!==null);
+
+      if(clean.length===0){ document.getElementById('interpret').textContent='No valid digit values found.'; return }
+
+      onNewNumbers(clean);
+
+    } catch(err){
+      lastFetch.textContent = new Date().toLocaleString();
+      document.getElementById('interpret').textContent = 'Fetch error: ' + err.message + '. Possible CORS or network block.';
+      console.error(err);
+    }
+  }
+
+  // initial demo: do nothing until user presses fetch
+
+  // expose small helpers for advanced users
+  window.MPP = {predictFromHistory, tryExtractNumbers};
+
+})();
+</script>
 </body>
 </html>
