@@ -1,384 +1,472 @@
 <!doctype html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Live Colour Trading Predictor (MrPerfect Style)</title>
-  <style>
-    :root{--bg:#0b1020;--card:#0f1724;--accent:#ffd166;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    body{background:linear-gradient(135deg,#030418 0%, #061022 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:20px}
-    .app{width:980px;max-width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}
-    header{display:flex;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px}
-    .controls{display:flex;gap:8px;margin-top:12px;align-items:center}
-    input[type=text]{background:var(--glass);border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:inherit}
-    button{background:linear-gradient(90deg,var(--accent),#ffb703);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:16px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-    .history{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding-right:6px}
-    .row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px}
-    .chip{padding:6px 10px;border-radius:999px;font-weight:700}
-    .big{background:rgba(0,0,0,0.2)}
-    .prediction{font-size:28px;font-weight:800;display:flex;gap:10px;align-items:center}
-    .muted{color:var(--muted);font-size:13px}
-    .conf{font-weight:700}
-    .mapping{display:flex;gap:6px;flex-wrap:wrap}
-    textarea{width:100%;height:80px;background:transparent;border:1px dashed rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:6px}
-    footer{margin-top:12px;font-size:13px;color:var(--muted)}
-    .warn{color:#ff8b8b}
-    .ok{color:#8fffd1}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TAHSAN-Style Demo — Frontend Only</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#fff; --muted:#6b7280; --accent:#0f172a;
+    --primary:#0ea5a4; --glass: rgba(255,255,255,0.75);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--accent);min-height:100vh}
+  .wrap{max-width:1100px;margin:18px auto;padding:14px}
+  header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:12px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,0.06)}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#ec4899);display:grid;place-items:center;color:#fff;font-weight:800}
+  nav{display:flex;gap:8px;align-items:center}
+  .btn{padding:8px 12px;border-radius:8px;border:0;background:#eef2ff;cursor:pointer}
+  .btn-primary{background:var(--primary);color:#fff}
+  .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 8px 20px rgba(15,23,42,0.04)}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .clubs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+  .club{padding:10px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid #eef6ff}
+  .muted{color:var(--muted);font-size:13px}
+  .small{font-size:13px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  .input{padding:8px;border-radius:8px;border:1px solid #e6eef6}
+  .hidden{display:none}
+  .flex{display:flex;gap:8px;align-items:center}
+  .spaced{display:flex;justify-content:space-between;align-items:center}
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  @media(max-width:900px){
+    .grid-4,.clubs{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
 </head>
 <body>
-  <div class="app">
+  <div class="wrap">
     <header>
-      <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(180deg,#132033,#0b1624);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)">MP</div>
-      <div>
-        <h1>Live Colour Trading Predictor</h1>
-        <div class="muted">Fetches history from the API you provided & shows next-period prediction (Big/Small + confidence). Use responsibly — no guarantees.</div>
+      <div class="brand">
+        <div class="logo" id="logoTxt">T</div>
+        <div>
+          <div style="font-weight:800" id="titleMain">TAHSAN-STYLE (Demo)</div>
+          <div class="muted small">Frontend demo — admin panel local-only</div>
+        </div>
       </div>
+      <nav>
+        <div class="muted small">Balance: <span id="bal">₹0</span></div>
+        <button class="btn" id="homeBtn">Home</button>
+        <button class="btn" id="clubsBtn">Clubs</button>
+        <button class="btn" id="gamesBtn">Games</button>
+        <button class="btn" id="walletBtn">Wallet</button>
+        <button class="btn" id="adminOpenBtn">Admin</button>
+      </nav>
     </header>
 
-    <div class="controls">
-      <label class="muted">API URL</label>
-      <input id="apiUrl" type="text" value="https://draw.ar-lottery01.com/D5/D5_1M/GetHistoryIssuePage.json?r=1756242028187" style="flex:1" />
-      <button id="startBtn">Start</button>
-      <button id="fetchBtn">Fetch Now</button>
-      <div style="margin-left:6px" class="muted">Poll: <span id="pollStatus">stopped</span></div>
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="muted">Latest Prediction</div>
-              <div class="prediction" id="predictionBox">--</div>
-              <div class="muted">Confidence: <span id="confidence">--</span></div>
-            </div>
-            <div style="text-align:right">
-              <div class="muted">Last fetch</div>
-              <div id="lastFetch">-</div>
-              <div class="muted">Auto-poll interval (s)</div>
-              <input id="intervalInput" type="text" value="5" style="width:48px;margin-top:6px" />
-            </div>
+    <main style="margin-top:14px">
+      <!-- HOME CARD -->
+      <section id="homeView" class="card">
+        <div class="spaced">
+          <div>
+            <h2 style="margin:0">Welcome — Demo</h2>
+            <div class="muted small">Yeh file frontend-only hai. Real deposits, withdrawals, game-engine, KYC aur security backend se hi mumkin hain.</div>
           </div>
-
-          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-
-          <div class="muted">Trend Analysis (last 15 numbers)</div>
-          <div id="trendBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
-
-          <div style="margin-top:12px">
-            <div class="muted">Interpretation</div>
-            <div id="interpret" style="margin-top:6px">--</div>
+          <div class="controls">
+            <button class="btn btn-primary" onclick="document.getElementById('gamesBtn').click()">Play</button>
+            <button class="btn" onclick="document.getElementById('clubsBtn').click()">Clubs</button>
           </div>
         </div>
 
-        <div style="height:12px"></div>
-
-        <div class="card">
-          <div class="muted">Manual / Fallback</div>
-          <div style="margin-top:8px">
-            <label class="muted">Paste last results (comma separated, newest first):</label>
-            <textarea id="manualInput" placeholder="e.g. 3,7,1,5,0,2,6,8,9,4"></textarea>
-            <div style="margin-top:8px;display:flex;gap:8px"><button id="useManual">Use These</button><button id="clearManual">Clear</button></div>
+        <div style="margin-top:12px" class="grid-4">
+          <div class="card">
+            <div class="small muted">Active Games</div>
+            <div style="font-weight:700;margin-top:6px">Color Trading · Wingo</div>
+            <div class="muted small" style="margin-top:8px">Game logic simulated client-side (demo).</div>
+          </div>
+          <div class="card">
+            <div class="small muted">Invite / Gift</div>
+            <div style="margin-top:8px">
+              <div class="muted small">Invite code:</div>
+              <div style="margin-top:6px" id="inviteCode" class="small code">—</div>
+              <button class="btn" style="margin-top:8px" onclick="generateInvite()">Generate</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="small muted">Deposit QR</div>
+            <div style="margin-top:8px">
+              <div class="muted small">Create QR for payment link / UPI</div>
+              <input id="qrText" class="input" placeholder="upi://pay?pa=someone@bank..." style="width:100%" />
+              <div style="margin-top:8px" class="flex">
+                <button class="btn" onclick="generateQR()">Generate QR</button>
+                <button class="btn" onclick="downloadQR()">Download</button>
+              </div>
+              <div id="qrWrap" style="margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="small muted">Top Club</div>
+            <div style="margin-top:8px;font-weight:700" id="topClub">Club A</div>
+            <div class="muted small" id="topClubCount">Members: 1234</div>
           </div>
         </div>
+      </section>
 
+      <!-- GRID LAYOUT: main + sidebar -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;margin-top:12px">
+        <div>
+          <!-- CLUBS -->
+          <section id="clubsView" class="card hidden">
+            <div class="spaced">
+              <h3 style="margin:0">Clubs (32)</h3>
+              <div class="muted small">Join a club (demo)</div>
+            </div>
+            <div class="clubs" id="clubsGrid"></div>
+          </section>
+
+          <!-- GAMES -->
+          <section id="gamesView" class="card hidden" style="margin-top:10px">
+            <h3 style="margin:0">Games</h3>
+            <div style="margin-top:8px" class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700">Color Trading</div>
+                  <div class="muted small">Place demo bets on Red/Green/Violet.</div>
+                </div>
+                <div>
+                  <input id="betAmt" class="input" placeholder="₹100" style="width:110px"/>
+                </div>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn" onclick="placeBet('Red')">Red</button>
+                <button class="btn" onclick="placeBet('Green')">Green</button>
+                <button class="btn" onclick="placeBet('Violet')">Violet</button>
+              </div>
+              <div id="betRes" class="muted small" style="margin-top:8px"></div>
+            </div>
+
+            <div style="margin-top:10px" class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700">Wingo</div>
+                  <div class="muted small">1 / 3 / 5 minute demo rounds (simulated)</div>
+                </div>
+                <div class="controls">
+                  <button class="btn" onclick="startWingo(1)">1 min</button>
+                  <button class="btn" onclick="startWingo(3)">3 min</button>
+                  <button class="btn" onclick="startWingo(5)">5 min</button>
+                </div>
+              </div>
+              <div id="wingoArea" class="muted small" style="margin-top:8px">Round not started</div>
+            </div>
+          </section>
+
+          <!-- WALLET -->
+          <section id="walletView" class="card hidden" style="margin-top:10px">
+            <h3 style="margin:0">Wallet (Demo)</h3>
+            <div class="muted small" style="margin-top:6px">Add and withdraw operate on client-side only.</div>
+            <div style="margin-top:8px" class="flex">
+              <input id="addInp" class="input" placeholder="Amount ₹100" style="width:140px"/>
+              <button class="btn" onclick="addMoney()">Add</button>
+              <button class="btn" onclick="withdrawAll()">Withdraw All</button>
+            </div>
+            <div style="margin-top:8px">
+              <div class="muted small">Transactions</div>
+              <div id="txList" style="margin-top:6px"></div>
+            </div>
+          </section>
+
+          <!-- ADMIN (frontend demo) -->
+          <section id="adminPanel" class="card hidden" style="margin-top:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <h3 style="margin:0">Admin Panel (Local Demo)</h3>
+              <div class="muted small">You are admin</div>
+            </div>
+
+            <div style="margin-top:10px" class="grid-4">
+              <div class="card">
+                <div style="font-weight:700">Users</div>
+                <div class="muted small" style="margin-top:6px">Total (demo): <span id="userCount">1234</span></div>
+                <button class="btn" style="margin-top:8px" onclick="exportUsers()">Export CSV</button>
+              </div>
+              <div class="card">
+                <div style="font-weight:700">Gift Codes</div>
+                <input id="giftVal" class="input" placeholder="Value ₹" />
+                <button class="btn" style="margin-top:8px" onclick="createGift()">Create Gift</button>
+                <div id="giftList" class="muted small" style="margin-top:8px"></div>
+              </div>
+              <div class="card">
+                <div style="font-weight:700">Game Control</div>
+                <div class="muted small" style="margin-top:6px">Set simulated result for next round:</div>
+                <input id="forceRes" class="input" placeholder="Red/Green/Violet or number" />
+                <button class="btn" style="margin-top:8px" onclick="setForce()">Set</button>
+              </div>
+              <div class="card">
+                <div style="font-weight:700">Deposit QR</div>
+                <div class="muted small" style="margin-top:6px">Create QR for deposit (users scan to pay)</div>
+                <input id="adminQRText" class="input" placeholder="UPI / Payment link" />
+                <button class="btn" style="margin-top:8px" onclick="generateAdminQR()">Generate</button>
+                <div id="adminQR" style="margin-top:8px"></div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <button class="btn" onclick="clearDemoStorage()">Reset Demo Data</button>
+              <span class="muted small" style="margin-left:8px">Default admin password: <strong>admin123</strong> (change recommended)</span>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="muted small">Profile</div>
+                <div style="font-weight:700" id="userName">DemoUser</div>
+              </div>
+              <div>
+                <button class="btn" onclick="toggleLogin()">Login</button>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <div class="muted small">Invite</div>
+              <input id="applyInvite" class="input" placeholder="Enter code" />
+              <button class="btn" style="margin-top:8px" onclick="applyInvite()">Apply</button>
+            </div>
+
+            <div style="margin-top:10px">
+              <div class="muted small">Gift Redeem</div>
+              <input id="redeemGift" class="input" placeholder="Gift code" />
+              <button class="btn" style="margin-top:8px" onclick="redeemGift()">Redeem</button>
+              <div id="giftMsg" class="muted small" style="margin-top:8px"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:10px">
+            <div class="muted small">Quick Nav</div>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+              <button class="btn" onclick="document.getElementById('homeBtn').click()">Home</button>
+              <button class="btn" onclick="document.getElementById('gamesBtn').click()">Games</button>
+              <button class="btn" onclick="document.getElementById('walletBtn').click()">Wallet</button>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <div>
-        <div class="card">
-          <div class="muted">Fetched History (newest first)</div>
-          <div class="history" id="historyList"></div>
-        </div>
+      <footer class="muted small" style="margin-top:14px">
+        © <span id="yr"></span> TAHSAN-STYLE Demo — Frontend only. For real money use, integrate secure backend, payment gateway, KYC, logging, anti-fraud, and legal review.
+      </footer>
+    </main>
+  </div>
 
-        <div style="height:12px"></div>
-
-        <div class="card">
-          <div class="muted">Settings & Color Mapping</div>
-          <div style="margin-top:8px">
-            <div class="muted">Map digits to colours (editable). Format: digit=Colour. One per line.</div>
-            <textarea id="mappingInput">0=Red
-1=Green
-2=Red
-3=Violet
-4=Green
-5=Red
-6=Green
-7=Violet
-8=Red
-9=Green</textarea>
-            <div style="margin-top:8px;display:flex;gap:8px"><button id="applyMap">Apply Map</button><button id="resetMap">Reset</button></div>
-            <div style="margin-top:10px" class="muted">CORS: If the API blocks cross-origin requests, open using a local server or use a CORS proxy.</div>
-          </div>
-        </div>
+  <!-- ADMIN PASSWORD PROMPT (modal-like) -->
+  <div id="adminModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:grid;place-items:center">
+    <div style="background:white;padding:16px;border-radius:10px;max-width:420px;width:100%">
+      <div style="font-weight:700">Admin Login</div>
+      <div class="muted small" style="margin-top:6px">Enter admin password (client-side demo).</div>
+      <input id="adminPwd" class="input" placeholder="Password" style="width:100%;margin-top:8px"/>
+      <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="closeAdminModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="adminLogin()">Login</button>
       </div>
     </div>
-
-    <footer>
-      <div class="muted">Notes: This tool fetches the API and tries to infer the next result by simple pattern heuristics (majority, streak detection, last-result flip). No guaranteed wins. Use responsibly.</div>
-    </footer>
   </div>
 
 <script>
-(function(){
-  const apiUrlEl = document.getElementById('apiUrl');
-  const startBtn = document.getElementById('startBtn');
-  const fetchBtn = document.getElementById('fetchBtn');
-  const historyList = document.getElementById('historyList');
-  const trendBar = document.getElementById('trendBar');
-  const predictionBox = document.getElementById('predictionBox');
-  const confidenceEl = document.getElementById('confidence');
-  const lastFetch = document.getElementById('lastFetch');
-  const pollStatus = document.getElementById('pollStatus');
-  const intervalInput = document.getElementById('intervalInput');
-  const manualInput = document.getElementById('manualInput');
-  const useManual = document.getElementById('useManual');
-  const applyMap = document.getElementById('applyMap');
-  const mappingInput = document.getElementById('mappingInput');
+/* ==========================
+   Config (change text safely)
+   ========================== */
+const SITE = { title: "TAHSAN-STYLE (Demo)", logo:"T", clubs: [
+  "Club A","Club B","Club C","Club D","Club E","Club F","Club G","Club H",
+  "Club I","Club J","Club K","Club L","Club M","Club N","Club O","Club P",
+  "Club Q","Club R","Club S","Club T","Club U","Club V","Club W","Club X",
+  "Club Y","Club Z","Club 1","Club 2","Club 3","Club 4","Club 5","Club 6"
+]};
 
-  let map = {}; function parseMap(){
-    map = {};
-    mappingInput.value.split('\n').forEach(line => {
-      const parts = line.split('=');
-      if(parts.length>=2){
-        const d = parts[0].trim(); const c = parts.slice(1).join('=').trim();
-        if(d!=='' ) map[d] = c;
-      }
-    })
-  }
-  parseMap();
+/* ==========================
+   Demo state (client-only)
+   ========================== */
+let BAL = Number(localStorage.getItem('demo_bal')||0);
+let TXS = JSON.parse(localStorage.getItem('demo_txs')||'[]');
+let GIFTS = JSON.parse(localStorage.getItem('demo_gifts')||'{}');
+let FORCE_RES = null;
 
-  applyMap.addEventListener('click', ()=>{ parseMap(); alert('Mapping applied') })
+/* ==========================
+   Init UI
+   ========================== */
+document.getElementById('titleMain').innerText = SITE.title;
+document.getElementById('logoTxt').innerText = SITE.logo;
+document.getElementById('yr').innerText = new Date().getFullYear();
+renderBalance(); renderTx(); renderGifts(); renderClubs();
 
-  function safeFetch(url){
-    // try raw fetch, fallback to CORS proxy suggestion
-    return fetch(url, {cache:'no-store'}).then(r=>{
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    })
-  }
+/* NAV */
+document.getElementById('homeBtn').addEventListener('click', ()=>show('homeView'));
+document.getElementById('clubsBtn').addEventListener('click', ()=>show('clubsView'));
+document.getElementById('gamesBtn').addEventListener('click', ()=>show('gamesView'));
+document.getElementById('walletBtn').addEventListener('click', ()=>show('walletView'));
+document.getElementById('adminOpenBtn').addEventListener('click', openAdminModal);
 
-  function tryExtractNumbers(json){
-    // Try several common shapes: list in json.data or json.rows or json.list or json.issues
-    const tries = [];
-    if(Array.isArray(json)) tries.push(json);
-    if(json && typeof json === 'object'){
-      ['data','rows','list','issues','result','history'].forEach(k=>{
-        if(json[k]) tries.push(json[k]);
-      })
+function show(id){
+  ['homeView','clubsView','gamesView','walletView','adminPanel'].forEach(x=>{
+    const el = document.getElementById(x);
+    if(!el) return;
+    el.classList.toggle('hidden', x!==id);
+  });
+}
+
+/* ==========================
+   Clubs
+   ========================== */
+function renderClubs(){
+  const grid = document.getElementById('clubsGrid');
+  grid.innerHTML='';
+  SITE.clubs.forEach((c,i)=>{
+    const div = document.createElement('div');
+    div.className = 'club';
+    const members = Math.floor(Math.random()*5000+20);
+    div.innerHTML = `<div style="font-weight:600">${c}</div>
+      <div class="muted small" style="margin-top:6px">Members: ${members}</div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button class="btn" onclick="joinClub('${c}')">Join</button>
+        <button class="btn" onclick="viewClub('${c}')">Details</button>
+      </div>`;
+    grid.appendChild(div);
+  });
+  document.getElementById('topClub').innerText = SITE.clubs[0];
+  document.getElementById('topClubCount').innerText = 'Members: ' + (Math.floor(Math.random()*5000)+200);
+}
+function joinClub(n){ alert('Joined '+n+' (demo). Server required for real join.'); }
+function viewClub(n){ alert('Club: '+n+' (demo)'); }
+
+/* ==========================
+   Wallet & TX
+   ========================== */
+function renderBalance(){ document.getElementById('bal').innerText = '₹'+BAL; localStorage.setItem('demo_bal', BAL); }
+function renderTx(){ document.getElementById('txList').innerHTML = TXS.slice(0,8).map(t=>`<div class="small">${t.date} • ${t.type} • ₹${t.amount}</div>`).join(''); localStorage.setItem('demo_txs', JSON.stringify(TXS));}
+function addMoney(){ const v = Number(document.getElementById('addInp').value)||0; if(v<=0){ alert('Amount dalen'); return;} BAL += v; TXS.unshift({type:'add',amount:v,date:new Date().toLocaleString()}); renderBalance(); renderTx(); }
+function withdrawAll(){ if(BAL<=0){ alert('No balance'); return;} TXS.unshift({type:'withdraw',amount:BAL,date:new Date().toLocaleString()}); BAL=0; renderBalance(); renderTx(); }
+
+/* ==========================
+   Invite & Gift (demo)
+   ========================== */
+function generateInvite(){ const code = 'INV'+Math.random().toString(36).slice(2,8).toUpperCase(); document.getElementById('inviteCode').innerText = code; TXS.unshift({type:'invite-bonus',amount:10,date:new Date().toLocaleString()}); BAL+=10; renderBalance(); renderTx(); }
+function applyInvite(){ const c = document.getElementById('applyInvite').value.trim(); if(!c){ alert('Code dalen'); return;} BAL+=10; TXS.unshift({type:'invite-applied',amount:10,date:new Date().toLocaleString()}); renderBalance(); renderTx(); alert('Invite applied — ₹10 demo bonus'); }
+function createGift(){ const val = Number(document.getElementById('giftVal').value)||0; if(val<=0){ alert('Value daalein'); return;} const code = 'GFT'+Math.random().toString(36).slice(2,7).toUpperCase(); GIFTS[code] = {value:val,used:false}; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); renderGifts(); alert('Created: '+code); }
+function renderGifts(){ const el = document.getElementById('giftList'); el.innerHTML = Object.keys(GIFTS).map(k=>`${k} → ₹${GIFTS[k].value} ${GIFTS[k].used? '(used)':''}`).join('<br>') || '(no gifts)'; }
+function redeemGift(){ const code = document.getElementById('redeemGift').value.trim().toUpperCase(); if(!code){ alert('Code daalen'); return;} if(!GIFTS[code]){ document.getElementById('giftMsg').innerText='Invalid code'; return;} if(GIFTS[code].used){ document.getElementById('giftMsg').innerText='Code used'; return;} BAL += GIFTS[code].value; GIFTS[code].used = true; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); TXS.unshift({type:'gift',amount:GIFTS[code].value,date:new Date().toLocaleString()}); renderBalance(); renderTx(); renderGifts(); document.getElementById('giftMsg').innerText = 'Redeemed ₹'+GIFTS[code].value; }
+
+/* ==========================
+   Betting (simulated)
+   ========================== */
+function placeBet(color){
+  const amt = Number(document.getElementById('betAmt').value)||0;
+  if(amt<=0){ alert('Bet amount daalein'); return; }
+  if(amt>BAL){ alert('Balance kam hai'); return; }
+  const options = ['Red','Green','Violet'];
+  const result = FORCE_RES || options[Math.floor(Math.random()*options.length)];
+  const out = document.getElementById('betRes');
+  if(result===color){ const win = Math.floor(amt * (1.8 + Math.random()*0.6)); BAL += win; TXS.unshift({type:'win',amount:win,date:new Date().toLocaleString()}); out.innerText = `Result: ${result} — Aap jeete ₹${win}`; }
+  else { BAL -= amt; TXS.unshift({type:'loss',amount:amt,date:new Date().toLocaleString()}); out.innerText = `Result: ${result} — Haar gaye ₹${amt}`; }
+  renderBalance(); renderTx();
+  FORCE_RES = null; // reset forced result after use
+}
+
+/* ==========================
+   Wingo (simulated)
+   ========================== */
+let wTimer = null;
+function startWingo(mins){
+  if(wTimer){ alert('Round chal raha hai'); return; }
+  const el = document.getElementById('wingoArea');
+  const end = Date.now() + mins*60*1000;
+  el.innerText = `Wingo ${mins}min round started — calculating...`;
+  wTimer = setInterval(()=>{
+    const left = Math.max(0, end - Date.now());
+    const s = Math.ceil(left/1000);
+    el.innerText = `Wingo ${mins}min — time left ${s}s`;
+    if(left<=0){ clearInterval(wTimer); wTimer = null;
+      const win = FORCE_RES || Math.floor(Math.random()*10);
+      el.innerText = `Round finished. Winning: ${win} (demo).`;
+      FORCE_RES = null;
     }
-    // flatten arrays and look for numeric fields
-    for(const candidate of tries){
-      if(Array.isArray(candidate)){
-        // candidate may be array of objects or numbers
-        const out = [];
-        for(const item of candidate){
-          if(item==null) continue;
-          if(typeof item === 'number') out.push(item);
-          else if(typeof item === 'string'){
-            // maybe a comma-separated numbers string
-            const m = item.match(/\d/);
-            if(m) out.push(parseInt(item));
-          } else if(typeof item === 'object'){
-            // try common fields: Result, Number, OpenNumber, OpenCode, WinCode, ResultNumber
-            const keys = ['Result','Number','OpenNumber','OpenCode','WinCode','result','number','openNumber','openCode','winCode','issue'];
-            let found = false;
-            for(const k of keys){
-              if(item[k]!=null){
-                const v = item[k];
-                if(typeof v === 'number') { out.push(v); found=true; break }
-                if(typeof v === 'string' && v.match(/\d/)) { out.push(parseInt(v)); found=true; break }
-              }
-            }
-            // sometimes the number is inside a 'value' array or 'num' etc
-            if(!found){
-              for(const k in item){
-                const v = item[k];
-                if(typeof v === 'number') { out.push(v); found=true; break }
-                if(typeof v === 'string' && v.length<=3 && v.match(/^\d+$/)) { out.push(parseInt(v)); found=true; break }
-              }
-            }
-          }
-          if(out.length>=50) break;
-        }
-        if(out.length>0) return out;
-      }
-    }
-    return [];
-  }
+  }, 800);
+}
 
-  function toBigSmall(n){
-    if(n==null) return null;
-    return (n>=5)?'Big':'Small';
-  }
+/* ==========================
+   Admin (client-side)
+   ========================== */
+function openAdminModal(){ document.getElementById('adminModal').classList.remove('hidden'); }
+function closeAdminModal(){ document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminPwd').value=''; }
+function adminLogin(){
+  const pwd = document.getElementById('adminPwd').value || '';
+  // demo password check client-side
+  const saved = localStorage.getItem('demo_admin_pwd') || 'admin123';
+  if(pwd === saved){ closeAdminModal(); show('adminPanel'); alert('Admin access granted (demo).'); } 
+  else { alert('Password incorrect'); }
+}
+function clearDemoStorage(){ if(confirm('Reset demo data?')){ localStorage.removeItem('demo_bal'); localStorage.removeItem('demo_txs'); localStorage.removeItem('demo_gifts'); location.reload(); } }
+function setForce(){ const v = document.getElementById('forceRes').value.trim(); if(!v){ alert('Value daalo (Red/Green/Violet or number)'); return;} FORCE_RES = v; alert('Next round forced to: '+v); }
 
-  function predictFromHistory(nums){
-    // nums: newest-first array of digits 0-9
-    if(!nums || nums.length===0) return {pred:null,conf:0,explain:'no data'};
-    const last15 = nums.slice(0,15);
-    // majority big/small
-    const bsCounts = {Big:0,Small:0};
-    last15.forEach(n=> bsCounts[toBigSmall(n)]++);
-    const majority = (bsCounts.Big>=bsCounts.Small)?'Big':'Small';
-    const majorityPct = Math.round((Math.max(bsCounts.Big,bsCounts.Small)/last15.length)*100);
+/* ==========================
+   Admin: Deposit QR generator
+   ========================== */
+function generateQR(){
+  const txt = document.getElementById('qrText').value.trim();
+  if(!txt){ alert('Payment link / UPI dalen'); return; }
+  // uses Google Chart API for QR image (browser will fetch)
+  const url = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl='+encodeURIComponent(txt);
+  document.getElementById('qrWrap').innerHTML = `<img id="generatedQR" src="${url}" alt="QR" style="width:200px;height:200px;border-radius:8px"/>`;
+}
+function downloadQR(){
+  const img = document.getElementById('generatedQR');
+  if(!img){ alert('Pehle QR generate karo'); return; }
+  // open image in new tab for user to save
+  window.open(img.src, '_blank');
+}
+function generateAdminQR(){
+  const t = document.getElementById('adminQRText').value.trim();
+  if(!t){ alert('Link daalen'); return; }
+  const url = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl='+encodeURIComponent(t);
+  document.getElementById('adminQR').innerHTML = `<img src="${url}" alt="adminQR" style="width:200px;height:200px;border-radius:6px"/>`;
+}
 
-    // streak detection (newest first)
-    let streak=1;
-    for(let i=1;i<last15.length;i++){
-      if(toBigSmall(last15[i])===toBigSmall(last15[0])) streak++; else break;
-    }
+/* ==========================
+   Admin: Gifts, export
+   ========================== */
+function exportUsers(){
+  // demo users CSV
+  const rows = [
+    ['id','name','balance'],
+    ['u1','Alice','100'],
+    ['u2','Bob','50'],
+    ['u3','Charlie','0']
+  ];
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  const a = document.createElement('a'); a.href = url; a.download = 'users_demo.csv'; a.click();
+}
 
-    // last number
-    const last = last15[0];
+/* ==========================
+   Gift redeem helper
+   ========================== */
+function createGift(){ const val = Number(document.getElementById('giftVal').value)||0; if(val<=0){ alert('Enter value'); return;} const code = 'G'+Math.random().toString(36).slice(2,8).toUpperCase(); GIFTS[code]={value:val,used:false}; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); renderGifts(); alert('Gift created: '+code); }
+function renderGifts(){ document.getElementById('giftList').innerHTML = Object.keys(GIFTS).map(k=>`${k} → ₹${GIFTS[k].value} ${GIFTS[k].used? '(used)':''}`).join('<br>') || '(no gifts)'; }
 
-    // simple pattern: if there is a strong majority OR long streak, predict flip with lower confidence (systems often flip after streak), else predict majority
-    let pred = majority;
-    let conf = majorityPct;
-    let explain = `Majority ${majority} ${majorityPct}% over last ${last15.length}. Streak: ${streak}. Last:${last} (${toBigSmall(last)}).`;
+/* ==========================
+   Misc
+   ========================== */
+function applyInvite(){ const v = document.getElementById('applyInvite').value.trim(); if(!v){ alert('Code daalen'); return;} BAL+=10; TXS.unshift({type:'invite',amount:10,date:new Date().toLocaleString()}); renderBalance(); renderTx(); alert('Invite applied (demo)'); }
+function redeemGift(){ const c = document.getElementById('redeemGift').value.trim().toUpperCase(); if(!c){ alert('Code daalen'); return;} if(!GIFTS[c]){ document.getElementById('giftMsg').innerText='Invalid'; return;} if(GIFTS[c].used){ document.getElementById('giftMsg').innerText='Used'; return;} BAL+=GIFTS[c].value; GIFTS[c].used=true; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); TXS.unshift({type:'gift',amount:GIFTS[c].value,date:new Date().toLocaleString()}); renderBalance(); renderTx(); renderGifts(); document.getElementById('giftMsg').innerText='Redeemed ₹'+GIFTS[c].value; }
+function toggleLogin(){ const u = document.getElementById('userName'); if(u.innerText==='DemoUser'){ u.innerText='AdminUser'; openAdminModal(); } else { u.innerText='DemoUser'; show('homeView'); } }
 
-    if(streak>=4){
-      // if very long streak, many systems flip -> predict flip with moderate confidence
-      pred = (toBigSmall(last)==='Big')? 'Small':'Big';
-      conf = Math.max(40, Math.round(50 - (streak-4)*5));
-      explain += ' Long streak detected → expecting possible flip.';
-    } else if(majorityPct>=70){
-      // strong majority
-      pred = majority; conf = Math.min(95, majorityPct + 5);
-      explain += ' Strong majority → follow majority.';
-    } else {
-      // check recent 3 pattern (e.g., X Y X suggests X repeat)
-      if(last15.length>=3){
-        const a = toBigSmall(last15[0]); const b = toBigSmall(last15[1]); const c = toBigSmall(last15[2]);
-        if(a===c && a!==b){ pred = a; conf = Math.max(conf, 60); explain += ' Pattern XYX observed → repeat of X likely.' }
-      }
-    }
+/* ==========================
+   Helpers: render initial tx/gifts if none
+   ========================== */
+if(TXS.length===0){ TXS.unshift({type:'init',amount:0,date:new Date().toLocaleString()}); localStorage.setItem('demo_txs', JSON.stringify(TXS)); renderTx(); }
+if(Object.keys(GIFTS).length>0) renderGifts();
 
-    // confidence adjust by recency: if majority is based on recent 5, boost
-    const recent5 = last15.slice(0,5); const recCounts = {Big:0,Small:0}; recent5.forEach(n=> recCounts[toBigSmall(n)]++);
-    if(Math.max(recCounts.Big,recCounts.Small)>=4) { conf = Math.max(conf, 70); explain += ' Recent 4/5 agrees.' }
-
-    // Ensure conf 1..99
-    conf = Math.max(10, Math.min(99, conf));
-
-    return {pred,conf,explain};
-  }
-
-  function renderHistory(nums){
-    historyList.innerHTML = '';
-    nums.slice(0,50).forEach((n,idx)=>{
-      const row = document.createElement('div'); row.className='row';
-      const left = document.createElement('div'); left.textContent = `#${idx+1}`;
-      const chip = document.createElement('div'); chip.className='chip'; chip.textContent = n;
-      // colour from map
-      const col = map[String(n)] || '';
-      chip.title = String(col);
-      chip.style.background = 'rgba(255,255,255,0.02)';
-      chip.style.border = '1px solid rgba(255,255,255,0.03)';
-      chip.style.minWidth='46px'; chip.style.textAlign='center';
-      row.appendChild(left); row.appendChild(chip);
-      const right = document.createElement('div'); right.textContent = toBigSmall(n) + (col?(' • '+col):''); right.className='muted';
-      row.appendChild(right);
-      historyList.appendChild(row);
-    })
-  }
-
-  function renderTrend(nums){
-    trendBar.innerHTML='';
-    nums.slice(0,15).reverse().forEach(n=>{ // oldest -> newest left->right
-      const el = document.createElement('div'); el.style.padding='8px 10px'; el.style.borderRadius='8px'; el.style.minWidth='46px'; el.style.textAlign='center'; el.style.fontWeight='700';
-      el.textContent = n + '\n' + toBigSmall(n);
-      const col = map[String(n)] || '';
-      if(col) el.title = col;
-      el.style.background = 'rgba(255,255,255,0.02)';
-      trendBar.appendChild(el);
-    })
-  }
-
-  let pollTimer = null;
-  function startPolling(){
-    if(pollTimer) clearInterval(pollTimer);
-    const sec = Math.max(2, parseInt(intervalInput.value)||5);
-    pollStatus.textContent = 'running';
-    pollTimer = setInterval(()=>{ fetchAndUpdate(); }, sec*1000);
-  }
-  function stopPolling(){ if(pollTimer) clearInterval(pollTimer); pollTimer=null; pollStatus.textContent='stopped' }
-
-  startBtn.addEventListener('click', ()=>{
-    if(pollTimer){ stopPolling(); startBtn.textContent='Start'; }
-    else { startPolling(); startBtn.textContent='Stop'; }
-  })
-
-  fetchBtn.addEventListener('click', ()=> fetchAndUpdate());
-
-  useManual.addEventListener('click', ()=>{
-    const v = manualInput.value.trim(); if(!v) return alert('Paste some numbers');
-    const arr = v.split(',').map(x=>parseInt(x.trim())).filter(x=>!Number.isNaN(x));
-    if(arr.length===0) return alert('No numbers parsed');
-    onNewNumbers(arr);
-  })
-
-  document.getElementById('clearManual').addEventListener('click', ()=>{ manualInput.value=''; })
-
-  function onNewNumbers(arr){
-    // arr expected newest-first
-    renderHistory(arr);
-    renderTrend(arr);
-    const res = predictFromHistory(arr);
-    predictionBox.textContent = res.pred + '  ';
-    confidenceEl.textContent = res.conf + '%';
-    lastFetch.textContent = new Date().toLocaleString();
-    document.getElementById('interpret').textContent = res.explain;
-  }
-
-  async function fetchAndUpdate(){
-    const url = apiUrlEl.value.trim(); if(!url) return alert('Set API URL');
-    const finalUrl = url + (url.includes('?')?('&'):'?') + 'r=' + Date.now();
-    try{
-      const json = await safeFetch(finalUrl);
-      const nums = tryExtractNumbers(json);
-      if(nums.length===0){
-        // try to parse embedded text
-        const txt = JSON.stringify(json);
-        const found = txt.match(/\d/g);
-        if(found){
-          // not reliable; skip
-        }
-      }
-      if(nums.length===0){
-        predictionBox.textContent='--'; confidenceEl.textContent='--'; document.getElementById('interpret').textContent='Could not extract numbers from API response. Check structure or CORS.';
-        lastFetch.textContent = new Date().toLocaleString();
-        console.warn('Could not parse numbers from API JSON', json);
-        return;
-      }
-      // ensure digits 0-9 only (if values >9, try to split string digits)
-      let clean = nums.map(x=>{
-        if(typeof x==='number' && x>=0 && x<=9) return x;
-        if(typeof x==='string' && x.length===1 && /\d/.test(x)) return parseInt(x);
-        // if number is like 12, maybe it's issue id; skip
-        return null;
-      }).filter(x=>x!==null);
-
-      if(clean.length===0){ document.getElementById('interpret').textContent='No valid digit values found.'; return }
-
-      onNewNumbers(clean);
-
-    } catch(err){
-      lastFetch.textContent = new Date().toLocaleString();
-      document.getElementById('interpret').textContent = 'Fetch error: ' + err.message + '. Possible CORS or network block.';
-      console.error(err);
-    }
-  }
-
-  // initial demo: do nothing until user presses fetch
-
-  // expose small helpers for advanced users
-  window.MPP = {predictFromHistory, tryExtractNumbers};
-
-})();
+/* Keyboard nav */
+document.addEventListener('keydown', e=>{
+  if(e.key==='h') document.getElementById('homeBtn').click();
+  if(e.key==='c') document.getElementById('clubsBtn').click();
+  if(e.key==='g') document.getElementById('gamesBtn').click();
+  if(e.key==='w') document.getElementById('walletBtn').click();
+});
 </script>
 </body>
 </html>
