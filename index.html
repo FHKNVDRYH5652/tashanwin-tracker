@@ -1,472 +1,216 @@
-<!doctype html>
-<html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TAHSAN-Style Demo — Frontend Only</title>
-<style>
-  :root{
-    --bg:#f4f6fb; --card:#fff; --muted:#6b7280; --accent:#0f172a;
-    --primary:#0ea5a4; --glass: rgba(255,255,255,0.75);
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--accent);min-height:100vh}
-  .wrap{max-width:1100px;margin:18px auto;padding:14px}
-  header{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:12px;border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,0.06)}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#4f46e5,#ec4899);display:grid;place-items:center;color:#fff;font-weight:800}
-  nav{display:flex;gap:8px;align-items:center}
-  .btn{padding:8px 12px;border-radius:8px;border:0;background:#eef2ff;cursor:pointer}
-  .btn-primary{background:var(--primary);color:#fff}
-  .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 8px 20px rgba(15,23,42,0.04)}
-  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  .clubs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
-  .club{padding:10px;border-radius:8px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid #eef6ff}
-  .muted{color:var(--muted);font-size:13px}
-  .small{font-size:13px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap}
-  .input{padding:8px;border-radius:8px;border:1px solid #e6eef6}
-  .hidden{display:none}
-  .flex{display:flex;gap:8px;align-items:center}
-  .spaced{display:flex;justify-content:space-between;align-items:center}
-  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-  @media(max-width:900px){
-    .grid-4,.clubs{grid-template-columns:repeat(2,1fr)}
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sureshot Prediction Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #141e30, #243b55, #141e30, #243b55);
+      background-size: 400% 400%;
+      animation: gradient 10s ease infinite;
+      color: #fff;
+      text-align: center;
+    }
+    @keyframes gradient {
+      0% {background-position:0% 50%;}
+      50% {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
+    }
+    header {
+      padding: 20px;
+      font-size: 1.8em;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      text-shadow: 0 0 12px #00ffe0;
+      font-weight: bold;
+    }
+    .screen {display:none; padding:20px; min-height:80vh;}
+    .screen.active {display:block; animation: fadeIn 0.6s;}
+    @keyframes fadeIn {from{opacity:0; transform:scale(0.95);} to{opacity:1; transform:scale(1);}}
+    .btn {
+      padding:14px 26px;
+      margin:12px;
+      border:none;
+      border-radius:10px;
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+      color:#fff;
+      font-size:1.1em;
+      cursor:pointer;
+      transition:0.2s;
+      font-weight:bold;
+      box-shadow:0 0 12px #00e6ff;
+    }
+    .btn:hover {transform:scale(1.05); box-shadow:0 0 24px #00e6ff;}
+    .card {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 30px auto;
+      max-width: 520px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    input {
+      padding:14px;
+      width:80%;
+      border:none;
+      border-radius:10px;
+      margin-top:18px;
+      font-size:1em;
+      text-align:center;
+      background:rgba(255,255,255,0.2);
+      color:#fff;
+    }
+    .qr {width:250px; margin:20px auto; display:block; border-radius:12px; box-shadow:0 0 25px #00ffcc;}
+    #wheel {
+      width:340px; height:340px; border-radius:50%;
+      margin:25px auto; border:14px solid #fff;
+      box-shadow:0 0 30px #00ffcc;
+      transition: transform 5s cubic-bezier(.17,.67,.83,.67);
+    }
+    .arrow {
+      width:0; height:0; border-left:22px solid transparent;
+      border-right:22px solid transparent; border-bottom:35px solid yellow;
+      margin:0 auto;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo" id="logoTxt">T</div>
-        <div>
-          <div style="font-weight:800" id="titleMain">TAHSAN-STYLE (Demo)</div>
-          <div class="muted small">Frontend demo — admin panel local-only</div>
-        </div>
-      </div>
-      <nav>
-        <div class="muted small">Balance: <span id="bal">₹0</span></div>
-        <button class="btn" id="homeBtn">Home</button>
-        <button class="btn" id="clubsBtn">Clubs</button>
-        <button class="btn" id="gamesBtn">Games</button>
-        <button class="btn" id="walletBtn">Wallet</button>
-        <button class="btn" id="adminOpenBtn">Admin</button>
-      </nav>
-    </header>
+<header>Sureshot Prediction Portal</header>
 
-    <main style="margin-top:14px">
-      <!-- HOME CARD -->
-      <section id="homeView" class="card">
-        <div class="spaced">
-          <div>
-            <h2 style="margin:0">Welcome — Demo</h2>
-            <div class="muted small">Yeh file frontend-only hai. Real deposits, withdrawals, game-engine, KYC aur security backend se hi mumkin hain.</div>
-          </div>
-          <div class="controls">
-            <button class="btn btn-primary" onclick="document.getElementById('gamesBtn').click()">Play</button>
-            <button class="btn" onclick="document.getElementById('clubsBtn').click()">Clubs</button>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="grid-4">
-          <div class="card">
-            <div class="small muted">Active Games</div>
-            <div style="font-weight:700;margin-top:6px">Color Trading · Wingo</div>
-            <div class="muted small" style="margin-top:8px">Game logic simulated client-side (demo).</div>
-          </div>
-          <div class="card">
-            <div class="small muted">Invite / Gift</div>
-            <div style="margin-top:8px">
-              <div class="muted small">Invite code:</div>
-              <div style="margin-top:6px" id="inviteCode" class="small code">—</div>
-              <button class="btn" style="margin-top:8px" onclick="generateInvite()">Generate</button>
-            </div>
-          </div>
-          <div class="card">
-            <div class="small muted">Deposit QR</div>
-            <div style="margin-top:8px">
-              <div class="muted small">Create QR for payment link / UPI</div>
-              <input id="qrText" class="input" placeholder="upi://pay?pa=someone@bank..." style="width:100%" />
-              <div style="margin-top:8px" class="flex">
-                <button class="btn" onclick="generateQR()">Generate QR</button>
-                <button class="btn" onclick="downloadQR()">Download</button>
-              </div>
-              <div id="qrWrap" style="margin-top:8px"></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="small muted">Top Club</div>
-            <div style="margin-top:8px;font-weight:700" id="topClub">Club A</div>
-            <div class="muted small" id="topClubCount">Members: 1234</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- GRID LAYOUT: main + sidebar -->
-      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;margin-top:12px">
-        <div>
-          <!-- CLUBS -->
-          <section id="clubsView" class="card hidden">
-            <div class="spaced">
-              <h3 style="margin:0">Clubs (32)</h3>
-              <div class="muted small">Join a club (demo)</div>
-            </div>
-            <div class="clubs" id="clubsGrid"></div>
-          </section>
-
-          <!-- GAMES -->
-          <section id="gamesView" class="card hidden" style="margin-top:10px">
-            <h3 style="margin:0">Games</h3>
-            <div style="margin-top:8px" class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                  <div style="font-weight:700">Color Trading</div>
-                  <div class="muted small">Place demo bets on Red/Green/Violet.</div>
-                </div>
-                <div>
-                  <input id="betAmt" class="input" placeholder="₹100" style="width:110px"/>
-                </div>
-              </div>
-              <div style="margin-top:10px;display:flex;gap:8px">
-                <button class="btn" onclick="placeBet('Red')">Red</button>
-                <button class="btn" onclick="placeBet('Green')">Green</button>
-                <button class="btn" onclick="placeBet('Violet')">Violet</button>
-              </div>
-              <div id="betRes" class="muted small" style="margin-top:8px"></div>
-            </div>
-
-            <div style="margin-top:10px" class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                  <div style="font-weight:700">Wingo</div>
-                  <div class="muted small">1 / 3 / 5 minute demo rounds (simulated)</div>
-                </div>
-                <div class="controls">
-                  <button class="btn" onclick="startWingo(1)">1 min</button>
-                  <button class="btn" onclick="startWingo(3)">3 min</button>
-                  <button class="btn" onclick="startWingo(5)">5 min</button>
-                </div>
-              </div>
-              <div id="wingoArea" class="muted small" style="margin-top:8px">Round not started</div>
-            </div>
-          </section>
-
-          <!-- WALLET -->
-          <section id="walletView" class="card hidden" style="margin-top:10px">
-            <h3 style="margin:0">Wallet (Demo)</h3>
-            <div class="muted small" style="margin-top:6px">Add and withdraw operate on client-side only.</div>
-            <div style="margin-top:8px" class="flex">
-              <input id="addInp" class="input" placeholder="Amount ₹100" style="width:140px"/>
-              <button class="btn" onclick="addMoney()">Add</button>
-              <button class="btn" onclick="withdrawAll()">Withdraw All</button>
-            </div>
-            <div style="margin-top:8px">
-              <div class="muted small">Transactions</div>
-              <div id="txList" style="margin-top:6px"></div>
-            </div>
-          </section>
-
-          <!-- ADMIN (frontend demo) -->
-          <section id="adminPanel" class="card hidden" style="margin-top:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <h3 style="margin:0">Admin Panel (Local Demo)</h3>
-              <div class="muted small">You are admin</div>
-            </div>
-
-            <div style="margin-top:10px" class="grid-4">
-              <div class="card">
-                <div style="font-weight:700">Users</div>
-                <div class="muted small" style="margin-top:6px">Total (demo): <span id="userCount">1234</span></div>
-                <button class="btn" style="margin-top:8px" onclick="exportUsers()">Export CSV</button>
-              </div>
-              <div class="card">
-                <div style="font-weight:700">Gift Codes</div>
-                <input id="giftVal" class="input" placeholder="Value ₹" />
-                <button class="btn" style="margin-top:8px" onclick="createGift()">Create Gift</button>
-                <div id="giftList" class="muted small" style="margin-top:8px"></div>
-              </div>
-              <div class="card">
-                <div style="font-weight:700">Game Control</div>
-                <div class="muted small" style="margin-top:6px">Set simulated result for next round:</div>
-                <input id="forceRes" class="input" placeholder="Red/Green/Violet or number" />
-                <button class="btn" style="margin-top:8px" onclick="setForce()">Set</button>
-              </div>
-              <div class="card">
-                <div style="font-weight:700">Deposit QR</div>
-                <div class="muted small" style="margin-top:6px">Create QR for deposit (users scan to pay)</div>
-                <input id="adminQRText" class="input" placeholder="UPI / Payment link" />
-                <button class="btn" style="margin-top:8px" onclick="generateAdminQR()">Generate</button>
-                <div id="adminQR" style="margin-top:8px"></div>
-              </div>
-            </div>
-
-            <div style="margin-top:10px">
-              <button class="btn" onclick="clearDemoStorage()">Reset Demo Data</button>
-              <span class="muted small" style="margin-left:8px">Default admin password: <strong>admin123</strong> (change recommended)</span>
-            </div>
-          </section>
-
-        </div>
-
-        <!-- RIGHT SIDEBAR -->
-        <aside>
-          <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="muted small">Profile</div>
-                <div style="font-weight:700" id="userName">DemoUser</div>
-              </div>
-              <div>
-                <button class="btn" onclick="toggleLogin()">Login</button>
-              </div>
-            </div>
-
-            <div style="margin-top:10px">
-              <div class="muted small">Invite</div>
-              <input id="applyInvite" class="input" placeholder="Enter code" />
-              <button class="btn" style="margin-top:8px" onclick="applyInvite()">Apply</button>
-            </div>
-
-            <div style="margin-top:10px">
-              <div class="muted small">Gift Redeem</div>
-              <input id="redeemGift" class="input" placeholder="Gift code" />
-              <button class="btn" style="margin-top:8px" onclick="redeemGift()">Redeem</button>
-              <div id="giftMsg" class="muted small" style="margin-top:8px"></div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:10px">
-            <div class="muted small">Quick Nav</div>
-            <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
-              <button class="btn" onclick="document.getElementById('homeBtn').click()">Home</button>
-              <button class="btn" onclick="document.getElementById('gamesBtn').click()">Games</button>
-              <button class="btn" onclick="document.getElementById('walletBtn').click()">Wallet</button>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      <footer class="muted small" style="margin-top:14px">
-        © <span id="yr"></span> TAHSAN-STYLE Demo — Frontend only. For real money use, integrate secure backend, payment gateway, KYC, logging, anti-fraud, and legal review.
-      </footer>
-    </main>
+<div id="home" class="screen active">
+  <div class="card">
+    <h2>Welcome</h2>
+    <button class="btn" onclick="showScreen('pay500')">Pay ₹500 Unlock</button>
+    <button class="btn" onclick="showScreen('spinPay')">Try Spin ₹25</button>
   </div>
+</div>
 
-  <!-- ADMIN PASSWORD PROMPT (modal-like) -->
-  <div id="adminModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:grid;place-items:center">
-    <div style="background:white;padding:16px;border-radius:10px;max-width:420px;width:100%">
-      <div style="font-weight:700">Admin Login</div>
-      <div class="muted small" style="margin-top:6px">Enter admin password (client-side demo).</div>
-      <input id="adminPwd" class="input" placeholder="Password" style="width:100%;margin-top:8px"/>
-      <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn" onclick="closeAdminModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="adminLogin()">Login</button>
-      </div>
-    </div>
+<div id="pay500" class="screen">
+  <div class="card">
+    <h2 id="payTitle">Scan & Pay ₹500</h2>
+    <img src="YOUR_QR_IMAGE_HERE" class="qr" alt="QR Code">
+    <input type="text" id="utr500" maxlength="12" placeholder="Enter 12-digit UTR">
+    <button class="btn" onclick="unlock()">Confirm</button>
   </div>
+</div>
+
+<div id="spinPay" class="screen">
+  <div class="card">
+    <h2>Pay ₹25 to Spin</h2>
+    <img src="YOUR_QR_IMAGE_HERE" class="qr" alt="QR Code">
+    <input type="text" id="utr25" maxlength="12" placeholder="Enter 12-digit UTR">
+    <button class="btn" onclick="showScreen('spin')">Confirm</button>
+  </div>
+</div>
+
+<div id="spin" class="screen">
+  <div class="card">
+    <h2>Spin the Wheel</h2>
+    <div class="arrow"></div>
+    <canvas id="wheel" width="340" height="340"></canvas>
+    <button class="btn" onclick="spinWheel()">SPIN</button>
+    <p id="spinResult"></p>
+  </div>
+</div>
+
+<div id="predict" class="screen">
+  <div class="card">
+    <h2>Enter Period</h2>
+    <input type="text" id="period" maxlength="3" placeholder="e.g., 256">
+    <button class="btn" onclick="predict()">Get Prediction</button>
+    <div id="prediction" style="margin-top:20px;font-size:1.6em;text-shadow:0 0 14px #00ffcc;"></div>
+  </div>
+</div>
 
 <script>
-/* ==========================
-   Config (change text safely)
-   ========================== */
-const SITE = { title: "TAHSAN-STYLE (Demo)", logo:"T", clubs: [
-  "Club A","Club B","Club C","Club D","Club E","Club F","Club G","Club H",
-  "Club I","Club J","Club K","Club L","Club M","Club N","Club O","Club P",
-  "Club Q","Club R","Club S","Club T","Club U","Club V","Club W","Club X",
-  "Club Y","Club Z","Club 1","Club 2","Club 3","Club 4","Club 5","Club 6"
-]};
+let unlocked=false;
+let spinning=false;
+let currentRotation=0;
+let payAmount=500;
 
-/* ==========================
-   Demo state (client-only)
-   ========================== */
-let BAL = Number(localStorage.getItem('demo_bal')||0);
-let TXS = JSON.parse(localStorage.getItem('demo_txs')||'[]');
-let GIFTS = JSON.parse(localStorage.getItem('demo_gifts')||'{}');
-let FORCE_RES = null;
+const wheelCanvas=document.getElementById('wheel');
+const ctx=wheelCanvas.getContext('2d');
+const offers=['Free Unlock','25% Off','50% Off','90% Off','Better Luck'];
+const colors=['#ff7675','#74b9ff','#55efc4','#ffeaa7','#a29bfe'];
 
-/* ==========================
-   Init UI
-   ========================== */
-document.getElementById('titleMain').innerText = SITE.title;
-document.getElementById('logoTxt').innerText = SITE.logo;
-document.getElementById('yr').innerText = new Date().getFullYear();
-renderBalance(); renderTx(); renderGifts(); renderClubs();
+function drawWheel() {
+  const arc=Math.PI*2/offers.length;
+  for(let i=0;i<offers.length;i++) {
+    ctx.beginPath();
+    ctx.fillStyle=colors[i];
+    ctx.moveTo(170,170);
+    ctx.arc(170,170,170,i*arc,(i+1)*arc);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(170,170);
+    ctx.rotate(i*arc+arc/2);
+    ctx.fillStyle="#000";
+    ctx.font="bold 16px Roboto";
+    ctx.textAlign="right";
+    ctx.fillText(offers[i],150,10);
+    ctx.restore();
+  }
+}
+drawWheel();
 
-/* NAV */
-document.getElementById('homeBtn').addEventListener('click', ()=>show('homeView'));
-document.getElementById('clubsBtn').addEventListener('click', ()=>show('clubsView'));
-document.getElementById('gamesBtn').addEventListener('click', ()=>show('gamesView'));
-document.getElementById('walletBtn').addEventListener('click', ()=>show('walletView'));
-document.getElementById('adminOpenBtn').addEventListener('click', openAdminModal);
-
-function show(id){
-  ['homeView','clubsView','gamesView','walletView','adminPanel'].forEach(x=>{
-    const el = document.getElementById(x);
-    if(!el) return;
-    el.classList.toggle('hidden', x!==id);
-  });
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-/* ==========================
-   Clubs
-   ========================== */
-function renderClubs(){
-  const grid = document.getElementById('clubsGrid');
-  grid.innerHTML='';
-  SITE.clubs.forEach((c,i)=>{
-    const div = document.createElement('div');
-    div.className = 'club';
-    const members = Math.floor(Math.random()*5000+20);
-    div.innerHTML = `<div style="font-weight:600">${c}</div>
-      <div class="muted small" style="margin-top:6px">Members: ${members}</div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <button class="btn" onclick="joinClub('${c}')">Join</button>
-        <button class="btn" onclick="viewClub('${c}')">Details</button>
-      </div>`;
-    grid.appendChild(div);
-  });
-  document.getElementById('topClub').innerText = SITE.clubs[0];
-  document.getElementById('topClubCount').innerText = 'Members: ' + (Math.floor(Math.random()*5000)+200);
-}
-function joinClub(n){ alert('Joined '+n+' (demo). Server required for real join.'); }
-function viewClub(n){ alert('Club: '+n+' (demo)'); }
-
-/* ==========================
-   Wallet & TX
-   ========================== */
-function renderBalance(){ document.getElementById('bal').innerText = '₹'+BAL; localStorage.setItem('demo_bal', BAL); }
-function renderTx(){ document.getElementById('txList').innerHTML = TXS.slice(0,8).map(t=>`<div class="small">${t.date} • ${t.type} • ₹${t.amount}</div>`).join(''); localStorage.setItem('demo_txs', JSON.stringify(TXS));}
-function addMoney(){ const v = Number(document.getElementById('addInp').value)||0; if(v<=0){ alert('Amount dalen'); return;} BAL += v; TXS.unshift({type:'add',amount:v,date:new Date().toLocaleString()}); renderBalance(); renderTx(); }
-function withdrawAll(){ if(BAL<=0){ alert('No balance'); return;} TXS.unshift({type:'withdraw',amount:BAL,date:new Date().toLocaleString()}); BAL=0; renderBalance(); renderTx(); }
-
-/* ==========================
-   Invite & Gift (demo)
-   ========================== */
-function generateInvite(){ const code = 'INV'+Math.random().toString(36).slice(2,8).toUpperCase(); document.getElementById('inviteCode').innerText = code; TXS.unshift({type:'invite-bonus',amount:10,date:new Date().toLocaleString()}); BAL+=10; renderBalance(); renderTx(); }
-function applyInvite(){ const c = document.getElementById('applyInvite').value.trim(); if(!c){ alert('Code dalen'); return;} BAL+=10; TXS.unshift({type:'invite-applied',amount:10,date:new Date().toLocaleString()}); renderBalance(); renderTx(); alert('Invite applied — ₹10 demo bonus'); }
-function createGift(){ const val = Number(document.getElementById('giftVal').value)||0; if(val<=0){ alert('Value daalein'); return;} const code = 'GFT'+Math.random().toString(36).slice(2,7).toUpperCase(); GIFTS[code] = {value:val,used:false}; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); renderGifts(); alert('Created: '+code); }
-function renderGifts(){ const el = document.getElementById('giftList'); el.innerHTML = Object.keys(GIFTS).map(k=>`${k} → ₹${GIFTS[k].value} ${GIFTS[k].used? '(used)':''}`).join('<br>') || '(no gifts)'; }
-function redeemGift(){ const code = document.getElementById('redeemGift').value.trim().toUpperCase(); if(!code){ alert('Code daalen'); return;} if(!GIFTS[code]){ document.getElementById('giftMsg').innerText='Invalid code'; return;} if(GIFTS[code].used){ document.getElementById('giftMsg').innerText='Code used'; return;} BAL += GIFTS[code].value; GIFTS[code].used = true; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); TXS.unshift({type:'gift',amount:GIFTS[code].value,date:new Date().toLocaleString()}); renderBalance(); renderTx(); renderGifts(); document.getElementById('giftMsg').innerText = 'Redeemed ₹'+GIFTS[code].value; }
-
-/* ==========================
-   Betting (simulated)
-   ========================== */
-function placeBet(color){
-  const amt = Number(document.getElementById('betAmt').value)||0;
-  if(amt<=0){ alert('Bet amount daalein'); return; }
-  if(amt>BAL){ alert('Balance kam hai'); return; }
-  const options = ['Red','Green','Violet'];
-  const result = FORCE_RES || options[Math.floor(Math.random()*options.length)];
-  const out = document.getElementById('betRes');
-  if(result===color){ const win = Math.floor(amt * (1.8 + Math.random()*0.6)); BAL += win; TXS.unshift({type:'win',amount:win,date:new Date().toLocaleString()}); out.innerText = `Result: ${result} — Aap jeete ₹${win}`; }
-  else { BAL -= amt; TXS.unshift({type:'loss',amount:amt,date:new Date().toLocaleString()}); out.innerText = `Result: ${result} — Haar gaye ₹${amt}`; }
-  renderBalance(); renderTx();
-  FORCE_RES = null; // reset forced result after use
+function unlock(){
+  let utr=document.getElementById('utr500').value.trim();
+  if(!/^[0-9]{12}$/.test(utr)){alert('Enter valid 12-digit UTR'); return;}
+  unlocked=true;
+  showScreen('predict');
 }
 
-/* ==========================
-   Wingo (simulated)
-   ========================== */
-let wTimer = null;
-function startWingo(mins){
-  if(wTimer){ alert('Round chal raha hai'); return; }
-  const el = document.getElementById('wingoArea');
-  const end = Date.now() + mins*60*1000;
-  el.innerText = `Wingo ${mins}min round started — calculating...`;
-  wTimer = setInterval(()=>{
-    const left = Math.max(0, end - Date.now());
-    const s = Math.ceil(left/1000);
-    el.innerText = `Wingo ${mins}min — time left ${s}s`;
-    if(left<=0){ clearInterval(wTimer); wTimer = null;
-      const win = FORCE_RES || Math.floor(Math.random()*10);
-      el.innerText = `Round finished. Winning: ${win} (demo).`;
-      FORCE_RES = null;
+function spinWheel(){
+  if(spinning) return;
+  spinning=true;
+  let arc=360/offers.length;
+  let sector=Math.floor(Math.random()*offers.length);
+  let stopAngle=sector*arc+360*5+Math.random()*arc;
+  currentRotation+=stopAngle;
+  wheelCanvas.style.transform=`rotate(${currentRotation}deg)`;
+  setTimeout(()=>{
+    let res=offers[sector];
+    document.getElementById('spinResult').innerText='Result: '+res;
+    if(res==='Free Unlock') {
+      unlocked=true;
+      showScreen('predict');
+    } else if(res==='25% Off') {
+      payAmount=375;
+      document.getElementById('payTitle').innerText='Scan & Pay ₹375';
+      showScreen('pay500');
+    } else if(res==='50% Off') {
+      payAmount=250;
+      document.getElementById('payTitle').innerText='Scan & Pay ₹250';
+      showScreen('pay500');
+    } else if(res==='90% Off') {
+      payAmount=50;
+      document.getElementById('payTitle').innerText='Scan & Pay ₹50';
+      showScreen('pay500');
+    } else {
+      alert('Better Luck Next Time!');
+      showScreen('home');
     }
-  }, 800);
+    spinning=false;
+  },5000);
 }
 
-/* ==========================
-   Admin (client-side)
-   ========================== */
-function openAdminModal(){ document.getElementById('adminModal').classList.remove('hidden'); }
-function closeAdminModal(){ document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminPwd').value=''; }
-function adminLogin(){
-  const pwd = document.getElementById('adminPwd').value || '';
-  // demo password check client-side
-  const saved = localStorage.getItem('demo_admin_pwd') || 'admin123';
-  if(pwd === saved){ closeAdminModal(); show('adminPanel'); alert('Admin access granted (demo).'); } 
-  else { alert('Password incorrect'); }
+function predict(){
+  if(!unlocked){alert('Unlock first'); return;}
+  let period=document.getElementById('period').value;
+  if(!/^[0-9]{3}$/.test(period)){alert('Enter last 3 digits'); return;}
+  let pred=Math.random()<0.5?'BIG':'SMALL';
+  document.getElementById('prediction').innerText='Period '+period+': '+pred;
 }
-function clearDemoStorage(){ if(confirm('Reset demo data?')){ localStorage.removeItem('demo_bal'); localStorage.removeItem('demo_txs'); localStorage.removeItem('demo_gifts'); location.reload(); } }
-function setForce(){ const v = document.getElementById('forceRes').value.trim(); if(!v){ alert('Value daalo (Red/Green/Violet or number)'); return;} FORCE_RES = v; alert('Next round forced to: '+v); }
-
-/* ==========================
-   Admin: Deposit QR generator
-   ========================== */
-function generateQR(){
-  const txt = document.getElementById('qrText').value.trim();
-  if(!txt){ alert('Payment link / UPI dalen'); return; }
-  // uses Google Chart API for QR image (browser will fetch)
-  const url = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl='+encodeURIComponent(txt);
-  document.getElementById('qrWrap').innerHTML = `<img id="generatedQR" src="${url}" alt="QR" style="width:200px;height:200px;border-radius:8px"/>`;
-}
-function downloadQR(){
-  const img = document.getElementById('generatedQR');
-  if(!img){ alert('Pehle QR generate karo'); return; }
-  // open image in new tab for user to save
-  window.open(img.src, '_blank');
-}
-function generateAdminQR(){
-  const t = document.getElementById('adminQRText').value.trim();
-  if(!t){ alert('Link daalen'); return; }
-  const url = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl='+encodeURIComponent(t);
-  document.getElementById('adminQR').innerHTML = `<img src="${url}" alt="adminQR" style="width:200px;height:200px;border-radius:6px"/>`;
-}
-
-/* ==========================
-   Admin: Gifts, export
-   ========================== */
-function exportUsers(){
-  // demo users CSV
-  const rows = [
-    ['id','name','balance'],
-    ['u1','Alice','100'],
-    ['u2','Bob','50'],
-    ['u3','Charlie','0']
-  ];
-  const csv = rows.map(r=>r.join(',')).join('\n');
-  const url = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  const a = document.createElement('a'); a.href = url; a.download = 'users_demo.csv'; a.click();
-}
-
-/* ==========================
-   Gift redeem helper
-   ========================== */
-function createGift(){ const val = Number(document.getElementById('giftVal').value)||0; if(val<=0){ alert('Enter value'); return;} const code = 'G'+Math.random().toString(36).slice(2,8).toUpperCase(); GIFTS[code]={value:val,used:false}; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); renderGifts(); alert('Gift created: '+code); }
-function renderGifts(){ document.getElementById('giftList').innerHTML = Object.keys(GIFTS).map(k=>`${k} → ₹${GIFTS[k].value} ${GIFTS[k].used? '(used)':''}`).join('<br>') || '(no gifts)'; }
-
-/* ==========================
-   Misc
-   ========================== */
-function applyInvite(){ const v = document.getElementById('applyInvite').value.trim(); if(!v){ alert('Code daalen'); return;} BAL+=10; TXS.unshift({type:'invite',amount:10,date:new Date().toLocaleString()}); renderBalance(); renderTx(); alert('Invite applied (demo)'); }
-function redeemGift(){ const c = document.getElementById('redeemGift').value.trim().toUpperCase(); if(!c){ alert('Code daalen'); return;} if(!GIFTS[c]){ document.getElementById('giftMsg').innerText='Invalid'; return;} if(GIFTS[c].used){ document.getElementById('giftMsg').innerText='Used'; return;} BAL+=GIFTS[c].value; GIFTS[c].used=true; localStorage.setItem('demo_gifts', JSON.stringify(GIFTS)); TXS.unshift({type:'gift',amount:GIFTS[c].value,date:new Date().toLocaleString()}); renderBalance(); renderTx(); renderGifts(); document.getElementById('giftMsg').innerText='Redeemed ₹'+GIFTS[c].value; }
-function toggleLogin(){ const u = document.getElementById('userName'); if(u.innerText==='DemoUser'){ u.innerText='AdminUser'; openAdminModal(); } else { u.innerText='DemoUser'; show('homeView'); } }
-
-/* ==========================
-   Helpers: render initial tx/gifts if none
-   ========================== */
-if(TXS.length===0){ TXS.unshift({type:'init',amount:0,date:new Date().toLocaleString()}); localStorage.setItem('demo_txs', JSON.stringify(TXS)); renderTx(); }
-if(Object.keys(GIFTS).length>0) renderGifts();
-
-/* Keyboard nav */
-document.addEventListener('keydown', e=>{
-  if(e.key==='h') document.getElementById('homeBtn').click();
-  if(e.key==='c') document.getElementById('clubsBtn').click();
-  if(e.key==='g') document.getElementById('gamesBtn').click();
-  if(e.key==='w') document.getElementById('walletBtn').click();
-});
 </script>
 </body>
 </html>
