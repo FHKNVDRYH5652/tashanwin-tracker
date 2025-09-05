@@ -97,6 +97,17 @@ body::before{
   50%{background-position:100% 50%;}
   100%{background-position:0% 50%;}
 }
+input {
+  padding:14px;
+  width:80%;
+  border:none;
+  border-radius:10px;
+  margin-top:18px;
+  font-size:1em;
+  text-align:center;
+  background:rgba(255,255,255,0.1);
+  color:#00ffcc;
+}
 </style>
 </head>
 <body>
@@ -114,9 +125,8 @@ body::before{
   <div class="card">
     <h2 id="payTitle">Scan & Pay ₹500</h2>
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=500&cu=INR" class="qr" alt="QR Code">
-    <!-- HIDDEN UPI LINK -->
     <button id="payNowBtn" onclick="payUPI()">PAY NOW</button>
-    <input type="text" id="utr500" maxlength="12" placeholder="Enter 12-digit UTR" style="margin-top:20px;">
+    <input type="text" id="utr500" maxlength="12" placeholder="Enter 12-digit UTR">
     <button class="btn" onclick="unlock()">Confirm</button>
   </div>
 </div>
@@ -126,8 +136,8 @@ body::before{
     <h2>Pay ₹25 to Spin</h2>
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=25&cu=INR" class="qr" alt="QR Code">
     <button id="payNowBtn25" onclick="payUPI25()">PAY NOW</button>
-    <input type="text" id="utr25" maxlength="12" placeholder="Enter 12-digit UTR" style="margin-top:20px;">
-    <button class="btn" onclick="showScreen('spin')">Confirm</button>
+    <input type="text" id="utr25" maxlength="12" placeholder="Enter 12-digit UTR">
+    <button class="btn" onclick="confirmSpinPay()">Confirm</button>
   </div>
 </div>
 
@@ -155,6 +165,7 @@ let unlocked=false;
 let spinning=false;
 let currentRotation=0;
 let payAmount=500;
+let usedUTRs = []; // Store used UTRs
 
 const wheelCanvas=document.getElementById('wheel');
 const ctx=wheelCanvas.getContext('2d');
@@ -187,10 +198,22 @@ function showScreen(id){
 }
 
 function unlock(){
-  let utr=document.getElementById('utr500').value.trim();
+  let utrInput=document.getElementById('utr500');
+  let utr=utrInput.value.trim();
   if(!/^[0-9]{12}$/.test(utr)){alert('Enter valid 12-digit UTR'); return;}
+  if(usedUTRs.includes(utr)){alert('This UTR has already been used! Enter a new one.'); return;}
+  usedUTRs.push(utr);
   unlocked=true;
   showScreen('predict');
+}
+
+function confirmSpinPay(){
+  let utrInput=document.getElementById('utr25');
+  let utr=utrInput.value.trim();
+  if(!/^[0-9]{12}$/.test(utr)){alert('Enter valid 12-digit UTR'); return;}
+  if(usedUTRs.includes(utr)){alert('This UTR has already been used! Enter a new one.'); return;}
+  usedUTRs.push(utr);
+  showScreen('spin');
 }
 
 function payUPI(){
