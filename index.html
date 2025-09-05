@@ -6,69 +6,58 @@
 <title>Sureshot Prediction Portal</title>
 <style>
 body {
-  margin: 0;
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
-  background: linear-gradient(-45deg, #141e30, #243b55, #141e30, #243b55);
-  background-size: 400% 400%;
-  animation: gradient 10s ease infinite;
-  color: #fff;
-  text-align: center;
-}
-@keyframes gradient {
-  0% {background-position:0% 50%;}
-  50% {background-position:100% 50%;}
-  100% {background-position:0% 50%;}
+  margin:0;
+  font-family:'Roboto','Segoe UI',sans-serif;
+  background:#000;
+  color:#00ffcc;
+  text-align:center;
+  overflow-x:hidden;
 }
 header {
-  padding: 20px;
-  font-size: 1.8em;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  text-shadow: 0 0 12px #00ffe0;
-  font-weight: bold;
+  padding:20px;
+  font-size:2em;
+  text-shadow:0 0 10px #00ffcc;
+  font-weight:bold;
 }
 .screen {display:none; padding:20px; min-height:80vh;}
-.screen.active {display:block; animation: fadeIn 0.6s;}
+.screen.active {display:block; animation:fadeIn 0.6s;}
 @keyframes fadeIn {from{opacity:0; transform:scale(0.95);} to{opacity:1; transform:scale(1);}}
+.card {
+  background: rgba(0,0,0,0.8);
+  border:1px solid #00ffcc;
+  border-radius:16px;
+  padding:30px;
+  margin:30px auto;
+  max-width:520px;
+  box-shadow:0 0 20px #00ffcc,0 0 40px #00ffcc inset;
+}
 .btn {
   padding:14px 26px;
   margin:12px;
   border:none;
   border-radius:10px;
-  background: linear-gradient(90deg, #00f2fe, #4facfe);
-  color:#fff;
+  background:#00ffcc;
+  color:#000;
   font-size:1.1em;
   cursor:pointer;
-  transition:0.2s;
   font-weight:bold;
-  box-shadow:0 0 12px #00e6ff;
+  box-shadow:0 0 15px #00ffcc;
+  transition:0.3s;
 }
-.btn:hover {transform:scale(1.05); box-shadow:0 0 24px #00e6ff;}
-.card {
-  background: rgba(255,255,255,0.07);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 30px;
-  margin: 30px auto;
-  max-width: 520px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+.btn:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 30px #00ffcc,0 0 60px #00ffcc inset;
 }
-input {
-  padding:14px;
-  width:80%;
-  border:none;
-  border-radius:10px;
-  margin-top:18px;
-  font-size:1em;
-  text-align:center;
-  background:rgba(255,255,255,0.2);
-  color:#fff;
+.qr {
+  width:250px;
+  margin:20px auto;
+  display:block;
+  border-radius:12px;
+  box-shadow:0 0 25px #00ffcc;
 }
-.qr {width:250px; margin:20px auto; display:block; border-radius:12px; box-shadow:0 0 25px #00ffcc;}
 #wheel {
   width:340px; height:340px; border-radius:50%;
-  margin:25px auto; border:14px solid #fff;
+  margin:25px auto; border:14px solid #00ffcc;
   box-shadow:0 0 30px #00ffcc;
   transition: transform 5s cubic-bezier(.17,.67,.83,.67);
 }
@@ -76,6 +65,37 @@ input {
   width:0; height:0; border-left:22px solid transparent;
   border-right:22px solid transparent; border-bottom:35px solid yellow;
   margin:0 auto;
+}
+#payNowBtn {
+  padding:14px 28px;
+  background:#000;
+  border:2px solid #00ffcc;
+  color:#00ffcc;
+  font-size:1.2em;
+  font-weight:bold;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 0 15px #00ffcc,0 0 40px #00ffcc inset;
+  transition:0.3s;
+}
+#payNowBtn:hover {
+  background:#00ffcc;
+  color:#000;
+  box-shadow:0 0 30px #00ffcc,0 0 60px #00ffcc inset;
+}
+body::before{
+  content:"";
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:linear-gradient(270deg,#00ffcc, #000, #00ffcc, #000);
+  background-size:400% 400%;
+  z-index:-1;
+  animation:bgAnim 20s linear infinite;
+}
+@keyframes bgAnim{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
 }
 </style>
 </head>
@@ -94,11 +114,9 @@ input {
   <div class="card">
     <h2 id="payTitle">Scan & Pay ₹500</h2>
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=500&cu=INR" class="qr" alt="QR Code">
-    
-    <!-- Hidden UPI Box -->
-    <input type="text" id="upiBox" value="upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=500&cu=INR" readonly onclick="payUPI()" style="cursor:pointer;">
-    
-    <input type="text" id="utr500" maxlength="12" placeholder="Enter 12-digit UTR">
+    <!-- HIDDEN UPI LINK -->
+    <button id="payNowBtn" onclick="payUPI()">PAY NOW</button>
+    <input type="text" id="utr500" maxlength="12" placeholder="Enter 12-digit UTR" style="margin-top:20px;">
     <button class="btn" onclick="unlock()">Confirm</button>
   </div>
 </div>
@@ -107,8 +125,8 @@ input {
   <div class="card">
     <h2>Pay ₹25 to Spin</h2>
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=25&cu=INR" class="qr" alt="QR Code">
-    <input type="text" id="upiBox25" value="upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=25&cu=INR" readonly onclick="payUPI25()" style="cursor:pointer;">
-    <input type="text" id="utr25" maxlength="12" placeholder="Enter 12-digit UTR">
+    <button id="payNowBtn25" onclick="payUPI25()">PAY NOW</button>
+    <input type="text" id="utr25" maxlength="12" placeholder="Enter 12-digit UTR" style="margin-top:20px;">
     <button class="btn" onclick="showScreen('spin')">Confirm</button>
   </div>
 </div>
@@ -176,18 +194,17 @@ function unlock(){
 }
 
 function payUPI(){
-  let upiLink=document.getElementById('upiBox').value;
+  let upiLink=`upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=${payAmount}&cu=INR`;
   window.location.href=upiLink;
 }
 function payUPI25(){
-  let upiLink=document.getElementById('upiBox25').value;
+  let upiLink=`upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=25&cu=INR`;
   window.location.href=upiLink;
 }
 
 function updateUPILink(amount){
-  let upiLink=`upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=${amount}&cu=INR`;
-  document.getElementById('upiBox').value=upiLink;
-  document.querySelector('#pay500 .qr').src=`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}`;
+  payAmount=amount;
+  document.querySelector('#pay500 .qr').src=`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=perfect.k@ptaxis&pn=Shakti&am=${amount}&cu=INR`)}`;
 }
 
 function spinWheel(){
@@ -205,19 +222,16 @@ function spinWheel(){
       unlocked=true;
       showScreen('predict');
     } else if(res==='25% Off') {
-      payAmount=375;
-      document.getElementById('payTitle').innerText='Scan & Pay ₹375';
       updateUPILink(375);
+      document.getElementById('payTitle').innerText='Scan & Pay ₹375';
       showScreen('pay500');
     } else if(res==='50% Off') {
-      payAmount=250;
-      document.getElementById('payTitle').innerText='Scan & Pay ₹250';
       updateUPILink(250);
+      document.getElementById('payTitle').innerText='Scan & Pay ₹250';
       showScreen('pay500');
     } else if(res==='90% Off') {
-      payAmount=50;
-      document.getElementById('payTitle').innerText='Scan & Pay ₹50';
       updateUPILink(50);
+      document.getElementById('payTitle').innerText='Scan & Pay ₹50';
       showScreen('pay500');
     } else {
       alert('Better Luck Next Time!');
