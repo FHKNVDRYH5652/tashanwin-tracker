@@ -1,44 +1,38 @@
 <div id="uploadBox" style="margin-top:16px">
   <label>Upload Payment Screenshot:</label><br>
-  <input type="file" id="ssInput" accept="image/*" onchange="checkScreenshot()">
+  <input type="file" id="ssInput" accept="image/*" onchange="checkUTR()">
   <p id="ssStatus" class="small" style="margin-top:6px;color:#ff8080"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-let planAmount = 200; // Example: चुने गए plan का amount
-
-function checkScreenshot(){
+function checkUTR(){
   let file = document.getElementById("ssInput").files[0];
   if(!file){ return; }
 
   document.getElementById("ssStatus").style.color="yellow";
-  document.getElementById("ssStatus").innerText = "⏳ Verifying payment...";
+  document.getElementById("ssStatus").innerText = "⏳ Verifying UTR...";
 
-  // 5 sec के अंदर fast check
-  setTimeout(()=>{
-      Tesseract.recognize(file,'eng',{logger:m=>console.log(m)}).then(({ data:{ text } })=>{
-          console.log("OCR Text:", text);
+  // OCR run karega
+  Tesseract.recognize(file,'eng',{logger:m=>console.log(m)}).then(({ data:{ text } })=>{
+      console.log("OCR Text:", text);
 
-          // Amount निकालना
-          let amtMatch = text.match(/₹?\s?(\d{2,6})/);
-          if(amtMatch){
-              let detectedAmount = parseInt(amtMatch[1]);
-              console.log("Detected:", detectedAmount);
+      // Sirf 12 digit number search karna
+      let utrMatch = text.match(/\b\d{12}\b/);
 
-              if(detectedAmount === planAmount){
-                  document.getElementById("ssStatus").style.color="lime";
-                  document.getElementById("ssStatus").innerText = "✅ Payment Verified: ₹" + detectedAmount;
-                  // यहाँ पर unlock panel call करो
-              } else {
-                  document.getElementById("ssStatus").style.color="red";
-                  document.getElementById("ssStatus").innerText = "❌ Wrong Amount! Expected ₹" + planAmount + " but found ₹" + detectedAmount;
-              }
-          } else {
-              document.getElementById("ssStatus").style.color="red";
-              document.getElementById("ssStatus").innerText = "❌ Could not detect payment amount.";
-          }
-      });
-  }, 3000); // सिर्फ 3 sec wait
+      if(utrMatch){
+          let utr = utrMatch[0];
+          console.log("Detected UTR:", utr);
+
+          document.getElementById("ssStatus").style.color="lime";
+          document.getElementById("ssStatus").innerText = "✅ UTR Verified: " + utr;
+
+          // Yaha unlock panel open karna
+          // document.getElementById("hackPanel").classList.remove("hidden");
+      } else {
+          document.getElementById("ssStatus").style.color="red";
+          document.getElementById("ssStatus").innerText = "❌ Valid 12-digit UTR not found!";
+      }
+  });
 }
 </script>
