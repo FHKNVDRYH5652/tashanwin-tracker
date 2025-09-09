@@ -1,310 +1,40 @@
-      <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Loss Recover — Sureshot (Dashboard · User · Access)</title>
-<style>
-  :root{--bg:#071022;--card:#0f1724;--muted:#9fb0d6;--accent1:#00d2a8;--accent2:#00a6ff}
-  body{margin:0;font-family:Inter,Segoe UI,Arial,system-ui;background:linear-gradient(180deg,#061021,#07142a);color:#eaf6ff}
-  header{padding:18px;text-align:center;font-weight:800;font-size:1.2rem;letter-spacing:0.4px}
-  .wrap{max-width:980px;margin:18px auto;padding:18px}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 40px rgba(0,0,0,0.5)}
-  .hidden{display:none}
-  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
-  .plan{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:left;cursor:pointer;transition:background .15s}
-  .plan:hover{background:rgba(255,255,255,0.04)}
-  .plan b{display:block;font-size:1.05rem}
-  .btn{padding:10px 14px;border-radius:9px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#012;font-weight:800;cursor:pointer}
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  input[type=text]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:90%;text-align:center;margin-top:10px}
-  .qr{width:220px;height:220px;border-radius:12px;display:block;margin:8px auto;border:2px solid rgba(255,255,255,0.03);background:#fff}
-  .status{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
-  .small{color:var(--muted);font-size:0.95rem}
-  .history{margin-top:12px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:260px;overflow:auto}
-  footer{padding:14px;text-align:center;color:var(--muted);font-size:0.9rem}
-  .row{display:flex;gap:8px;align-items:center}
-</style>
-</head>
-<body>
-<header>Loss Recover — Dashboard · User · Access (All-in-One)</header>
-<div class="wrap">
-
-  <!-- DASHBOARD -->
-  <section id="screen-dashboard" class="card">
-    <h2>Choose a Loss-Recovery Plan</h2>
-    <div class="small">Click a plan to go to payment. Deposit shown = 10% of plan (editable at request screen).</div>
-    <div class="plans" id="plansList" aria-live="polite"></div>
-  </section>
-
-  <!-- USER / PAYMENT -->
-  <section id="screen-user" class="card hidden">
-    <button class="btn ghost" onclick="goDashboard()" style="float:right">Back</button>
-    <h2>Unlock — Pay & Enter UTR</h2>
-
-    <!-- QR image will be generated dynamically -->
-    <img id="qrImg" class="qr" alt="QR Code (UPI)">
-
-    <div class="small">Scan this QR with any UPI app (or click on mobile). UPI must be used to pay the shown deposit amount.</div>
-
-    <div style="margin-top:12px">
-      <div class="small">Payable amount (deposit):</div>
-      <div id="userAmount" style="font-weight:800;font-size:1.3rem;margin-top:6px">₹0</div>
-    </div>
-
-    <input id="utrInput" type="text" maxlength="12" placeholder="Enter 12-digit UTR after payment">
-    <div style="margin-top:8px">
-      <button class="btn" id="reqBtn" onclick="requestApproval()">Request Approval</button>
-    </div>
-    <div id="userStatus" class="status hidden"></div>
-    <div id="userResult" style="margin-top:8px"></div>
-  </section>
-
-  <!-- ACCESS (UID -> processing -> Hack panel) -->
-  <section id="screen-access" class="card hidden">
-    <button class="btn ghost" onclick="goDashboard()" style="float:right">Home</button>
-    <h2>Register & Deposit — Unlock Panel</h2>
-    <p class="small">Open external registration & deposit link, deposit 10% (shown). Then enter 6-digit UID and Submit.</p>
-    <p><b>Plan:</b> <span id="accessPlan">—</span> | <b>Deposit:</b> ₹<span id="accessDeposit">0</span></p>
-    <div style="margin-bottom:8px"><button class="btn" onclick="openRegister()">Open Register & Deposit</button></div>
-
-    <input id="uidInput" type="text" maxlength="6" placeholder="Enter 6-digit UID after deposit">
-    <div style="margin-top:8px"><button class="btn ghost" onclick="submitUID()">Submit & Process</button></div>
-    <p id="procMsg" class="small"></p>
-
-    <div id="processingBox" class="hidden" style="margin-top:12px">
-      <h3>Processing...</h3>
-      <p class="small">Verifying UID — please wait 5 seconds</p>
-      <div style="height:10px;background:#07102a;border-radius:999px;overflow:hidden">
-        <div id="procBar" style="height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width 5s linear"></div>
-      </div>
-    </div>
-
-    <!-- Hack Panel -->
-    <div id="hackPanel" class="hidden" style="margin-top:18px">
-      <h3>Hack Opened — Prediction Panel</h3>
-      <p class="small">Target Range: <b id="targetRange"></b> | Balance: ₹<b id="balanceVal"></b></p>
-
-      <input id="periodInput" type="text" maxlength="3" placeholder="Enter last 3 digits of period (e.g. 256)">
-      <div style="margin-top:10px">
-        <button class="btn" id="predictBtn" onclick="getPrediction()">Get Prediction</button>
-        <button class="btn ghost" onclick="markWin()">Win</button>
-        <button class="btn ghost" onclick="markLoss()">Loss</button>
-        <button class="btn ghost" onclick="resetSession()">Reset</button>
-      </div>
-
-      <div id="predictionText" style="margin-top:12px;font-weight:800"></div>
-      <div class="history" id="historyBox"></div>
-    </div>
-  </section>
-
+<!-- Payment Screenshot Upload -->
+<div id="uploadBox" style="margin-top:16px">
+  <label>Upload Payment Screenshot:</label><br>
+  <input type="file" id="ssInput" accept="image/*" onchange="checkScreenshot()">
+  <p id="ssStatus" class="small" style="margin-top:6px;color:#ff8080"></p>
 </div>
 
-<footer>Local demo — admin approval must be done using your admin panel (it must write approved_<UTR> into localStorage).</footer>
-
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-/* ---------- Config - change if needed ---------- */
-const UPI_ID = 'perfect.k@ptaxis'; // replace with your UPI id if required
-const UPI_NAME = 'Sureshot';
-const REGISTER_LINK = 'http://www.tashanwin.info/#/register?invitationCode=13413405256';
-const QR_API = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=';
+let planAmount = 200; // Example: चुने गए plan का amount (backend से set करना होगा)
 
-/* ---------- state ---------- */
-const plans = [1000,2000,5000,10000]; // plans shown on dashboard
-let selectedPlan = 0;
-let selectedDeposit = 0;
+function checkScreenshot(){
+  let file = document.getElementById("ssInput").files[0];
+  if(!file){ return; }
 
-/* ---------- helpers ---------- */
-function formatINR(n){ return '₹' + n; }
+  document.getElementById("ssStatus").innerText = "Processing screenshot...";
 
-/* ---------- render plans ---------- */
-function initPlans(){
-  const box = document.getElementById('plansList');
-  box.innerHTML = '';
-  plans.forEach(p=>{
-    const d = Math.ceil(p * 0.10);
-    const div = document.createElement('div');
-    div.className = 'plan';
-    div.innerHTML = `<b>Plan ₹${p}</b><div class="small">Full plan price: ₹${p}</div><div style="margin-top:8px">Deposit (10%): <b>₹${d}</b></div><div style="margin-top:10px"><button class="btn" onclick="choosePlan(${p}, ${d})">Choose plan</button></div>`;
-    box.appendChild(div);
+  Tesseract.recognize(file,'eng').then(({ data:{ text } })=>{
+      console.log("OCR Text:", text);
+
+      // सिर्फ numbers निकालना
+      let amtMatch = text.match(/₹?\s?(\d{2,6})/);
+      if(amtMatch){
+          let detectedAmount = parseInt(amtMatch[1]);
+          console.log("Detected:", detectedAmount);
+
+          if(detectedAmount === planAmount){
+              document.getElementById("ssStatus").style.color="lime";
+              document.getElementById("ssStatus").innerText = "✅ Payment Verified: ₹" + detectedAmount;
+              // अब अगला step unlock कर सकते हैं
+          } else {
+              document.getElementById("ssStatus").style.color="red";
+              document.getElementById("ssStatus").innerText = "❌ Wrong Amount! Expected ₹" + planAmount + " but found ₹" + detectedAmount;
+          }
+      } else {
+          document.getElementById("ssStatus").innerText = "❌ Could not detect payment amount.";
+      }
   });
 }
-
-/* ---------- navigation ---------- */
-function showScreen(id){
-  document.getElementById('screen-dashboard').classList.add('hidden');
-  document.getElementById('screen-user').classList.add('hidden');
-  document.getElementById('screen-access').classList.add('hidden');
-  if(id === 'dashboard') document.getElementById('screen-dashboard').classList.remove('hidden');
-  if(id === 'user') document.getElementById('screen-user').classList.remove('hidden');
-  if(id === 'access') document.getElementById('screen-access').classList.remove('hidden');
-}
-function goDashboard(){ showScreen('dashboard'); }
-
-/* ---------- choose plan -> user screen ---------- */
-function choosePlan(plan, deposit){
-  selectedPlan = plan;
-  selectedDeposit = deposit;
-  showScreen('user');
-  document.getElementById('userAmount').innerText = formatINR(deposit);
-  // build UPI string and embed in QR (ensure encoding)
-  const upi = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${encodeURIComponent(deposit)}&cu=INR`;
-  const qrUrl = QR_API + encodeURIComponent(upi);
-  document.getElementById('qrImg').src = qrUrl;
-  // clear fields
-  document.getElementById('utrInput').value = '';
-  document.getElementById('userStatus').classList.add('hidden');
-  document.getElementById('userResult').innerText = '';
-}
-
-/* ---------- request approval (user) ---------- */
-function requestApproval(){
-  const utr = document.getElementById('utrInput').value.trim();
-  if(!/^[0-9]{12}$/.test(utr)){ alert('Enter valid 12-digit UTR'); return; }
-  const key = 'pending_' + utr;
-  const info = { utr: utr, amount: selectedDeposit, plan: selectedPlan, ts: Date.now() };
-  try {
-    localStorage.setItem(key, JSON.stringify(info));
-    // store last pending so checkApproval knows which UTR this user asked for
-    localStorage.setItem('last_pending', utr);
-  } catch(e){
-    alert('localStorage error: ' + e);
-    return;
-  }
-  document.getElementById('userStatus').classList.remove('hidden');
-  document.getElementById('userStatus').innerText = 'Pending approval for UTR ' + utr + ' — waiting for admin.';
-  document.getElementById('userResult').innerText = '';
-}
-
-/* ---------- approval poll ---------- */
-function checkApproval(){
-  const last = localStorage.getItem('last_pending');
-  if(!last) return;
-  const appr = localStorage.getItem('approved_' + last);
-  if(appr){
-    // parse info if admin wrote object
-    let info = null;
-    try{ info = JSON.parse(appr); }catch(e){}
-    document.getElementById('userStatus').classList.add('hidden');
-    document.getElementById('userResult').innerHTML = '<div style="color:#b8ffce;font-weight:800">✅ Approved for UTR ' + last + '</div>';
-    // set access values (if admin supplied plan/amount in approved info, use them)
-    const planVal = info && info.plan ? info.plan : selectedPlan;
-    const depositVal = info && info.amount ? info.amount : selectedDeposit;
-    document.getElementById('accessPlan').innerText = '₹' + planVal;
-    document.getElementById('accessDeposit').innerText = depositVal;
-    // switch screen after small delay
-    setTimeout(()=>{ showScreen('access'); }, 700);
-    // clear last_pending to avoid repeated processing
-    localStorage.removeItem('last_pending');
-  }
-}
-setInterval(checkApproval, 1500);
-
-/* ---------- access screen functions ---------- */
-function openRegister(){
-  // open registration in new tab (or alert if blocked)
-  try { window.open(REGISTER_LINK, '_blank'); }
-  catch(e){ alert('Open this link manually: ' + REGISTER_LINK); }
-}
-
-function submitUID(){
-  const uid = document.getElementById('uidInput').value.trim();
-  if(!/^[0-9]{6}$/.test(uid)){ alert('Enter valid 6-digit UID'); return; }
-  document.getElementById('procMsg').innerText = 'Processing UID ' + uid + ' ...';
-  document.getElementById('processingBox').classList.remove('hidden');
-  // animate progress bar
-  const bar = document.getElementById('procBar');
-  bar.style.width = '0%';
-  setTimeout(()=>{ bar.style.width = '100%'; }, 50);
-  setTimeout(()=>{
-    document.getElementById('processingBox').classList.add('hidden');
-    document.getElementById('hackPanel').classList.remove('hidden');
-    // init values
-    document.getElementById('targetRange').innerText = (selectedPlan ? (selectedDeposit + ' to ' + selectedPlan) : '—');
-    document.getElementById('balanceVal').innerText = selectedDeposit || Math.ceil((selectedPlan||0)*0.10) || 0;
-    // setup session state
-    initSessionState();
-  }, 5000);
-}
-
-/* ---------- prediction session state ---------- */
-let balance = 0, level = 1, currentBet = 0, history = [];
-
-function initSessionState(){
-  balance = selectedDeposit || Math.ceil((selectedPlan||0)*0.10) || 0;
-  level = 1; currentBet = 0; history = [];
-  updateSessionUI();
-}
-
-function calcBet(){
-  if(level === 1) return Math.max(1, Math.round(balance * 0.15));
-  if(level === 2) return Math.max(1, Math.round(balance * 0.30));
-  if(level === 3) return Math.max(1, Math.round(balance * 0.55));
-  return 0;
-}
-
-function getPrediction(){
-  const p = document.getElementById('periodInput').value.trim();
-  if(!/^[0-9]{1,3}$/.test(p)){ alert('Enter last 1–3 digits of period'); return; }
-  currentBet = calcBet();
-  const pred = Math.random() < 0.5 ? 'BIG' : 'SMALL';
-  const txt = `Period ${p}: Prediction = ${pred} • Bet = ₹${currentBet} (Level ${level})`;
-  document.getElementById('predictionText').innerText = txt;
-  // show in history area
-  const hbox = document.getElementById('historyBox');
-  const el = document.createElement('div');
-  el.innerText = (new Date().toLocaleTimeString()) + ' — ' + txt;
-  hbox.insertBefore(el, hbox.firstChild);
-}
-
-function markWin(){
-  if(currentBet <= 0){ alert('No active bet — click Get Prediction first'); return; }
-  balance = Math.round(balance + currentBet);
-  history.unshift({time: new Date().toLocaleTimeString(), bet: currentBet, result: 'WIN', level});
-  currentBet = 0; level = 1;
-  updateSessionUI();
-  checkTargetComplete();
-}
-
-function markLoss(){
-  if(currentBet <= 0){ alert('No active bet — click Get Prediction first'); return; }
-  balance = Math.max(0, balance - currentBet);
-  history.unshift({time: new Date().toLocaleTimeString(), bet: currentBet, result: 'LOSS', level});
-  currentBet = 0;
-  level = (level < 3) ? (level + 1) : 1;
-  updateSessionUI();
-  checkTargetComplete();
-}
-
-function updateSessionUI(){
-  document.getElementById('balanceVal').innerText = balance;
-  document.getElementById('historyBox').innerHTML = history.map(h => `${h.time} — Bet ₹${h.bet} — ${h.result} (L${h.level})`).join('<br>');
-  // predictionText remains as-is
-}
-
-function resetSession(){
-  if(!confirm('Reset this session?')) return;
-  initSessionState();
-  document.getElementById('periodInput').value = '';
-  document.getElementById('predictionText').innerText = '';
-  document.getElementById('historyBox').innerHTML = '';
-}
-
-/* ---------- win condition ---------- */
-function checkTargetComplete(){
-  if(selectedPlan && balance >= selectedPlan){
-    setTimeout(()=> {
-      alert('🎉 Congratulations — Your Target is Complete!');
-      showScreen('dashboard');
-    }, 250);
-  }
-}
-
-/* ---------- init ---------- */
-document.addEventListener('DOMContentLoaded', ()=>{
-  initPlans();
-  showScreen('dashboard');
-});
 </script>
-</body>
-</html>
