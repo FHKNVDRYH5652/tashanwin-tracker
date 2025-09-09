@@ -1,4 +1,3 @@
-<!-- Payment Screenshot Upload -->
 <div id="uploadBox" style="margin-top:16px">
   <label>Upload Payment Screenshot:</label><br>
   <input type="file" id="ssInput" accept="image/*" onchange="checkScreenshot()">
@@ -7,34 +6,39 @@
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-let planAmount = 200; // Example: चुने गए plan का amount (backend से set करना होगा)
+let planAmount = 200; // Example: चुने गए plan का amount
 
 function checkScreenshot(){
   let file = document.getElementById("ssInput").files[0];
   if(!file){ return; }
 
-  document.getElementById("ssStatus").innerText = "Processing screenshot...";
+  document.getElementById("ssStatus").style.color="yellow";
+  document.getElementById("ssStatus").innerText = "⏳ Verifying payment...";
 
-  Tesseract.recognize(file,'eng').then(({ data:{ text } })=>{
-      console.log("OCR Text:", text);
+  // 5 sec के अंदर fast check
+  setTimeout(()=>{
+      Tesseract.recognize(file,'eng',{logger:m=>console.log(m)}).then(({ data:{ text } })=>{
+          console.log("OCR Text:", text);
 
-      // सिर्फ numbers निकालना
-      let amtMatch = text.match(/₹?\s?(\d{2,6})/);
-      if(amtMatch){
-          let detectedAmount = parseInt(amtMatch[1]);
-          console.log("Detected:", detectedAmount);
+          // Amount निकालना
+          let amtMatch = text.match(/₹?\s?(\d{2,6})/);
+          if(amtMatch){
+              let detectedAmount = parseInt(amtMatch[1]);
+              console.log("Detected:", detectedAmount);
 
-          if(detectedAmount === planAmount){
-              document.getElementById("ssStatus").style.color="lime";
-              document.getElementById("ssStatus").innerText = "✅ Payment Verified: ₹" + detectedAmount;
-              // अब अगला step unlock कर सकते हैं
+              if(detectedAmount === planAmount){
+                  document.getElementById("ssStatus").style.color="lime";
+                  document.getElementById("ssStatus").innerText = "✅ Payment Verified: ₹" + detectedAmount;
+                  // यहाँ पर unlock panel call करो
+              } else {
+                  document.getElementById("ssStatus").style.color="red";
+                  document.getElementById("ssStatus").innerText = "❌ Wrong Amount! Expected ₹" + planAmount + " but found ₹" + detectedAmount;
+              }
           } else {
               document.getElementById("ssStatus").style.color="red";
-              document.getElementById("ssStatus").innerText = "❌ Wrong Amount! Expected ₹" + planAmount + " but found ₹" + detectedAmount;
+              document.getElementById("ssStatus").innerText = "❌ Could not detect payment amount.";
           }
-      } else {
-          document.getElementById("ssStatus").innerText = "❌ Could not detect payment amount.";
-      }
-  });
+      });
+  }, 3000); // सिर्फ 3 sec wait
 }
 </script>
