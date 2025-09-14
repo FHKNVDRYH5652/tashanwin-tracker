@@ -3,365 +3,562 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Sureshot — All-in-One (Dashboard · User · Access)</title>
+<title>Coin Predictions — Buy Coins & Generate Predictions</title>
 <style>
-  :root{--bg:#071022;--card:#0f1724;--muted:#9fb0d6;--accent1:#00d2a8;--accent2:#00a6ff}
-  body{margin:0;font-family:Inter,Segoe UI,Arial;background:linear-gradient(180deg,#061021,#07142a);color:#eaf6ff}
-  header{padding:18px;text-align:center;font-weight:800;font-size:1.2rem;letter-spacing:0.4px}
-  .wrap{max-width:980px;margin:18px auto;padding:18px}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 40px rgba(0,0,0,0.5)}
-  .hidden{display:none}
-  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
-  .plan{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);text-align:left}
-  .plan b{display:block;font-size:1.05rem}
-  .btn{padding:10px 14px;border-radius:9px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#012;font-weight:800;cursor:pointer}
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  input[type=text]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:90%;text-align:center;margin-top:10px}
-  .qr{width:220px;height:220px;border-radius:12px;display:block;margin:8px auto;border:2px solid rgba(255,255,255,0.03)}
-  .status{margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
-  .small{color:var(--muted);font-size:0.95rem}
-  .history{margin-top:12px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:260px;overflow:auto}
-  footer{padding:14px;text-align:center;color:var(--muted);font-size:0.9rem}
+  :root{
+    --bg: #0b1220;
+    --card: #0f1724;
+    --accent: #00d2a8;
+    --muted: #9fb0d6;
+  }
+  *{box-sizing:border-box;font-family:Inter,Arial,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,#071021,#0b1220);color:#eaf6ff;min-height:100vh;padding:18px}
+  .wrap{max-width:980px;margin:20px auto}
+  .card{background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.02)}
+  h1{margin:0 0 8px 0;font-size:20px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .col{flex:1;min-width:240px}
+  label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+  input[type=number], input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+  select{padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
+  .btn{padding:10px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),#00a6ff);color:#001;font-weight:800;cursor:pointer}
+  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  .small{font-size:13px;color:var(--muted)}
+  .center{text-align:center}
+  .qr{width:220px;height:220px;border-radius:12px;display:block;margin:10px auto;border:2px solid rgba(255,255,255,0.03)}
+  .wallet{font-size:18px;font-weight:800}
+  .note{color:#ffdca8;font-weight:700}
+  .admin-cross{position:fixed;right:14px;bottom:14px;width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999}
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:2000;visibility:hidden;opacity:0;transition:all .15s}
+  .modal.show{visibility:visible;opacity:1}
+  .modal .card{min-width:320px;max-width:560px}
+  .period{font-weight:800;font-size:14px}
+  .stats{font-size:13px;color:var(--muted)}
+  .history{max-height:160px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25)}
 </style>
 </head>
 <body>
-<header>Sureshot — Dashboard · User · Access (All-in-One)</header>
+
 <div class="wrap">
+  <div class="card">
+    <h1>Coin Predictions — Buy Coins & Generate</h1>
+    <div class="small">Buy coins → admin approves payment (UTR) → coins credited → use 2 coins per prediction.</div>
+  </div>
 
-  <!-- DASHBOARD -->
-  <section id="screen-dashboard" class="card">
-    <h2>Choose a Loss-Recovery Plan</h2>
-    <div class="small">Click a plan to go to payment. Deposit shown = 10% of plan (editable at request screen).</div>
-    <div class="plans" id="plansList"></div>
-  </section>
-
-  <!-- USER / PAYMENT -->
-  <section id="screen-user" class="card hidden">
-    <button class="btn ghost" onclick="goDashboard()" style="float:right">Back</button>
-    <h2>Unlock — Pay & Enter UTR</h2>
-    <img id="qrImg" class="qr" alt="QR Code">
-    <div class="small">Scan this QR with any UPI app (or click on mobile). UPI collects amount automatically.</div>
-
-    <div style="margin-top:12px">
-      <div class="small">Payable amount (deposit):</div>
-      <div id="userAmount" style="font-weight:800;font-size:1.3rem;margin-top:6px">₹0</div>
-    </div>
-
-    <input id="utrInput" type="text" maxlength="12" placeholder="Enter 12-digit UTR after payment">
-    <div style="margin-top:8px">
-      <button class="btn" id="reqBtn" onclick="requestApproval()">Request Approval</button>
-    </div>
-    <div id="userStatus" class="status hidden"></div>
-    <div id="userResult" style="margin-top:8px"></div>
-  </section>
-
-  <!-- ACCESS (UID -> processing -> Hack panel) -->
-  <section id="screen-access" class="card hidden">
-    <button class="btn ghost" onclick="goDashboard()" style="float:right">Home</button>
-    <h2>Register & Deposit — Unlock Panel</h2>
-    <p class="small">Open external registration & deposit link, deposit 10% (shown). Then enter 6-digit UID and Submit.</p>
-    <p><b>Plan:</b> <span id="accessPlan">—</span> | <b>Deposit:</b> ₹<span id="accessDeposit">0</span></p>
-    <div><button class="btn" onclick="openRegister()">Open Register & Deposit</button></div>
-
-    <input id="uidInput" type="text" maxlength="6" placeholder="Enter 6-digit UID after deposit">
-    <div style="margin-top:8px"><button class="btn ghost" onclick="submitUID()">Submit & Process</button></div>
-    <p id="procMsg" class="small"></p>
-
-    <div id="processingBox" class="hidden" style="margin-top:12px">
-      <h3>Processing...</h3>
-      <p class="small">Verifying UID — please wait 5 seconds</p>
-      <div style="height:10px;background:#07102a;border-radius:999px;overflow:hidden">
-        <div id="procBar" style="height:100%;width:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width 5s linear"></div>
+  <!-- Buy coins -->
+  <div class="card row">
+    <div class="col">
+      <label>Choose coins (min 100 — max 4000)</label>
+      <input id="coinsInput" type="number" min="100" max="4000" step="1" value="100">
+      <div style="margin-top:8px" class="small">Pricing: <b>100 coins = ₹50</b> (so ₹0.5 per coin). You can buy any amount between 100 and 4000.</div>
+      <div style="margin-top:12px" class="row">
+        <button id="buyBtn" class="btn">Buy Coins</button>
+        <button id="preset100" class="ghost">100</button>
+        <button id="preset500" class="ghost">500</button>
+        <button id="preset1000" class="ghost">1000</button>
       </div>
     </div>
 
-    <!-- Hack Panel -->
-    <div id="hackPanel" class="hidden" style="margin-top:18px">
-      <h3>Hack Opened — Prediction Panel</h3>
-      <p class="small">Target Range: <b id="targetRange"></b> | Balance: ₹<b id="balanceVal"></b></p>
+    <div class="col center">
+      <div class="small">QR for payment (scan with UPI)</div>
+      <img id="qrImage" class="qr" src="qr.png" alt="QR — replace qr.png">
+      <div class="small" style="margin-top:8px">After payment, enter 12-digit UTR and confirm. Admin will verify & approve.</div>
+    </div>
 
-      <input id="periodInput" type="text" maxlength="3" placeholder="Enter last 3 digits of period (e.g. 256)">
+    <div class="col">
+      <label>Your Wallet</label>
+      <div class="wallet" id="walletCoins">Coins: 0</div>
+      <div style="margin-top:8px" class="small">Use <b>2 coins</b> to generate one prediction.</div>
+      <div style="margin-top:12px" class="small">Pending purchases:</div>
+      <div id="pendingList" class="history"></div>
+    </div>
+  </div>
+
+  <!-- Payment modal -->
+  <div id="payModal" class="modal">
+    <div class="card">
+      <h2 style="margin-top:0">Confirm Payment</h2>
+      <div class="small">QR shown on page above. After paying, enter 12-digit UTR and press Submit.</div>
       <div style="margin-top:10px">
-        <button class="btn" id="predictBtn" onclick="getPrediction()">Get Prediction</button>
-        <button class="btn ghost" onclick="markWin()">Win</button>
-        <button class="btn ghost" onclick="markLoss()">Loss</button>
-        <button class="btn ghost" onclick="resetSession()">Reset</button>
+        <label>Coins to buy</label>
+        <input id="modalCoins" type="number" readonly>
+        <label style="margin-top:8px">Amount (₹)</label>
+        <input id="modalAmount" type="text" readonly>
+        <label style="margin-top:8px">Enter 12-digit UTR</label>
+        <input id="modalUTR" type="text" maxlength="12" placeholder="Enter UTR">
+        <div style="margin-top:10px" class="row">
+          <button id="modalSubmit" class="btn">Submit Purchase</button>
+          <button id="modalClose" class="ghost">Cancel</button>
+        </div>
+        <div id="modalMsg" class="small" style="margin-top:8px"></div>
+        <div class="note" id="csNote" style="display:none;margin-top:8px">Payment complete but not open — contact: <a href="https://t.me/Nskskssiwi" target="_blank" style="color:#bfe">Customer Service</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prediction area -->
+  <div class="card">
+    <div class="row">
+      <div class="col">
+        <label>Live period (auto-updates every minute)</label>
+        <div class="period" id="periodDisplay">--</div>
+        <div class="small" id="countdown">Next period in: --s</div>
+
+        <div style="margin-top:12px">
+          <label>Enter last 3 digits of period (optional for record)</label>
+          <input id="period3" type="text" maxlength="3" placeholder="e.g. 123">
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <button id="generateBtn" class="btn">Generate Prediction (2 coins)</button>
+          <button id="refreshWallet" class="ghost">Refresh Wallet</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <div id="predictionArea" class="card" style="padding:12px;display:none">
+            <div><b>Period:</b> <span id="predPeriod">--</span></div>
+            <div style="margin-top:6px"><b>Signal:</b> <span id="predSignal">--</span></div>
+            <div style="margin-top:6px"><b>Numbers:</b> <span id="predNums">-- / --</span></div>
+            <div style="margin-top:8px" class="small">History (latest first):</div>
+            <div id="predHistory" class="history"></div>
+          </div>
+        </div>
       </div>
 
-      <div id="predictionText" style="margin-top:12px;font-weight:800"></div>
-      <div class="history" id="historyBox"></div>
+      <div class="col">
+        <label>Stats</label>
+        <div class="small">Last results:</div>
+        <div id="resultsArea" class="history"></div>
+
+        <div style="margin-top:12px">
+          <label>Admin actions (hidden — open with ❌ at bottom-right)</label>
+          <div class="small">Admin can approve/reject purchases.</div>
+          <div id="adminStatus" class="small" style="margin-top:8px"></div>
+        </div>
+      </div>
     </div>
-  </section>
+  </div>
 
 </div>
 
-<footer>Local demo — admin approval must be done using your admin panel (it must write approved_&lt;UTR&gt; into localStorage).</footer>
+<!-- admin cross (hidden toggle) -->
+<div class="admin-cross" id="adminCross">❌</div>
+
+<!-- admin modal -->
+<div id="adminModal" class="modal">
+  <div class="card">
+    <h2 style="margin-top:0">Admin — Approve Purchases</h2>
+    <div class="small">Pending purchases below. Click Approve to credit wallet.</div>
+    <div id="adminPending" class="history" style="margin-top:10px"></div>
+    <div style="margin-top:12px" class="row">
+      <button id="adminClose" class="ghost">Close</button>
+    </div>
+    <div id="adminMsg" class="small" style="margin-top:8px"></div>
+  </div>
+</div>
 
 <script>
-/* ---------- Config ---------- */
-const UPI_ID = 'perfect.k@ptaxis'; // your UPI id
-const UPI_NAME = 'Sureshot';
-const REGISTER_LINK = 'http://www.tashanwin.info/#/register?invitationCode=13413405256';
+/*
+  coin-prediction.html
+  - Save as a single file.
+  - Put your QR image as qr.png (same folder).
+  - Admin password: Mrperfect456
+  - Storage:
+      pending_<utr> => JSON purchase object { utr, coins, amount, ts, status }
+      approved_<utr> => JSON approved info
+      wallet_coins => integer (user's coin balance)
+      predictions => array of last predictions
+*/
 
-/* ---------- state ---------- */
-let currentPlan = 3000;
-let currentDeposit = 300;
-let pendingUTR = '';
-let pollInterval = null;
+const ADMIN_PASS = 'Mrperfect456';
+const MIN_COINS = 100;
+const MAX_COINS = 4000;
+const PRICE_PER_COIN = 0.5; // ₹0.5 per coin
+const PRED_COST = 2; // 2 coins per prediction
 
-/* ---------- DOM refs ---------- */
-const screenDashboard = document.getElementById('screen-dashboard');
-const screenUser = document.getElementById('screen-user');
-const screenAccess = document.getElementById('screen-access');
+// DOM
+const coinsInput = document.getElementById('coinsInput');
+const buyBtn = document.getElementById('buyBtn');
+const preset100 = document.getElementById('preset100');
+const preset500 = document.getElementById('preset500');
+const preset1000 = document.getElementById('preset1000');
+const qrImage = document.getElementById('qrImage');
+const walletCoinsEl = document.getElementById('walletCoins');
+const pendingListEl = document.getElementById('pendingList');
 
-const plansList = document.getElementById('plansList');
-const qrImg = document.getElementById('qrImg');
-const userAmount = document.getElementById('userAmount');
-const userStatus = document.getElementById('userStatus');
-const userResult = document.getElementById('userResult');
+const payModal = document.getElementById('payModal');
+const modalCoins = document.getElementById('modalCoins');
+const modalAmount = document.getElementById('modalAmount');
+const modalUTR = document.getElementById('modalUTR');
+const modalSubmit = document.getElementById('modalSubmit');
+const modalClose = document.getElementById('modalClose');
+const modalMsg = document.getElementById('modalMsg');
+const csNote = document.getElementById('csNote');
 
-const accessPlan = document.getElementById('accessPlan');
-const accessDeposit = document.getElementById('accessDeposit');
-const procMsg = document.getElementById('procMsg');
-const procBar = document.getElementById('procBar');
+const periodDisplay = document.getElementById('periodDisplay');
+const countdownEl = document.getElementById('countdown');
+const generateBtn = document.getElementById('generateBtn');
+const predictionArea = document.getElementById('predictionArea');
+const predPeriod = document.getElementById('predPeriod');
+const predSignal = document.getElementById('predSignal');
+const predNums = document.getElementById('predNums');
+const predHistory = document.getElementById('predHistory');
 
-const hackPanel = document.getElementById('hackPanel');
-const targetRange = document.getElementById('targetRange');
-const balanceVal = document.getElementById('balanceVal');
-const historyBox = document.getElementById('historyBox');
-const predictionText = document.getElementById('predictionText');
+const resultsArea = document.getElementById('resultsArea');
+const adminCross = document.getElementById('adminCross');
+const adminModal = document.getElementById('adminModal');
+const adminPending = document.getElementById('adminPending');
+const adminClose = document.getElementById('adminClose');
+const adminMsg = document.getElementById('adminMsg');
+const refreshWalletBtn = document.getElementById('refreshWallet');
+const period3 = document.getElementById('period3');
 
-let balance = 0;
-let level = 1;
-let currentBet = 0;
-let history = [];
+// util storage functions
+function readJSON(key, fallback = null){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch(e){ return fallback; }
+}
+function writeJSON(key,obj){ localStorage.setItem(key, JSON.stringify(obj)); }
 
-/* ---------- populate plans ---------- */
-const plans = [
-  {loss:3000, price:299},
-  {loss:5000, price:399},
-  {loss:10000, price:499},
-  {loss:25000, price:899},
-  {loss:50000, price:1599},
-  {loss:100000, price:2499},
-  {loss:500000, price:9999}
-];
+// wallet
+function getWallet(){ return parseInt(localStorage.getItem('wallet_coins')||'0',10); }
+function setWallet(n){ localStorage.setItem('wallet_coins', String(n)); updateWalletUI(); }
+function updateWalletUI(){ walletCoinsEl.innerText = 'Coins: ' + getWallet(); }
 
-function renderPlans(){
-  plansList.innerHTML = '';
-  plans.forEach(p=>{
-    const deposit = Math.ceil(p.loss*0.10);
+// pending purchases UI
+function renderPendingList(){
+  const items = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('pending_')){
+      const v = readJSON(k);
+      if(v) items.push({key:k, val:v});
+    }
+  }
+  pendingListEl.innerHTML = '';
+  if(items.length===0){ pendingListEl.innerHTML = '<div class="small">No pending purchases</div>'; return; }
+  items.sort((a,b)=>b.val.ts - a.val.ts);
+  items.forEach(it=>{
+    const d = it.val;
     const div = document.createElement('div');
-    div.className = 'plan';
-    div.innerHTML = `<b>${p.loss} Loss</b>
-      <div class="small">Full plan price: ₹${p.price}</div>
-      <div style="margin-top:8px">Deposit (10%): <b>₹${deposit}</b></div>
-      <div style="margin-top:10px"><button class="btn" onclick="choosePlan(${p.loss}, ${deposit})">Choose plan</button></div>`;
-    plansList.appendChild(div);
+    div.style.padding = '8px';
+    div.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div><b>${d.coins} coins</b> — ₹${(d.amount).toFixed(2)}</div>
+        <div class="small">UTR: ${d.utr} • ${new Date(d.ts).toLocaleString()}</div>
+      </div>
+      <div style="text-align:right"><div class="small">${d.status||'pending'}</div></div>
+    </div>`;
+    pendingListEl.appendChild(div);
   });
 }
 
-/* ---------- navigation ---------- */
-function showScreen(id){
-  screenDashboard.classList.add('hidden');
-  screenUser.classList.add('hidden');
-  screenAccess.classList.add('hidden');
-  if(id === 'dashboard') screenDashboard.classList.remove('hidden');
-  if(id === 'user') screenUser.classList.remove('hidden');
-  if(id === 'access') screenAccess.classList.remove('hidden');
+// admin pending list in admin modal
+function renderAdminPending(){
+  adminPending.innerHTML = '';
+  const items = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('pending_')){
+      const v = readJSON(k);
+      if(v) items.push({key:k, val:v});
+    }
+  }
+  if(items.length===0){ adminPending.innerHTML = '<div class="small">No pending purchases</div>'; return; }
+  items.sort((a,b)=>b.val.ts - a.val.ts);
+  items.forEach(it=>{
+    const d = it.val;
+    const row = document.createElement('div');
+    row.style.padding='8px';
+    row.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div><b>${d.coins} coins</b> — ₹${(d.amount).toFixed(2)}</div>
+        <div class="small">UTR: ${d.utr} • ${new Date(d.ts).toLocaleString()}</div>
+      </div>
+      <div style="text-align:right">
+        <button data-utr="${d.utr}" class="btn admin-approve">Approve</button>
+        <button data-utr="${d.utr}" class="ghost admin-reject" style="margin-left:6px">Reject</button>
+      </div>
+    </div>`;
+    adminPending.appendChild(row);
+  });
+
+  // attach handlers
+  Array.from(document.getElementsByClassName('admin-approve')).forEach(btn=>{
+    btn.onclick = ()=>{ const utr = btn.getAttribute('data-utr'); adminApprove(utr); };
+  });
+  Array.from(document.getElementsByClassName('admin-reject')).forEach(btn=>{
+    btn.onclick = ()=>{ const utr = btn.getAttribute('data-utr'); adminReject(utr); };
+  });
 }
 
-function goDashboard(){ showScreen('dashboard'); stopPolling(); }
-
-/* ---------- choose plan -> user screen ---------- */
-function choosePlan(planLoss, deposit){
-  currentPlan = planLoss;
-  currentDeposit = deposit;
-  openUserForPlan();
-}
-function openUserForPlan(){
-  showScreen('user');
-  // set amount and generate QR
-  userAmount.innerText = '₹' + currentDeposit;
-  // upi:// pay link
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${encodeURIComponent(currentDeposit)}&cu=INR`;
-  // google chart api for QR visualization
-  qrImg.src = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + encodeURIComponent(upiUrl);
-  // clear inputs/status
-  document.getElementById('utrInput').value = '';
-  userStatus.classList.add('hidden');
-  userResult.innerHTML = '';
-  pendingUTR = '';
-}
-
-/* ---------- Request Approval (user) ---------- */
-function requestApproval(){
-  const utr = document.getElementById('utrInput').value.trim();
-  if(!/^[0-9]{12}$/.test(utr)){ alert('Enter valid 12-digit UTR (12 digits)'); return; }
+// admin actions
+function adminApprove(utr){
   const key = 'pending_' + utr;
-  const info = { utr: utr, amount: currentDeposit, planLoss: currentPlan, ts: Date.now() };
-  try {
-    localStorage.setItem(key, JSON.stringify(info));
-  } catch(e) {
-    alert('localStorage error: ' + e);
-    return;
-  }
-  pendingUTR = utr;
-  userStatus.classList.remove('hidden');
-  userStatus.innerText = 'Pending approval for UTR ' + utr;
-  userResult.innerHTML = '';
-  // start polling for approval
-  startPollingForApproval();
+  const data = readJSON(key);
+  if(!data){ adminMsg.innerText = 'Pending not found'; return; }
+  // credit wallet for the user who created (we don't have multi-user identification here)
+  // Add the coins to wallet_coins
+  const current = getWallet();
+  setWallet(current + Number(data.coins));
+  // mark approved
+  writeJSON('approved_' + utr, {utr, coins: data.coins, amount: data.amount, ts: Date.now()});
+  // remove pending
+  localStorage.removeItem(key);
+  adminMsg.innerText = 'Approved UTR ' + utr + ' — wallet credited.';
+  renderAdminPending();
+  renderPendingList();
 }
 
-/* ---------- Polling for admin approval ---------- */
-function startPollingForApproval(){
-  stopPolling();
-  pollInterval = setInterval(()=>{
-    if(!pendingUTR) return;
-    const appr = localStorage.getItem('approved_' + pendingUTR);
-    if(appr){
-      handleApproved(pendingUTR, appr);
-    }
-  }, 1200);
-}
-function stopPolling(){ if(pollInterval) { clearInterval(pollInterval); pollInterval=null; } }
-
-/* ---------- handle approved ---------- */
-function handleApproved(utr, raw){
-  stopPolling();
-  let info = null;
-  try { info = JSON.parse(raw); } catch(e){ info = null; }
-  userStatus.classList.add('hidden');
-  userResult.innerHTML = '<div style="color:#b8ffce;font-weight:800">✅ Approved for UTR ' + utr + '</div>';
-  // move to access screen (no new window)
-  // if admin included planLoss & amount inside approved object, use it; else use currentPlan/currentDeposit
-  const planLoss = (info && info.planLoss) ? info.planLoss : currentPlan;
-  const deposit = (info && info.amount) ? info.amount : currentDeposit;
-  // set up access screen values then show
-  accessPlan.innerText = planLoss;
-  accessDeposit.innerText = deposit;
-  // also store to state so access screen knows
-  currentPlan = planLoss;
-  currentDeposit = deposit;
-  // small delay so user sees approval message
-  setTimeout(()=> {
-    showScreen('access');
-    // initialize access state
-    initAccessState();
-  }, 900);
+function adminReject(utr){
+  const key = 'pending_' + utr;
+  const data = readJSON(key);
+  if(!data){ adminMsg.innerText = 'Pending not found'; return; }
+  writeJSON('rejected_' + utr, {utr, coins: data.coins, amount: data.amount, ts: Date.now()});
+  localStorage.removeItem(key);
+  adminMsg.innerText = 'Rejected UTR ' + utr;
+  renderAdminPending();
+  renderPendingList();
 }
 
-/* ---------- Access screen: register link, UID submit, processing ---------- */
-function openRegister(){ window.open(REGISTER_LINK, '_blank'); }
+// Buy flow
+preset100.onclick = ()=> coinsInput.value = 100;
+preset500.onclick = ()=> coinsInput.value = 500;
+preset1000.onclick = ()=> coinsInput.value = 1000;
 
-function submitUID(){
-  const uid = document.getElementById('uidInput').value.trim();
-  if(!/^[0-9]{6}$/.test(uid)){ alert('Enter valid 6-digit UID'); return; }
-  document.getElementById('procMsg').innerText = 'Processing UID ' + uid + ' ...';
-  document.getElementById('processingBox').classList.remove('hidden');
-  procBar.style.width = '0%';
-  setTimeout(()=> procBar.style.width = '100%', 50);
-  setTimeout(()=> {
-    document.getElementById('processingBox').classList.add('hidden');
-    // show hack panel
-    document.getElementById('hackPanel').classList.remove('hidden');
-    initAccessState();
-  }, 5000);
+buyBtn.onclick = ()=>{
+  let coins = parseInt(coinsInput.value||'0',10);
+  if(isNaN(coins) || coins < MIN_COINS){ alert('Minimum 100 coins'); coinsInput.value = MIN_COINS; return; }
+  if(coins > MAX_COINS){ alert('Maximum 4000 coins'); coinsInput.value = MAX_COINS; return; }
+  // open modal with computed amount
+  modalCoins.value = coins;
+  modalAmount.value = (coins * PRICE_PER_COIN).toFixed(2);
+  modalUTR.value = '';
+  modalMsg.innerText = '';
+  csNote.style.display = 'none';
+  openModal(payModal);
+};
+
+// modal submit
+modalSubmit.onclick = ()=>{
+  const coins = Number(modalCoins.value);
+  const amount = Number(modalAmount.value);
+  const utr = (modalUTR.value||'').trim();
+  if(!/^[0-9]{12}$/.test(utr)){ modalMsg.innerText = 'Enter valid 12-digit UTR'; return; }
+  // create pending key
+  const key = 'pending_' + utr;
+  if(readJSON(key)){ modalMsg.innerText = 'A pending request with this UTR already exists'; return; }
+  const payload = { utr, coins, amount, ts: Date.now(), status: 'pending' };
+  writeJSON(key, payload);
+  modalMsg.innerText = 'Submitted — awaiting admin approval';
+  csNote.style.display = 'block';
+  renderPendingList();
+  closeModal(payModal);
+};
+
+// modal close
+modalClose.onclick = ()=> closeModal(payModal);
+
+// modal open/close helpers
+function openModal(el){ el.classList.add('show'); }
+function closeModal(el){ el.classList.remove('show'); }
+
+// predictions: period generator + countdown
+// We'll create a period number that increments every minute. Format: YYYYMMDDHHMM + seq
+function makePeriodString(){
+  const d = new Date();
+  // YYYYMMDDHHMM
+  const YYYY = d.getFullYear().toString().padStart(4,'0');
+  const MM = String(d.getMonth()+1).padStart(2,'0');
+  const DD = String(d.getDate()).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  // seq: minutes since epoch modulo 100000 (keeps it numeric)
+  const seq = String(Math.floor(Date.now()/60000) % 100000).padStart(5,'0');
+  return `${YYYY}${MM}${DD}${hh}${mi}${seq}`; // long unique per minute string
 }
 
-/* ---------- initialize hack state ---------- */
-function initAccessState(){
-  // deposit and plan already set in currentDeposit/currentPlan
-  balance = currentDeposit || Math.max(1, Math.round(currentPlan * 0.10));
-  level = 1;
-  currentBet = 0;
-  history = [];
-  updateAccessUI();
+let countdownInterval = null;
+function startPeriodClock(){
+  // update immediately
+  updatePeriodDisplay();
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(()=>{
+    updatePeriodDisplay();
+  }, 1000);
 }
 
-/* ---------- bet calc (15%,30%,55%) ---------- */
-function calcBet(){
-  if(level === 1) return Math.max(1, Math.round(balance * 0.15));
-  if(level === 2) return Math.max(1, Math.round(balance * 0.30));
-  if(level === 3) return Math.max(1, Math.round(balance * 0.55));
-  return 0;
-}
-
-/* ---------- prediction / simulate ---------- */
-function getPrediction(){
-  const p = document.getElementById('periodInput').value.trim();
-  if(!/^[0-9]{3}$/.test(p)){ alert('Enter last 3 digits (3 digits)'); return; }
-  currentBet = calcBet();
-  const pred = Math.random() < 0.5 ? 'BIG' : 'SMALL';
-  predictionText.innerText = `Period ${p}: Prediction = ${pred} • Bet = ₹${currentBet} (Level ${level})`;
-}
-
-/* ---------- handlers: win / loss ---------- */
-function markWin(){
-  if(currentBet <= 0){ alert('No active bet — click Get Prediction first'); return; }
-  balance = Math.round(balance + currentBet);
-  history.unshift({ time: new Date().toLocaleTimeString(), bet: currentBet, result: 'WIN', level: level});
-  currentBet = 0;
-  level = 1;
-  updateAccessUI();
-  checkTargetComplete();
-}
-function markLoss(){
-  if(currentBet <= 0){ alert('No active bet — click Get Prediction first'); return; }
-  balance = Math.max(0, balance - currentBet);
-  history.unshift({ time: new Date().toLocaleTimeString(), bet: currentBet, result: 'LOSS', level: level});
-  if(level < 3) level++; else level = 1;
-  currentBet = 0;
-  updateAccessUI();
-  checkTargetComplete();
-}
-
-/* ---------- update UI / history ---------- */
-function updateAccessUI(){
-  balanceVal.innerText = balance;
-  targetRange.innerText = `${currentDeposit} to ${currentPlan}`;
-  historyBox.innerHTML = history.map(h=>`${h.time} — Bet ₹${h.bet} — ${h.result} (L${h.level})`).join('<br>');
-  predictionText.innerText = predictionText.innerText || '';
-}
-
-/* ---------- reset session ---------- */
-function resetSession(){
-  if(!confirm('Reset this session?')) return;
-  initAccessState();
-  document.getElementById('periodInput').value = '';
-  predictionText.innerText = '';
-}
-
-/* ---------- target completion ---------- */
-function checkTargetComplete(){
-  if(balance >= currentPlan){
-    setTimeout(()=> {
-      alert('🎉 Congratulations — Your Target is Complete!');
-      // go back to dashboard
-      showScreen('dashboard');
-    }, 250);
+function updatePeriodDisplay(){
+  // compute seconds until next minute
+  const now = Date.now();
+  const next = Math.ceil(now / 60000) * 60000;
+  const sec = Math.max(0, Math.round((next - now)/1000));
+  countdownEl.innerText = 'Next period in: ' + sec + 's';
+  if(sec === 0){
+    // period changed
+    periodDisplay.innerText = makePeriodString();
+  } else {
+    // show current minute's period (stable until next)
+    periodDisplay.innerText = makePeriodString();
   }
 }
 
-/* ---------- init ---------- */
-renderPlans();
-showScreen('dashboard');
+// generate prediction (consumes 2 coins)
+function loadPredictions(){
+  return readJSON('predictions', []);
+}
+function savePredictions(arr){ writeJSON('predictions', arr); }
 
-/* optional: if admin approves while on same page via storage event, detect */
-window.addEventListener('storage', function(ev){
+function renderPredHistory(){
+  const arr = loadPredictions();
+  predHistory.innerHTML = '';
+  if(arr.length === 0){ predHistory.innerHTML = '<div class="small">No predictions yet</div>'; return; }
+  arr.slice(0,20).forEach(p=>{
+    const item = document.createElement('div');
+    item.style.padding='6px';
+    item.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    item.innerHTML = `<div style="display:flex;justify-content:space-between">
+      <div><b>${p.period}</b><div class="small">${p.signal} • ${p.nums}</div></div>
+      <div class="small">${new Date(p.ts).toLocaleTimeString()}</div>
+    </div>`;
+    predHistory.appendChild(item);
+  });
+}
+
+function renderResultsArea(){
+  const arr = loadPredictions();
+  resultsArea.innerHTML = '';
+  if(arr.length === 0){ resultsArea.innerHTML = '<div class="small">No results</div>'; return; }
+  arr.slice(0,20).forEach(r=>{
+    const div = document.createElement('div');
+    div.style.padding='6px';
+    div.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between">
+      <div><strong>${r.period}</strong><div class="small">${r.signal} • ${r.nums}</div></div>
+      <div class="small">${new Date(r.ts).toLocaleTimeString()}</div>
+    </div>`;
+    resultsArea.appendChild(div);
+  });
+}
+
+generateBtn.onclick = ()=>{
+  // check wallet
+  const wallet = getWallet();
+  if(wallet < PRED_COST){ alert('Not enough coins. Buy coins first.'); return; }
+  // require user to enter period3 or allow blank
+  const p3 = (period3.value||'').trim();
+  // deduct coins immediately
+  setWallet(wallet - PRED_COST);
+  // create prediction
+  const signal = Math.random() < 0.5 ? 'SMALL' : 'BIG';
+  let a,b;
+  if(signal === 'SMALL'){ a = Math.floor(Math.random()*5); b = Math.floor(Math.random()*5); }
+  else { a = 5 + Math.floor(Math.random()*5); b = 5 + Math.floor(Math.random()*5); }
+  const periodNow = makePeriodString();
+  const nums = `${a} / ${b}`;
+  // display
+  predictionArea.style.display = 'block';
+  predPeriod.innerText = periodNow + (p3 ? (' • ' + p3) : '');
+  predSignal.innerText = signal;
+  predNums.innerText = nums;
+  // store in predictions history
+  const arr = loadPredictions();
+  arr.unshift({ period: periodNow + (p3 ? ('|' + p3) : ''), signal, nums, ts: Date.now()});
+  savePredictions(arr.slice(0,100)); // keep last 100
+  renderPredHistory();
+  renderResultsArea();
+};
+
+// admin modal open
+adminCross.onclick = async ()=>{
+  const pw = prompt('Enter admin password:');
+  if(pw === null) return;
+  if(pw !== ADMIN_PASS){ alert('Wrong password'); return; }
+  adminMsg.innerText = '';
+  renderAdminPending();
+  openModal(adminModal);
+};
+adminClose.onclick = ()=> closeModal(adminModal);
+
+// refresh wallet/pending
+refreshWalletBtn.onclick = ()=>{
+  updateWalletUI();
+  renderPendingList();
+  renderPredHistory();
+  renderResultsArea();
+};
+
+// listen for storage events so if admin approves in another tab, user sees it
+window.addEventListener('storage', (ev)=>{
   if(!ev.key) return;
+  // if approved_ key added, update wallet UI (we can't identify user per se; we assume single-user)
   if(ev.key.startsWith('approved_')){
-    const approvedUtr = ev.key.replace('approved_','');
-    // if user had a pending UTR and its approved, handle it
-    if(pendingUTR && approvedUtr === pendingUTR){
-      handleApproved(approvedUtr, ev.newValue);
-    }
+    // credit coins from approved entry if wallet hasn't seen it yet
+    try{
+      const approved = JSON.parse(ev.newValue);
+      if(approved && approved.utr){
+        // to avoid double-crediting across tabs we only credit if there is still a pending key removed
+        // This basic approach is local-only; for multi-user real system use server-side.
+        // For now, ensure pending_utr removed and then credit
+        const pendingKey = 'pending_' + approved.utr;
+        if(!localStorage.getItem(pendingKey)){
+          // credit (but only if not previously credited)
+          // We'll also set a marker approved_consume_<utr> so we don't credit multiple times in same tab
+          const marker = 'approved_consume_' + approved.utr;
+          if(!localStorage.getItem(marker)){
+            const cur = getWallet();
+            setWallet(cur + Number(approved.coins || approved.coins === 0 ? approved.coins : 0));
+            localStorage.setItem(marker, '1');
+          }
+        }
+      }
+    }catch(e){}
+    renderPendingList();
+  }
+  // if pending removed, update pending list
+  if(ev.key && ev.key.startsWith('pending_') === false){
+    renderPendingList();
   }
 });
+
+// initial setup & helpers
+function init(){
+  updateWalletUI();
+  renderPendingList();
+  renderPredHistory();
+  renderResultsArea();
+  startPeriodClock();
+  // set QR src fallback if not set
+  if(!qrImage.src || qrImage.src.indexOf('qr.png') === -1){
+    qrImage.src = 'qr.png';
+  }
+}
+init();
+
+// convenience: clicking buy opens modal prefilled
+// Also show amount when coins input changes
+coinsInput.addEventListener('input', ()=>{
+  let v = parseInt(coinsInput.value||'0',10);
+  if(isNaN(v)) v = MIN_COINS;
+  if(v < MIN_COINS) v = MIN_COINS;
+  if(v > MAX_COINS) v = MAX_COINS;
+  coinsInput.value = v;
+});
+
+// small UX: open modal when buy triggered
+buyBtn.addEventListener('click', ()=>{
+  // handled earlier — modal will open and filled.
+});
+
+// helpers to keep things tidy
+(function tidyInterval(){
+  setInterval(()=>{
+    // remove old approved_consume markers older than 7 days (not strictly necessary)
+    // (omitted to keep storage simpler)
+  }, 24*60*60*1000);
+})();
+
 </script>
 </body>
 </html>
-
-
-Iss code me yee sab edit kr ke file dena hai
