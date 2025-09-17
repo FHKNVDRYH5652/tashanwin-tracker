@@ -1,563 +1,475 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Coin Predictions — Buy Coins & Generate Predictions</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Smart Prediction Coach — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0b1220;
-    --card: #0f1724;
-    --accent: #00d2a8;
-    --muted: #9fb0d6;
+    --bg:#071022; --card:#0f1724; --accent:#00d2a8; --accent2:#00a6ff; --muted:#9fb0d6;
   }
-  *{box-sizing:border-box;font-family:Inter,Arial,sans-serif}
-  body{margin:0;background:linear-gradient(180deg,#071021,#0b1220);color:#eaf6ff;min-height:100vh;padding:18px}
-  .wrap{max-width:980px;margin:20px auto}
-  .card{background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.02)}
-  h1{margin:0 0 8px 0;font-size:20px}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .col{flex:1;min-width:240px}
-  label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
-  input[type=number], input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-  select{padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit}
-  .btn{padding:10px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),#00a6ff);color:#001;font-weight:800;cursor:pointer}
-  .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  .small{font-size:13px;color:var(--muted)}
+  *{box-sizing:border-box;font-family:'Poppins',sans-serif}
+  body{margin:0;min-height:100vh;background:linear-gradient(180deg,#051021,#07142a);color:#eaf6ff;padding:18px}
+  .wrap{max-width:980px;margin:0 auto}
+  header{font-weight:800;font-size:1.4rem;padding:12px 0;text-align:center}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
+  .row{display:flex;gap:12px;align-items:center}
+  .col{display:flex;flex-direction:column;gap:8px}
+  button{padding:10px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#002;font-weight:800;cursor:pointer}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:700}
+  input, select{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+  .plans{display:flex;gap:12px;flex-wrap:wrap}
+  .plan{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);min-width:140px;text-align:center}
+  .small{color:var(--muted);font-size:0.95rem}
+  .history-box{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;max-height:180px;overflow:auto}
+  .prediction-panel{display:grid;grid-template-columns:1fr 300px;gap:12px}
+  .badge{background:#0b2a24;padding:6px 10px;border-radius:999px;color:#aaffd9;font-weight:800}
+  .big{color:#7fe8a7;font-weight:800}
+  .smallSig{color:#ffcf8c;font-weight:800}
+  .stat{font-weight:800}
   .center{text-align:center}
-  .qr{width:220px;height:220px;border-radius:12px;display:block;margin:10px auto;border:2px solid rgba(255,255,255,0.03)}
-  .wallet{font-size:18px;font-weight:800}
-  .note{color:#ffdca8;font-weight:700}
-  .admin-cross{position:fixed;right:14px;bottom:14px;width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9999}
-  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:2000;visibility:hidden;opacity:0;transition:all .15s}
-  .modal.show{visibility:visible;opacity:1}
-  .modal .card{min-width:320px;max-width:560px}
-  .period{font-weight:800;font-size:14px}
-  .stats{font-size:13px;color:var(--muted)}
-  .history{max-height:160px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25)}
+  .spinner{width:28px;height:28px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite;display:inline-block}
+  @keyframes spin {to{transform:rotate(360deg)}}
+  footer{margin-top:8px;color:var(--muted);font-size:0.9rem;text-align:center}
+  .result-row{display:flex;gap:8px;flex-wrap:wrap}
+  .result-pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04)}
 </style>
 </head>
 <body>
-
 <div class="wrap">
-  <div class="card">
-    <h1>Coin Predictions — Buy Coins & Generate</h1>
-    <div class="small">Buy coins → admin approves payment (UTR) → coins credited → use 2 coins per prediction.</div>
-  </div>
+  <header>Smart Prediction Coach — AI Strategy Demo</header>
 
-  <!-- Buy coins -->
-  <div class="card row">
-    <div class="col">
-      <label>Choose coins (min 100 — max 4000)</label>
-      <input id="coinsInput" type="number" min="100" max="4000" step="1" value="100">
-      <div style="margin-top:8px" class="small">Pricing: <b>100 coins = ₹50</b> (so ₹0.5 per coin). You can buy any amount between 100 and 4000.</div>
-      <div style="margin-top:12px" class="row">
-        <button id="buyBtn" class="btn">Buy Coins</button>
-        <button id="preset100" class="ghost">100</button>
-        <button id="preset500" class="ghost">500</button>
-        <button id="preset1000" class="ghost">1000</button>
+  <!-- Step 1: Choose plan (target) -->
+  <section id="screen-choose" class="card">
+    <h3>1) Choose a target plan</h3>
+    <div class="small">Choose your starting balance target window. Example: "100 → 250" means you want to grow balance from 100 up to 250.</div>
+    <div style="margin-top:12px" class="plans">
+      <div class="plan">
+        <div style="font-weight:800">100 → 250</div>
+        <div class="small">Safe starter</div>
+        <div style="margin-top:8px"><button onclick="choosePlan(100,250)">Select</button></div>
+      </div>
+      <div class="plan">
+        <div style="font-weight:800">200 → 500</div>
+        <div class="small">Aggressive</div>
+        <div style="margin-top:8px"><button onclick="choosePlan(200,500)">Select</button></div>
+      </div>
+      <div class="plan">
+        <div style="font-weight:800">500 → 1200</div>
+        <div class="small">Pro</div>
+        <div style="margin-top:8px"><button onclick="choosePlan(500,1200)">Select</button></div>
       </div>
     </div>
+    <div style="margin-top:12px" class="small">You can also enter custom values:</div>
+    <div style="margin-top:8px" class="row">
+      <input id="customStart" placeholder="Start (e.g. 100)" type="number">
+      <input id="customTarget" placeholder="Target (e.g. 250)" type="number">
+      <button onclick="chooseCustom()">Choose</button>
+    </div>
+  </section>
 
-    <div class="col center">
-      <div class="small">QR for payment (scan with UPI)</div>
-      <img id="qrImage" class="qr" src="qr.png" alt="QR — replace qr.png">
-      <div class="small" style="margin-top:8px">After payment, enter 12-digit UTR and confirm. Admin will verify & approve.</div>
+  <!-- Step 2: Provide last-10 results -> AI analysis -->
+  <section id="screen-input" class="card" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>2) Enter last 10 results (earliest → latest)</h3>
+      <div class="small">Plan: <span id="planLabel" class="stat"></span></div>
     </div>
 
-    <div class="col">
-      <label>Your Wallet</label>
-      <div class="wallet" id="walletCoins">Coins: 0</div>
-      <div style="margin-top:8px" class="small">Use <b>2 coins</b> to generate one prediction.</div>
-      <div style="margin-top:12px" class="small">Pending purchases:</div>
-      <div id="pendingList" class="history"></div>
-    </div>
-  </div>
+    <div class="small">Click each box to toggle Big / Small. When finished press <b>Analyze</b>.</div>
+    <div style="margin-top:12px" id="last10" class="row"></div>
 
-  <!-- Payment modal -->
-  <div id="payModal" class="modal">
-    <div class="card">
-      <h2 style="margin-top:0">Confirm Payment</h2>
-      <div class="small">QR shown on page above. After paying, enter 12-digit UTR and press Submit.</div>
-      <div style="margin-top:10px">
-        <label>Coins to buy</label>
-        <input id="modalCoins" type="number" readonly>
-        <label style="margin-top:8px">Amount (₹)</label>
-        <input id="modalAmount" type="text" readonly>
-        <label style="margin-top:8px">Enter 12-digit UTR</label>
-        <input id="modalUTR" type="text" maxlength="12" placeholder="Enter UTR">
-        <div style="margin-top:10px" class="row">
-          <button id="modalSubmit" class="btn">Submit Purchase</button>
-          <button id="modalClose" class="ghost">Cancel</button>
+    <div style="margin-top:12px" class="row">
+      <button onclick="analyze()">Analyze & Get Strategy</button>
+      <button class="btn-ghost" onclick="goBack()">Back</button>
+      <div style="margin-left:auto" id="balanceInfo" class="small"></div>
+    </div>
+
+    <div style="margin-top:12px" class="small">Saved history helps the AI improve suggestions over time (stored locally).</div>
+  </section>
+
+  <!-- Step 3: AI & live interaction -->
+  <section id="screen-ai" class="card" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>3) Coach Recommendation</h3>
+      <div><span class="badge" id="targetBadge"></span></div>
+    </div>
+
+    <div style="margin-top:12px" class="prediction-panel">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Current balance</div>
+            <div style="font-size:1.6rem;font-weight:900" id="balanceDisplay">-</div>
+            <div class="small" id="progressText"></div>
+          </div>
+          <div class="center">
+            <div class="small">AI confidence</div>
+            <div id="confidenceDisplay" style="font-weight:900">-</div>
+            <div id="analysisSpinner" style="margin-top:8px;display:none"><span class="spinner"></span></div>
+          </div>
         </div>
-        <div id="modalMsg" class="small" style="margin-top:8px"></div>
-        <div class="note" id="csNote" style="display:none;margin-top:8px">Payment complete but not open — contact: <a href="https://t.me/Nskskssiwi" target="_blank" style="color:#bfe">Customer Service</a></div>
+
+        <hr style="margin:12px 0;border:0;border-top:1px solid rgba(255,255,255,0.03)">
+
+        <div>
+          <div class="small">AI Suggestion</div>
+          <div style="margin-top:8px">
+            <div id="aiAdvice" style="font-size:1.05rem;font-weight:800">—</div>
+            <div class="small" id="aiReason" style="margin-top:6px;color:var(--muted)"></div>
+            <div style="margin-top:8px">
+              <div class="small">Suggested amount</div>
+              <div id="suggestedAmount" style="font-weight:900;font-size:1.2rem">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button onclick="markOutcome('win')">Win ✅</button>
+          <button onclick="markOutcome('loss')">Loss ❌</button>
+          <button class="btn-ghost" onclick="markOutcome('skip')">Skip ⏭</button>
+          <div style="margin-left:auto" class="small">Last analysis <span id="lastAnalysisTime">—</span></div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small">Strategy notes</div>
+          <div id="strategyNotes" class="small" style="margin-top:6px;color:var(--muted)"></div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Prediction area -->
-  <div class="card">
-    <div class="row">
-      <div class="col">
-        <label>Live period (auto-updates every minute)</label>
-        <div class="period" id="periodDisplay">--</div>
-        <div class="small" id="countdown">Next period in: --s</div>
+      <!-- Right column: history, results, stats -->
+      <div>
+        <div class="small">AI saved history (global for this browser)</div>
+        <div style="margin-top:8px" class="history-box" id="historyBox"></div>
 
         <div style="margin-top:12px">
-          <label>Enter last 3 digits of period (optional for record)</label>
-          <input id="period3" type="text" maxlength="3" placeholder="e.g. 123">
-        </div>
-
-        <div style="margin-top:12px" class="row">
-          <button id="generateBtn" class="btn">Generate Prediction (2 coins)</button>
-          <button id="refreshWallet" class="ghost">Refresh Wallet</button>
+          <div class="small">Last results (most recent first)</div>
+          <div style="margin-top:8px" id="lastResults" class="history-box"></div>
         </div>
 
         <div style="margin-top:12px">
-          <div id="predictionArea" class="card" style="padding:12px;display:none">
-            <div><b>Period:</b> <span id="predPeriod">--</span></div>
-            <div style="margin-top:6px"><b>Signal:</b> <span id="predSignal">--</span></div>
-            <div style="margin-top:6px"><b>Numbers:</b> <span id="predNums">-- / --</span></div>
-            <div style="margin-top:8px" class="small">History (latest first):</div>
-            <div id="predHistory" class="history"></div>
+          <div class="small">Stats</div>
+          <div style="margin-top:8px">
+            <div>Wins: <span id="statWins">0</span></div>
+            <div>Losses: <span id="statLosses">0</span></div>
+            <div>Accuracy: <span id="statAcc">0%</span></div>
           </div>
         </div>
       </div>
-
-      <div class="col">
-        <label>Stats</label>
-        <div class="small">Last results:</div>
-        <div id="resultsArea" class="history"></div>
-
-        <div style="margin-top:12px">
-          <label>Admin actions (hidden — open with ❌ at bottom-right)</label>
-          <div class="small">Admin can approve/reject purchases.</div>
-          <div id="adminStatus" class="small" style="margin-top:8px"></div>
-        </div>
-      </div>
     </div>
-  </div>
+  </section>
 
-</div>
-
-<!-- admin cross (hidden toggle) -->
-<div class="admin-cross" id="adminCross">❌</div>
-
-<!-- admin modal -->
-<div id="adminModal" class="modal">
-  <div class="card">
-    <h2 style="margin-top:0">Admin — Approve Purchases</h2>
-    <div class="small">Pending purchases below. Click Approve to credit wallet.</div>
-    <div id="adminPending" class="history" style="margin-top:10px"></div>
-    <div style="margin-top:12px" class="row">
-      <button id="adminClose" class="ghost">Close</button>
-    </div>
-    <div id="adminMsg" class="small" style="margin-top:8px"></div>
-  </div>
+  <footer>Local demo — all data stored in your browser. You can export/import later.</footer>
 </div>
 
 <script>
 /*
-  coin-prediction.html
-  - Save as a single file.
-  - Put your QR image as qr.png (same folder).
-  - Admin password: Mrperfect456
-  - Storage:
-      pending_<utr> => JSON purchase object { utr, coins, amount, ts, status }
-      approved_<utr> => JSON approved info
-      wallet_coins => integer (user's coin balance)
-      predictions => array of last predictions
+  Smart Prediction Coach (client-only prototype)
+  - Not a real ML model. Uses heuristics:
+    * frequency, streaks, recency weighting, "psychology" bias detection
+    * bet sizing: proportional + adjustable risk
+    * suggests "skip" when low confidence
+  - History stored in localStorage under keys:
+    - spc_history: array of past predictions {period, side, result, amt, ts}
+    - spc_stats: wins/losses counts
+  - Flow: choose plan -> enter last 10 -> analyze -> show suggestion -> mark outcome -> iterate
 */
 
-const ADMIN_PASS = 'Mrperfect456';
-const MIN_COINS = 100;
-const MAX_COINS = 4000;
-const PRICE_PER_COIN = 0.5; // ₹0.5 per coin
-const PRED_COST = 2; // 2 coins per prediction
+// ---------------- state ----------------
+let startBalance = 100, targetBalance = 250;
+let balance = 0;
+let last10 = []; // earliest -> latest array of "Big" or "Small"
+let spc_history = []; // saved interactions
+let stats = {wins:0, losses:0};
+let lastSuggestion = null;
 
-// DOM
-const coinsInput = document.getElementById('coinsInput');
-const buyBtn = document.getElementById('buyBtn');
-const preset100 = document.getElementById('preset100');
-const preset500 = document.getElementById('preset500');
-const preset1000 = document.getElementById('preset1000');
-const qrImage = document.getElementById('qrImage');
-const walletCoinsEl = document.getElementById('walletCoins');
-const pendingListEl = document.getElementById('pendingList');
-
-const payModal = document.getElementById('payModal');
-const modalCoins = document.getElementById('modalCoins');
-const modalAmount = document.getElementById('modalAmount');
-const modalUTR = document.getElementById('modalUTR');
-const modalSubmit = document.getElementById('modalSubmit');
-const modalClose = document.getElementById('modalClose');
-const modalMsg = document.getElementById('modalMsg');
-const csNote = document.getElementById('csNote');
-
-const periodDisplay = document.getElementById('periodDisplay');
-const countdownEl = document.getElementById('countdown');
-const generateBtn = document.getElementById('generateBtn');
-const predictionArea = document.getElementById('predictionArea');
-const predPeriod = document.getElementById('predPeriod');
-const predSignal = document.getElementById('predSignal');
-const predNums = document.getElementById('predNums');
-const predHistory = document.getElementById('predHistory');
-
-const resultsArea = document.getElementById('resultsArea');
-const adminCross = document.getElementById('adminCross');
-const adminModal = document.getElementById('adminModal');
-const adminPending = document.getElementById('adminPending');
-const adminClose = document.getElementById('adminClose');
-const adminMsg = document.getElementById('adminMsg');
-const refreshWalletBtn = document.getElementById('refreshWallet');
-const period3 = document.getElementById('period3');
-
-// util storage functions
-function readJSON(key, fallback = null){
-  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch(e){ return fallback; }
+// ---------------- localStorage helpers ----------------
+function loadState(){
+  try{
+    spc_history = JSON.parse(localStorage.getItem('spc_history')||'[]');
+    stats = JSON.parse(localStorage.getItem('spc_stats')||'{"wins":0,"losses":0}');
+  }catch(e){ spc_history=[]; stats={wins:0,losses:0}; }
 }
-function writeJSON(key,obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+function saveState(){
+  localStorage.setItem('spc_history', JSON.stringify(spc_history));
+  localStorage.setItem('spc_stats', JSON.stringify(stats));
+}
 
-// wallet
-function getWallet(){ return parseInt(localStorage.getItem('wallet_coins')||'0',10); }
-function setWallet(n){ localStorage.setItem('wallet_coins', String(n)); updateWalletUI(); }
-function updateWalletUI(){ walletCoinsEl.innerText = 'Coins: ' + getWallet(); }
+// ---------------- UI helpers ----------------
+function show(id){ document.getElementById(id).style.display = 'block' }
+function hide(id){ document.getElementById(id).style.display = 'none' }
+function choosePlan(start, target){
+  startBalance = Number(start); targetBalance = Number(target);
+  balance = startBalance;
+  document.getElementById('planLabel').innerText = startBalance + ' → ' + targetBalance;
+  document.getElementById('targetBadge').innerText = `${startBalance} → ${targetBalance}`;
+  setupLast10UI();
+  hide('screen-choose'); show('screen-input');
+}
+function chooseCustom(){
+  const a = Number(document.getElementById('customStart').value||0);
+  const b = Number(document.getElementById('customTarget').value||0);
+  if(!a || !b || b<=a){ alert('Enter valid start & target (target > start)'); return; }
+  choosePlan(a,b);
+}
+function goBack(){
+  show('screen-choose'); hide('screen-input'); hide('screen-ai');
+}
 
-// pending purchases UI
-function renderPendingList(){
-  const items = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k && k.startsWith('pending_')){
-      const v = readJSON(k);
-      if(v) items.push({key:k, val:v});
-    }
+// ---------------- last10 UI ----------------
+function setupLast10UI(){
+  const container = document.getElementById('last10');
+  container.innerHTML = '';
+  last10 = [];
+  for(let i=0;i<10;i++){
+    last10.push('Big'); // default
+    const btn = document.createElement('button');
+    btn.className = 'btn-ghost';
+    btn.innerText = 'Big';
+    btn.style.minWidth='80px';
+    btn.dataset.idx=i;
+    btn.onclick = ()=>{ toggleLastBtn(btn) }
+    container.appendChild(btn);
   }
-  pendingListEl.innerHTML = '';
-  if(items.length===0){ pendingListEl.innerHTML = '<div class="small">No pending purchases</div>'; return; }
-  items.sort((a,b)=>b.val.ts - a.val.ts);
-  items.forEach(it=>{
-    const d = it.val;
-    const div = document.createElement('div');
-    div.style.padding = '8px';
-    div.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div><b>${d.coins} coins</b> — ₹${(d.amount).toFixed(2)}</div>
-        <div class="small">UTR: ${d.utr} • ${new Date(d.ts).toLocaleString()}</div>
-      </div>
-      <div style="text-align:right"><div class="small">${d.status||'pending'}</div></div>
+  document.getElementById('balanceInfo').innerText = `Balance: ₹${startBalance}`;
+}
+function toggleLastBtn(btn){
+  const idx = Number(btn.dataset.idx);
+  last10[idx] = (last10[idx] === 'Big') ? 'Small' : 'Big';
+  btn.innerText = last10[idx];
+}
+
+// ---------------- analysis (our "AI") ----------------
+function analyze(){
+  // UI spinner
+  document.getElementById('analysisSpinner').style.display = 'inline-block';
+  document.getElementById('analysisSpinner').scrollIntoView({behavior:'smooth', block:'center'});
+
+  // Build weighted counts: recent results get higher weight
+  const weights = [0.5,0.6,0.7,0.8,0.9,1,1.1,1.25,1.5,2]; // earliest->latest
+  const counts = {Big:0, Small:0};
+  for(let i=0;i<10;i++){
+    counts[last10[i]] += weights[i];
+  }
+  // detect streaks and bias
+  const last = last10[last10.length-1];
+  const streakLen = computeStreak(last10);
+  const bias = (counts.Big - counts.Small); // positive -> Big favored
+  const totalWeight = weights.reduce((s,a)=>s+a,0);
+  const bigProb = (counts.Big/totalWeight);
+  const smallProb = (counts.Small/totalWeight);
+  const confidence = Math.abs(bigProb - smallProb); // 0..1 smaller->low confidence
+  // determine suggested side
+  let suggestedSide = (bigProb >= smallProb) ? 'Big' : 'Small';
+  // Psychology heuristic: if there's a long streak of same side, contrarian or continuation?
+  // We'll prefer continuation for short streaks (<4), and contrarian for very long (>5)
+  if(streakLen >= 5){
+    // contrarian
+    suggestedSide = (last === 'Big') ? 'Small' : 'Big';
+  } else if(streakLen >= 3 && confidence < 0.15){
+    // low confidence but a short streak -> may skip
+    // leave suggestedSide but reduce confidence
+  }
+
+  // Bet sizing heuristic:
+  // baseRisk = 0.03 of balance when confident; scale by confidence
+  balance = Number(document.getElementById('balanceDisplay').dataset.val || startBalance);
+  if(!balance || isNaN(balance)) balance = startBalance;
+  const baseFraction = 0.03; // 3%
+  let suggestedAmount = Math.max(1, Math.round(balance * baseFraction * (0.5 + confidence*2))); // scaled by confidence
+  // if suggested amount > remaining to target, clamp
+  const remaining = Math.max(0, targetBalance - balance);
+  if(suggestedAmount > remaining) suggestedAmount = Math.min(remaining, suggestedAmount);
+
+  // Low confidence -> maybe skip
+  let adviceType = 'bet';
+  if(confidence < 0.06 || Math.max(bigProb, smallProb) < 0.52) {
+    adviceType = 'skip';
+  }
+
+  // Compose explanation
+  const reason = [];
+  reason.push(`Bias: Big ${bigProb.toFixed(2)} vs Small ${smallProb.toFixed(2)}`);
+  reason.push(`Recent streak: ${streakLen} (${last})`);
+  if(adviceType==='skip') reason.push('Low confidence — suggest skipping this period');
+  else reason.push('Confidence sufficient — suggest betting');
+
+  // store lastSuggestion and show in UI after a short simulated delay (approx 1s)
+  lastSuggestion = {
+    side: suggestedSide,
+    amount: suggestedAmount,
+    confidence: (confidence*100).toFixed(0),
+    adviceType,
+    reason: reason.join('. ')
+  };
+
+  setTimeout(()=>{
+    document.getElementById('analysisSpinner').style.display = 'none';
+    showAIAdvice();
+    // show ai history summary
+    renderHistory();
+  }, 900); // simulated analysis time (under 2s)
+}
+
+function computeStreak(arr){
+  if(!arr || !arr.length) return 0;
+  const last = arr[arr.length-1];
+  let c=0;
+  for(let i=arr.length-1;i>=0;i--){
+    if(arr[i]===last) c++; else break;
+  }
+  return c;
+}
+
+// ---------------- show AI advice ----------------
+function showAIAdvice(){
+  if(!lastSuggestion) return;
+  show('screen-ai'); hide('screen-input');
+  // set displays
+  document.getElementById('balanceDisplay').innerText = `₹${balance}`;
+  document.getElementById('balanceDisplay').dataset.val = balance;
+  document.getElementById('confidenceDisplay').innerText = `${lastSuggestion.confidence}%`;
+  document.getElementById('aiAdvice').innerText = (lastSuggestion.adviceType==='skip') ? `SKIP this period` : `${lastSuggestion.side} • Bet`;
+  document.getElementById('aiReason').innerText = lastSuggestion.reason;
+  document.getElementById('suggestedAmount').innerText = (lastSuggestion.adviceType==='skip') ? '—' : `₹${lastSuggestion.amount}`;
+  document.getElementById('lastAnalysisTime').innerText = new Date().toLocaleTimeString();
+  computeAndRenderStats();
+}
+
+// ---------------- mark outcome (user presses Win / Loss / Skip) ----------------
+function markOutcome(result){
+  // result: 'win' 'loss' 'skip'
+  if(!lastSuggestion && result!=='skip'){
+    alert('No suggestion exists yet. Click Analyze first.');
+    return;
+  }
+  const period = new Date().toISOString(); // synthetic period id; could be customized
+  const rec = {
+    period,
+    side: lastSuggestion ? lastSuggestion.side : null,
+    amt: lastSuggestion ? lastSuggestion.amount : 0,
+    advice: lastSuggestion ? lastSuggestion.adviceType : 'skip',
+    result, ts: Date.now()
+  };
+  // update balance & stats
+  if(result === 'win'){
+    // assume winning gives equal amount as profit (for demo): add amt
+    balance += (rec.amt || 0);
+    stats.wins = (stats.wins||0) + 1;
+  } else if(result === 'loss'){
+    balance -= (rec.amt || 0);
+    if(balance < 0) balance = 0;
+    stats.losses = (stats.losses||0) + 1;
+  } else if(result === 'skip'){
+    // no balance change
+  }
+  // apply rounding
+  balance = Math.round(balance);
+  // push to history (keep last 200 entries)
+  spc_history.unshift(rec);
+  if(spc_history.length>200) spc_history = spc_history.slice(0,200);
+  saveState();
+  // update UI
+  document.getElementById('balanceDisplay').innerText = `₹${balance}`;
+  document.getElementById('balanceDisplay').dataset.val = balance;
+  renderHistory();
+  computeAndRenderStats();
+  // re-analyze quickly using last saved history + last10
+  // update last10 shift: append actual observed result (Big/Small) if available
+  // For demo, if user reported win and lastSuggestion.side exists, we treat actual outcome = that side (this sim uses user feedback)
+  if(lastSuggestion && (result === 'win' || result === 'loss')){
+    // If win -> outcome matched side. If loss -> opposite.
+    const actual = (result==='win') ? lastSuggestion.side : (lastSuggestion.side==='Big' ? 'Small' : 'Big');
+    // shift last10 left and push actual
+    last10.shift(); last10.push(actual);
+    // reflect on UI last10 buttons if screen-input visible later
+  }
+  // check completed target
+  if(balance >= targetBalance){
+    setTimeout(()=> {
+      alert('🎉 Congratulations — Your target complete!');
+      // reset to initial screen
+      resetToStart();
+    }, 250);
+  }
+  // re-run analyze automatically to provide next suggestion
+  lastSuggestion = null;
+  setTimeout(()=> analyze(), 500);
+}
+
+// ---------------- render history & stats ----------------
+function renderHistory(){
+  // history summary (most recent first)
+  const box = document.getElementById('historyBox');
+  box.innerHTML = '';
+  const grouped = spc_history.slice(0,50); // show latest 50
+  grouped.forEach(h=>{
+    const d = document.createElement('div');
+    d.style.padding='6px 4px';
+    d.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    d.innerHTML = `<div style="display:flex;justify-content:space-between">
+      <div style="font-size:13px">${h.advice || '-'} ${h.side || '-'} ${h.amt?('₹'+h.amt):''}</div>
+      <div style="font-size:12px;color:#bbb">${new Date(h.ts).toLocaleTimeString()} • ${h.result}</div>
     </div>`;
-    pendingListEl.appendChild(div);
+    box.appendChild(d);
   });
-}
 
-// admin pending list in admin modal
-function renderAdminPending(){
-  adminPending.innerHTML = '';
-  const items = [];
-  for(let i=0;i<localStorage.length;i++){
-    const k = localStorage.key(i);
-    if(k && k.startsWith('pending_')){
-      const v = readJSON(k);
-      if(v) items.push({key:k, val:v});
-    }
-  }
-  if(items.length===0){ adminPending.innerHTML = '<div class="small">No pending purchases</div>'; return; }
-  items.sort((a,b)=>b.val.ts - a.val.ts);
-  items.forEach(it=>{
-    const d = it.val;
+  // lastResults (last10)
+  const lr = document.getElementById('lastResults');
+  lr.innerHTML = '';
+  if(last10.length){
     const row = document.createElement('div');
-    row.style.padding='8px';
-    row.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-    row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div><b>${d.coins} coins</b> — ₹${(d.amount).toFixed(2)}</div>
-        <div class="small">UTR: ${d.utr} • ${new Date(d.ts).toLocaleString()}</div>
-      </div>
-      <div style="text-align:right">
-        <button data-utr="${d.utr}" class="btn admin-approve">Approve</button>
-        <button data-utr="${d.utr}" class="ghost admin-reject" style="margin-left:6px">Reject</button>
-      </div>
-    </div>`;
-    adminPending.appendChild(row);
-  });
-
-  // attach handlers
-  Array.from(document.getElementsByClassName('admin-approve')).forEach(btn=>{
-    btn.onclick = ()=>{ const utr = btn.getAttribute('data-utr'); adminApprove(utr); };
-  });
-  Array.from(document.getElementsByClassName('admin-reject')).forEach(btn=>{
-    btn.onclick = ()=>{ const utr = btn.getAttribute('data-utr'); adminReject(utr); };
-  });
-}
-
-// admin actions
-function adminApprove(utr){
-  const key = 'pending_' + utr;
-  const data = readJSON(key);
-  if(!data){ adminMsg.innerText = 'Pending not found'; return; }
-  // credit wallet for the user who created (we don't have multi-user identification here)
-  // Add the coins to wallet_coins
-  const current = getWallet();
-  setWallet(current + Number(data.coins));
-  // mark approved
-  writeJSON('approved_' + utr, {utr, coins: data.coins, amount: data.amount, ts: Date.now()});
-  // remove pending
-  localStorage.removeItem(key);
-  adminMsg.innerText = 'Approved UTR ' + utr + ' — wallet credited.';
-  renderAdminPending();
-  renderPendingList();
-}
-
-function adminReject(utr){
-  const key = 'pending_' + utr;
-  const data = readJSON(key);
-  if(!data){ adminMsg.innerText = 'Pending not found'; return; }
-  writeJSON('rejected_' + utr, {utr, coins: data.coins, amount: data.amount, ts: Date.now()});
-  localStorage.removeItem(key);
-  adminMsg.innerText = 'Rejected UTR ' + utr;
-  renderAdminPending();
-  renderPendingList();
-}
-
-// Buy flow
-preset100.onclick = ()=> coinsInput.value = 100;
-preset500.onclick = ()=> coinsInput.value = 500;
-preset1000.onclick = ()=> coinsInput.value = 1000;
-
-buyBtn.onclick = ()=>{
-  let coins = parseInt(coinsInput.value||'0',10);
-  if(isNaN(coins) || coins < MIN_COINS){ alert('Minimum 100 coins'); coinsInput.value = MIN_COINS; return; }
-  if(coins > MAX_COINS){ alert('Maximum 4000 coins'); coinsInput.value = MAX_COINS; return; }
-  // open modal with computed amount
-  modalCoins.value = coins;
-  modalAmount.value = (coins * PRICE_PER_COIN).toFixed(2);
-  modalUTR.value = '';
-  modalMsg.innerText = '';
-  csNote.style.display = 'none';
-  openModal(payModal);
-};
-
-// modal submit
-modalSubmit.onclick = ()=>{
-  const coins = Number(modalCoins.value);
-  const amount = Number(modalAmount.value);
-  const utr = (modalUTR.value||'').trim();
-  if(!/^[0-9]{12}$/.test(utr)){ modalMsg.innerText = 'Enter valid 12-digit UTR'; return; }
-  // create pending key
-  const key = 'pending_' + utr;
-  if(readJSON(key)){ modalMsg.innerText = 'A pending request with this UTR already exists'; return; }
-  const payload = { utr, coins, amount, ts: Date.now(), status: 'pending' };
-  writeJSON(key, payload);
-  modalMsg.innerText = 'Submitted — awaiting admin approval';
-  csNote.style.display = 'block';
-  renderPendingList();
-  closeModal(payModal);
-};
-
-// modal close
-modalClose.onclick = ()=> closeModal(payModal);
-
-// modal open/close helpers
-function openModal(el){ el.classList.add('show'); }
-function closeModal(el){ el.classList.remove('show'); }
-
-// predictions: period generator + countdown
-// We'll create a period number that increments every minute. Format: YYYYMMDDHHMM + seq
-function makePeriodString(){
-  const d = new Date();
-  // YYYYMMDDHHMM
-  const YYYY = d.getFullYear().toString().padStart(4,'0');
-  const MM = String(d.getMonth()+1).padStart(2,'0');
-  const DD = String(d.getDate()).padStart(2,'0');
-  const hh = String(d.getHours()).padStart(2,'0');
-  const mi = String(d.getMinutes()).padStart(2,'0');
-  // seq: minutes since epoch modulo 100000 (keeps it numeric)
-  const seq = String(Math.floor(Date.now()/60000) % 100000).padStart(5,'0');
-  return `${YYYY}${MM}${DD}${hh}${mi}${seq}`; // long unique per minute string
-}
-
-let countdownInterval = null;
-function startPeriodClock(){
-  // update immediately
-  updatePeriodDisplay();
-  if(countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(()=>{
-    updatePeriodDisplay();
-  }, 1000);
-}
-
-function updatePeriodDisplay(){
-  // compute seconds until next minute
-  const now = Date.now();
-  const next = Math.ceil(now / 60000) * 60000;
-  const sec = Math.max(0, Math.round((next - now)/1000));
-  countdownEl.innerText = 'Next period in: ' + sec + 's';
-  if(sec === 0){
-    // period changed
-    periodDisplay.innerText = makePeriodString();
-  } else {
-    // show current minute's period (stable until next)
-    periodDisplay.innerText = makePeriodString();
+    row.className='result-row';
+    last10.slice().reverse().forEach(r=>{
+      const pill = document.createElement('div');
+      pill.className='result-pill';
+      pill.innerText = r;
+      if(r==='Big') pill.style.borderLeft = '4px solid #7fe8a7';
+      else pill.style.borderLeft = '4px solid #ffcf8c';
+      row.appendChild(pill);
+    });
+    lr.appendChild(row);
   }
 }
 
-// generate prediction (consumes 2 coins)
-function loadPredictions(){
-  return readJSON('predictions', []);
-}
-function savePredictions(arr){ writeJSON('predictions', arr); }
-
-function renderPredHistory(){
-  const arr = loadPredictions();
-  predHistory.innerHTML = '';
-  if(arr.length === 0){ predHistory.innerHTML = '<div class="small">No predictions yet</div>'; return; }
-  arr.slice(0,20).forEach(p=>{
-    const item = document.createElement('div');
-    item.style.padding='6px';
-    item.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-    item.innerHTML = `<div style="display:flex;justify-content:space-between">
-      <div><b>${p.period}</b><div class="small">${p.signal} • ${p.nums}</div></div>
-      <div class="small">${new Date(p.ts).toLocaleTimeString()}</div>
-    </div>`;
-    predHistory.appendChild(item);
-  });
+// ---------------- stats compute ----------------
+function computeAndRenderStats(){
+  const wins = stats.wins||0, losses=stats.losses||0, total = wins+losses;
+  const acc = total ? Math.round((wins/total)*100) : 0;
+  document.getElementById('statWins').innerText = wins;
+  document.getElementById('statLosses').innerText = losses;
+  document.getElementById('statAcc').innerText = acc + '%';
+  // progress
+  document.getElementById('progressText').innerText = `Target: ${startBalance} → ${targetBalance} • Remaining: ₹${Math.max(0, targetBalance-balance)}`;
+  // historyBox already updated
 }
 
-function renderResultsArea(){
-  const arr = loadPredictions();
-  resultsArea.innerHTML = '';
-  if(arr.length === 0){ resultsArea.innerHTML = '<div class="small">No results</div>'; return; }
-  arr.slice(0,20).forEach(r=>{
-    const div = document.createElement('div');
-    div.style.padding='6px';
-    div.style.borderBottom='1px solid rgba(255,255,255,0.03)';
-    div.innerHTML = `<div style="display:flex;justify-content:space-between">
-      <div><strong>${r.period}</strong><div class="small">${r.signal} • ${r.nums}</div></div>
-      <div class="small">${new Date(r.ts).toLocaleTimeString()}</div>
-    </div>`;
-    resultsArea.appendChild(div);
-  });
+// ---------------- reset to start ----------------
+function resetToStart(){
+  // clear session variables except saved global history & stats
+  last10 = [];
+  spc_history = spc_history || [];
+  stats = stats || {wins:0,losses:0};
+  saveState();
+  document.getElementById('screen-ai').style.display = 'none';
+  document.getElementById('screen-input').style.display = 'none';
+  document.getElementById('screen-choose').style.display = 'block';
+  // reset displays
+  document.getElementById('balanceDisplay').dataset.val = startBalance;
 }
 
-generateBtn.onclick = ()=>{
-  // check wallet
-  const wallet = getWallet();
-  if(wallet < PRED_COST){ alert('Not enough coins. Buy coins first.'); return; }
-  // require user to enter period3 or allow blank
-  const p3 = (period3.value||'').trim();
-  // deduct coins immediately
-  setWallet(wallet - PRED_COST);
-  // create prediction
-  const signal = Math.random() < 0.5 ? 'SMALL' : 'BIG';
-  let a,b;
-  if(signal === 'SMALL'){ a = Math.floor(Math.random()*5); b = Math.floor(Math.random()*5); }
-  else { a = 5 + Math.floor(Math.random()*5); b = 5 + Math.floor(Math.random()*5); }
-  const periodNow = makePeriodString();
-  const nums = `${a} / ${b}`;
-  // display
-  predictionArea.style.display = 'block';
-  predPeriod.innerText = periodNow + (p3 ? (' • ' + p3) : '');
-  predSignal.innerText = signal;
-  predNums.innerText = nums;
-  // store in predictions history
-  const arr = loadPredictions();
-  arr.unshift({ period: periodNow + (p3 ? ('|' + p3) : ''), signal, nums, ts: Date.now()});
-  savePredictions(arr.slice(0,100)); // keep last 100
-  renderPredHistory();
-  renderResultsArea();
-};
-
-// admin modal open
-adminCross.onclick = async ()=>{
-  const pw = prompt('Enter admin password:');
-  if(pw === null) return;
-  if(pw !== ADMIN_PASS){ alert('Wrong password'); return; }
-  adminMsg.innerText = '';
-  renderAdminPending();
-  openModal(adminModal);
-};
-adminClose.onclick = ()=> closeModal(adminModal);
-
-// refresh wallet/pending
-refreshWalletBtn.onclick = ()=>{
-  updateWalletUI();
-  renderPendingList();
-  renderPredHistory();
-  renderResultsArea();
-};
-
-// listen for storage events so if admin approves in another tab, user sees it
-window.addEventListener('storage', (ev)=>{
-  if(!ev.key) return;
-  // if approved_ key added, update wallet UI (we can't identify user per se; we assume single-user)
-  if(ev.key.startsWith('approved_')){
-    // credit coins from approved entry if wallet hasn't seen it yet
-    try{
-      const approved = JSON.parse(ev.newValue);
-      if(approved && approved.utr){
-        // to avoid double-crediting across tabs we only credit if there is still a pending key removed
-        // This basic approach is local-only; for multi-user real system use server-side.
-        // For now, ensure pending_utr removed and then credit
-        const pendingKey = 'pending_' + approved.utr;
-        if(!localStorage.getItem(pendingKey)){
-          // credit (but only if not previously credited)
-          // We'll also set a marker approved_consume_<utr> so we don't credit multiple times in same tab
-          const marker = 'approved_consume_' + approved.utr;
-          if(!localStorage.getItem(marker)){
-            const cur = getWallet();
-            setWallet(cur + Number(approved.coins || approved.coins === 0 ? approved.coins : 0));
-            localStorage.setItem(marker, '1');
-          }
-        }
-      }
-    }catch(e){}
-    renderPendingList();
-  }
-  // if pending removed, update pending list
-  if(ev.key && ev.key.startsWith('pending_') === false){
-    renderPendingList();
-  }
-});
-
-// initial setup & helpers
+// ---------------- init ----------------
 function init(){
-  updateWalletUI();
-  renderPendingList();
-  renderPredHistory();
-  renderResultsArea();
-  startPeriodClock();
-  // set QR src fallback if not set
-  if(!qrImage.src || qrImage.src.indexOf('qr.png') === -1){
-    qrImage.src = 'qr.png';
-  }
+  loadState();
+  // initial defaults
+  document.getElementById('balanceDisplay').dataset.val = startBalance;
+  // route: show choose screen
+  hide('screen-input'); hide('screen-ai');
+  show('screen-choose');
+  renderHistory();
+  computeAndRenderStats();
 }
 init();
-
-// convenience: clicking buy opens modal prefilled
-// Also show amount when coins input changes
-coinsInput.addEventListener('input', ()=>{
-  let v = parseInt(coinsInput.value||'0',10);
-  if(isNaN(v)) v = MIN_COINS;
-  if(v < MIN_COINS) v = MIN_COINS;
-  if(v > MAX_COINS) v = MAX_COINS;
-  coinsInput.value = v;
-});
-
-// small UX: open modal when buy triggered
-buyBtn.addEventListener('click', ()=>{
-  // handled earlier — modal will open and filled.
-});
-
-// helpers to keep things tidy
-(function tidyInterval(){
-  setInterval(()=>{
-    // remove old approved_consume markers older than 7 days (not strictly necessary)
-    // (omitted to keep storage simpler)
-  }, 24*60*60*1000);
-})();
 
 </script>
 </body>
