@@ -3,629 +3,535 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DeepPredict — Advanced Wingo Analyzer (Prototype)</title>
-
-<!-- Chart.js for charts -->
+<title>Prediction AI — Professional</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
   :root{
-    --bg:#071021;
+    --bg:#071022;
     --card:#0f1724;
-    --accent:#00d2a8;
-    --accent2:#00a6ff;
     --muted:#9fb0d6;
-    --danger:#ff6b6b;
+    --accent1:#00d2a8;
+    --accent2:#00a6ff;
     --glass: rgba(255,255,255,0.03);
   }
-  *{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif}
-  body{margin:0;background:linear-gradient(180deg,#061021,#07142a);color:#eaf6ff;min-height:100vh;padding:18px}
-  .container{max-width:1100px;margin:18px auto}
-  header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
-  .logo{width:56px;height:56px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:900;color:#002}
-  h1{margin:0;font-size:1.15rem}
-  p.lead{margin:6px 0 0;color:var(--muted);font-size:0.95rem}
-
-  .grid{display:grid;grid-template-columns: 380px 1fr;gap:16px}
-  @media(max-width:980px){ .grid{grid-template-columns:1fr} }
-
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.03)}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  input[type=text], textarea, select {width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  textarea{min-height:120px;resize:vertical}
-  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001;font-weight:800;cursor:pointer}
+  *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+  body{margin:0;background:linear-gradient(180deg,#030616,#071022);color:#eaf6ff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .app{width:100%;max-width:1100px}
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .logo{width:54px;height:54px;border-radius:10px;overflow:hidden;background:#09202a;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.04)}
+  .h1{font-weight:700;font-size:18px}
+  .muted{color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;padding:10px 12px;border-radius:8px;color:#001;font-weight:800;cursor:pointer}
   .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  .small{font-size:13px;color:var(--muted)}
-  .muted{color:var(--muted)}
-
-  /* Analysis console */
-  .console{height:220px;overflow:auto;background:rgba(0,0,0,0.25);border-radius:8px;padding:8px;font-family:monospace;font-size:13px;color:#bfe;line-height:1.3}
-  .row{display:flex;gap:8px;align-items:center}
-  .flexcol{display:flex;flex-direction:column;gap:8px}
-
-  /* Prediction card */
-  .pred-box{border-radius:12px;padding:14px;background:linear-gradient(90deg, rgba(0,210,168,0.03), rgba(0,166,255,0.02));border:1px solid rgba(0,210,168,0.06)}
-  .pred-label{font-weight:900;font-size:16px;color:var(--accent)}
-  .conf{font-weight:900;font-size:18px}
-  .insight{background:rgba(0,0,0,0.25);padding:8px;border-radius:8px;margin-top:8px}
-  .chip{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700;margin-right:6px}
-
-  footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+  input[type=text]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:100%}
+  .periodRow{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .periodRow input{flex:1}
+  .historyBox{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .chip{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);min-width:56px;text-align:center;font-weight:700}
+  .chip.big{background:linear-gradient(180deg, rgba(127,232,167,0.12), rgba(127,232,167,0.06));color:#8ff7c6}
+  .chip.small{background:linear-gradient(180deg, rgba(255,182,107,0.08), rgba(255,182,107,0.04));color:#ffd7a8}
+  .analytics{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bigPred{font-size:22px;font-weight:900;color:var(--accent1)}
+  .conf{font-weight:800}
+  canvas{background:transparent;border-radius:8px}
+  .log{margin-top:12px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.25);font-size:13px;max-height:160px;overflow:auto}
+  .footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+  .flex{display:flex;gap:8px;align-items:center}
+  .settings{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .badge{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:700}
 </style>
 </head>
 <body>
-
-<div class="container">
+<div class="app">
   <header>
-    <div class="logo">DP</div>
+    <div class="logo">AI</div>
     <div>
-      <h1>DeepPredict — Advanced Wingo Analyzer</h1>
-      <p class="lead">Deep pattern, trend & psychology analysis — enter last results and period, get high-confidence prediction.</p>
+      <div class="h1">Prediction AI — Professional (Wingo 1min style)</div>
+      <div class="muted">Deep analysis over last results • confidence threshold 60%</div>
     </div>
   </header>
 
   <div class="grid">
-    <!-- LEFT: Input / Controls -->
+    <!-- LEFT: main prediction area -->
     <div class="card">
-      <h3 style="margin-top:0">Inputs</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800">Prediction Console</div>
+          <div class="muted">Enter last results (B for BIG, S for SMALL) — minimum 10 results required</div>
+        </div>
+        <div class="badge" id="serverStatus">Server: Connected ✅</div>
+      </div>
 
-      <label>Enter last results (B for BIG, S for SMALL) — comma separated (min 10 recommended)</label>
-      <textarea id="lastResults" placeholder="Example: B,S,B,B,S,S,B,B,S,B"></textarea>
+      <div class="periodRow">
+        <input id="periodInput" placeholder="Enter full period id (e.g. 20250914100011151)" />
+        <button class="btn" id="nextPeriodBtn">Auto Next</button>
+      </div>
 
-      <label style="margin-top:10px">Current period number (exact format)</label>
-      <input type="text" id="periodNumber" placeholder="e.g. 20250914100011151">
+      <div style="margin-top:10px">
+        <div class="muted">Last results (latest on right)</div>
+        <div class="historyBox" id="historyBox" aria-live="polite"></div>
 
-      <label style="margin-top:10px">Analysis confidence threshold (%)</label>
-      <select id="confThreshold">
-        <option value="60">60%</option>
-        <option value="65">65%</option>
-        <option value="70" selected>70%</option>
-        <option value="75">75%</option>
-        <option value="80">80%</option>
-      </select>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <input id="manualResultInput" placeholder="Enter B or S" style="width:120px"/>
+          <button class="btn ghost" id="addResultBtn">Add Result</button>
+          <button class="btn" id="clearBtn">Clear All</button>
+        </div>
+      </div>
 
-      <div style="margin-top:12px" class="row">
-        <button class="btn" id="startBtn">Generate Prediction</button>
-        <button class="btn ghost" id="resetBtn">Reset Inputs</button>
+      <div class="controls">
+        <button class="btn" id="analyzeBtn">Analyze & Predict</button>
+        <button class="btn ghost" id="fillDemoBtn">Fill sample last-10</button>
+        <div class="muted" style="align-self:center">Confidence threshold: <input id="confThresh" type="text" value="60" style="width:60px;margin-left:8px"/>%</div>
+      </div>
+
+      <div class="analytics">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="muted">Prediction</div>
+            <div id="predictionBox" class="bigPred">--</div>
+          </div>
+          <div style="margin-top:8px" class="muted">Confidence: <span id="confText">--</span>%</div>
+          <div style="margin-top:10px" id="suggestionText" class="muted"></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="muted">Bet Suggestion (15/30/55)</div>
+            <div id="betSuggest" class="muted">—</div>
+          </div>
+          <div style="margin-top:8px" class="muted">Balance: <input id="balanceInput" type="text" value="1000" style="width:120px;margin-left:8px"/></div>
+        </div>
       </div>
 
       <div style="margin-top:12px">
-        <div class="small">Analysis Console (logs)</div>
-        <div id="console" class="console"></div>
+        <canvas id="freqChart" height="120"></canvas>
       </div>
 
-      <div style="margin-top:10px" class="muted">
-        Tip: Enter as many past rounds as you have (10–50). The analyzer will use multiple modules to compute a confident prediction and explain the reasoning.
-      </div>
+      <div class="log" id="logBox"></div>
     </div>
 
-    <!-- RIGHT: Charts & Prediction -->
+    <!-- RIGHT: sidebar -->
     <div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small">Server</div>
-            <div style="font-weight:800;color:#bfe">Connected (Local Analysis)</div>
-          </div>
-          <div class="small muted">Mode: Deterministic heuristic</div>
+          <div style="font-weight:800">Analysis Breakdown</div>
+          <div class="muted">10 modules</div>
         </div>
-
-        <div style="margin-top:12px" id="analysisArea">
-          <div class="pred-box">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="pred-label">Prediction</div>
-                <div id="predResult" style="font-size:28px;font-weight:900;color:#fff">--</div>
-                <div id="predPeriod" class="small muted" style="margin-top:6px">Period: --</div>
-              </div>
-              <div style="text-align:right">
-                <div class="small muted">Confidence</div>
-                <div id="predConf" class="conf" style="color:var(--accent)">-- %</div>
-                <div style="margin-top:8px"><button class="btn ghost" id="markWinBtn">Mark Win</button></div>
-              </div>
-            </div>
-
-            <div class="insight" id="topInsight" style="margin-top:12px">Analysis summary will appear here.</div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px">
-          <canvas id="freqChart" height="200"></canvas>
+        <div style="margin-top:10px">
+          <div class="muted">Modules run time: <span id="analysisTime">0s</span></div>
+          <div style="margin-top:10px" id="modulesList"></div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="card">
-        <h4 style="margin-top:0">Detailed Module Scores</h4>
-        <div id="modulesList" class="small muted">No analysis yet.</div>
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Results History</div>
+          <div class="muted" id="histCount">0</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="muted">Saved results (latest 50)</div>
+          <div class="log" id="savedList" style="max-height:240px"></div>
+        </div>
       </div>
 
-      <div style="margin-top:12px" class="card">
-        <h4 style="margin-top:0">Saved History (latest first)</h4>
-        <div id="historyBox" class="small muted">No history.</div>
+      <div class="card" style="margin-top:12px;text-align:center">
+        <div style="font-weight:800">Quick Actions</div>
+        <div style="margin-top:10px" class="controls">
+          <button class="btn ghost" id="exportBtn">Export JSON</button>
+          <button class="btn" id="importBtn">Import JSON</button>
+        </div>
+        <div style="margin-top:10px" class="muted">Auto-save last results to localStorage for AI learning</div>
       </div>
     </div>
   </div>
 
-  <footer>Prototype — Deterministic heuristics & pattern detection. For production ML: server model & historical dataset recommended.</footer>
+  <div class="footer">Design: Professional terminal • Analysis: weighted heuristics (hybrid)</div>
 </div>
 
 <script>
-/* -------------------------
-   DeepPredict — client-side analyzer
-   - multiple analysis modules
-   - aggregated confidence score
-   - deterministic, rule-based, explainable
-   ------------------------- */
+/* Prediction AI (hybrid heuristics) - client-side
+   - Maintains last results array (B/S) and period auto-increment
+   - When Analyze: runs multiple modules, computes weighted score for BIG and SMALL
+   - Confidence = normalized max score; if >= threshold -> shows prediction
+   - Saves history to localStorage 'pa_history' (latest 50)
+*/
 
-const consoleEl = document.getElementById('console');
-const lastResultsEl = document.getElementById('lastResults');
-const periodEl = document.getElementById('periodNumber');
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const predResultEl = document.getElementById('predResult');
-const predConfEl = document.getElementById('predConf');
-const predPeriodEl = document.getElementById('predPeriod');
-const modulesList = document.getElementById('modulesList');
-const topInsight = document.getElementById('topInsight');
-const historyBox = document.getElementById('historyBox');
-const confThresholdEl = document.getElementById('confThreshold');
-const markWinBtn = document.getElementById('markWinBtn');
-
-let history = JSON.parse(localStorage.getItem('dp_history')||'[]');
-
-// Utility helpers
-function logConsole(msg){
-  const t = new Date().toLocaleTimeString();
-  consoleEl.innerHTML = `<div>[${t}] ${msg}</div>` + consoleEl.innerHTML;
-}
-function saveHistoryEntry(entry){
-  history.unshift(entry);
-  if(history.length>100) history.length = 100;
-  localStorage.setItem('dp_history', JSON.stringify(history));
-  renderHistory();
-}
-function renderHistory(){
-  if(!history.length){ historyBox.innerHTML = '<div class="muted">No history yet.</div>'; return; }
-  historyBox.innerHTML = history.slice(0,20).map(h=>{
-    return `<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)"><strong>${h.period}</strong> — Pred: <b>${h.pred}</b> (${h.conf}%) • Result: ${h.result||'pending'}</div>`;
-  }).join('');
-}
-renderHistory();
-
-// Chart setup
-const ctx = document.getElementById('freqChart').getContext('2d');
-let freqChart = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['BIG','SMALL'],
-    datasets: [{
-      label: 'Frequency (last N)',
-      data: [0,0],
-      backgroundColor: ['rgba(0,210,168,0.8)','rgba(0,166,255,0.8)'],
-      borderRadius: 6
-    }]
-  },
-  options: {
-    plugins:{legend:{display:false}},
-    scales:{
-      y:{beginAtZero:true,ticks:{color:'#bfe'}},
-      x:{ticks:{color:'#bfe'}}
-    }
-  }
-});
-
-/* -------------------------
-   Pattern detection modules
-   Each returns {score:0..1, note:'explain'}
-   We'll weight modules into final confidence
-   ------------------------- */
-
-// Normalize input: array of 'B'/'S'
-function normalizeList(str){
-  if(!str) return [];
-  let arr = str.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
-  arr = arr.map(s => s.startsWith('B') ? 'B' : (s.startsWith('S') ? 'S' : null)).filter(Boolean);
-  return arr;
-}
-
-// Frequency module (how skewed is distribution)
-function moduleFrequency(arr){
-  const n = arr.length;
-  if(n===0) return {score:0,note:'No data'};
-  const b = arr.filter(x=>x==='B').length;
-  const s = n-b;
-  const ratio = Math.abs(b-s)/n; // 0..1
-  const fav = b> s ? 'B' : (s> b ? 'S' : 'tie');
-  const score = Math.min(1, ratio * 1.2); // amplify a bit
-  return {score, note:`Freq: B=${b}, S=${s}. Skew towards ${fav}`} ;
-}
-
-// Run-length / streak detection (long runs imply momentum)
-function moduleRuns(arr){
-  if(arr.length===0) return {score:0,note:'No data'};
-  let maxRun = 1, cur = 1;
-  for(let i=1;i<arr.length;i++){
-    if(arr[i]===arr[i-1]) cur++; else { if(cur>maxRun) maxRun=cur; cur=1; }
-  }
-  if(cur>maxRun) maxRun=cur;
-  // score normalized: runs >=4 considered strong
-  const score = Math.min(1, (maxRun-1)/3); // maxRun=4 -> score=1
-  return {score, note:`Max run length = ${maxRun}`};
-}
-
-// Alternation / zig-zag detection (if alternating frequently, zigzag pattern)
-function moduleAlternation(arr){
-  if(arr.length<3) return {score:0,note:'Too short'};
-  let alt=0;
-  for(let i=2;i<arr.length;i++){
-    if(arr[i]!==arr[i-1] && arr[i-1]!==arr[i-2]) alt++;
-  }
-  const ratio = alt / Math.max(1, arr.length-2);
-  const score = Math.min(1, ratio * 1.6);
-  return {score, note:`Alternation ratio ${(ratio*100).toFixed(0)}%`};
-}
-
-// Double / triple repeat pattern detection (detect repeating blocks)
-function moduleRepeats(arr){
-  if(arr.length<6) return {score:0,note:'Too short'};
-  // check for pattern of length 2..4 repeating at the end
-  const n = arr.length;
-  for(let L=2; L<=4; L++){
-    if(n < L*2) continue;
-    const tail = arr.slice(n-2*L);
-    const a = tail.slice(0,L).join('');
-    const b = tail.slice(L,2*L).join('');
-    if(a===b){
-      return {score:0.9, note:`Detected repeating block length ${L} (pattern ${a})`};
-    }
-  }
-  return {score:0.0, note:'No repeating block detected'};
-}
-
-// Momentum / trend detection (recent slope)
-function moduleMomentum(arr){
-  if(arr.length<6) return {score:0,note:'Too short'};
-  // map B->1, S->0 and compute recent average slope over sliding windows
-  const vals = arr.map(x=> x==='B' ? 1 : 0);
-  const window = Math.min(6, vals.length);
-  const firstAvg = vals.slice(0,window).reduce((a,b)=>a+b,0)/window;
-  const lastAvg = vals.slice(-window).reduce((a,b)=>a+b,0)/window;
-  const diff = lastAvg - firstAvg; // -1..1
-  const score = Math.min(1, Math.abs(diff)*2);
-  const dir = diff>0 ? 'towards BIG' : (diff<0 ? 'towards SMALL' : 'neutral');
-  return {score, note:`Momentum ${dir} (change ${(diff*100).toFixed(1)}%)`};
-}
-
-// Entropy (randomness) — lower entropy => pattern stronger
-function moduleEntropy(arr){
-  if(arr.length===0) return {score:0,note:'No data'};
-  const n = arr.length;
-  const pB = arr.filter(x=>x==='B').length / n;
-  const pS = 1 - pB;
-  function entropy(p){ if(p<=0 || p>=1) return 0; return - (p*Math.log2(p) + (1-p)*Math.log2(1-p)); }
-  const ent = entropy(pB);
-  // normalize: entropy 0 => strong (score 1), entropy 1 => weak (score 0)
-  const score = Math.min(1, (1 - ent));
-  return {score, note:`Entropy ${(ent).toFixed(3)} (pB=${(pB*100).toFixed(1)}%)`};
-}
-
-// Pattern matching: look for zigzag (ABAB), triple (AAA), dragon-ish (short rise then fall)
-function modulePatternMatch(arr){
-  if(arr.length<8) return {score:0,note:'Too short'};
-  // heuristic checks:
-  const n = arr.length;
-  // count alternation pairs
-  let toggleCount = 0;
-  for(let i=1;i<n;i++) if(arr[i]!==arr[i-1]) toggleCount++;
-  const toggleRatio = toggleCount/(n-1);
-
-  // detect "double then opposite" patterns
-  let doubleOpp=0;
-  for(let i=2;i<n;i++){
-    if(arr[i]===arr[i-1] && arr[i-2]!==arr[i-1]) doubleOpp++;
-  }
-
-  // zigzag if high toggle ratio and small doubleOpp
-  if(toggleRatio > 0.6 && doubleOpp < (n*0.15)) return {score:0.9, note:'Zig-zag pattern likely (high alternation)'};
-  if(doubleOpp >= Math.max(1, n*0.15)) return {score:0.8, note:'Double-then-opposite pattern observed'};
-  // dragon-like: detect a short increasing run followed by short decreasing run => approximate
-  // map B=1 S=0, find peak-run
-  const vals = arr.map(x=> x==='B' ? 1 : 0);
-  // find longest run of 1s or 0s near middle
-  let best=0; let cur=1;
-  for(let i=1;i<vals.length;i++){ if(vals[i]===vals[i-1]) cur++; else { best=Math.max(best,cur); cur=1; } }
-  best = Math.max(best,cur);
-  if(best>=4) return {score:0.85, note:'Long run detected (momentum / dragon-like behaviour)'};
-  return {score:0.2, note:'No clear repeating pattern'};
-}
-
-// Human-psychology heuristic (majority behavior -> odds to be opposite)
-function modulePsychology(arr){
-  if(arr.length===0) return {score:0,note:'No data'};
-  const n = arr.length;
-  const b = arr.filter(x=>x==='B').length;
-  const s = n-b;
-  const majority = b> s ? 'B' : (s> b ? 'S' : 'tie');
-  // heuristic: heavy majority implies many players expect that and house may favor opposite
-  const majRatio = Math.abs(b-s)/n;
-  // If majority strong (>0.6), prefer opposite with some score.
-  const score = Math.min(1, Math.max(0, (majRatio - 0.2) * 1.5)); // small threshold
-  const note = majRatio>0.25 ? `Majority leans ${majority} (${(majRatio*100).toFixed(1)}%) -> consider opposite` : 'No strong mass-psychology';
-  return {score, note};
-}
-
-// Recent-shift detector (last 3-5 rounds changed)
-function moduleRecentShift(arr){
-  if(arr.length<6) return {score:0,note:'Too short'};
-  const last3 = arr.slice(-3);
-  const prev3 = arr.slice(-6,-3);
-  const lastMode = mode(last3);
-  const prevMode = mode(prev3);
-  if(lastMode !== prevMode) return {score:0.8, note:`Recent shift from ${prevMode} to ${lastMode}`};
-  return {score:0.1, note:'No recent shift'};
-}
-
-// Utility mode
-function mode(arr){
-  const m = {};
-  arr.forEach(x=>m[x]=(m[x]||0)+1);
-  let best=null, bestc=0;
-  for(const k in m) if(m[k]>bestc){ bestc=m[k]; best=k; }
-  return best;
-}
-
-/* Aggregate modules with weights */
+// helpers
+const el = id=>document.getElementById(id);
+let history = JSON.parse(localStorage.getItem('pa_last_results')||'[]'); // array of 'B' or 'S' (latest on right)
 const modules = [
-  {fn:moduleFrequency, weight:1.2},
-  {fn:moduleRuns, weight:1.0},
-  {fn:moduleAlternation, weight:0.9},
-  {fn:moduleRepeats, weight:1.1},
-  {fn:moduleMomentum, weight:1.0},
-  {fn:moduleEntropy, weight:0.9},
-  {fn:modulePatternMatch, weight:1.3},
-  {fn:modulePsychology, weight:1.0},
-  {fn:moduleRecentShift, weight:1.1}
+  'Frequency Analysis', 'Run-Length Analysis', 'Recent Bias',
+  'Momentum Trend', 'Entropy (variety)', 'Streak Correction',
+  'Opposite-Psychology', 'Weighted Moving Bias', 'Time-based Drift', 'Randomized Tie-break'
 ];
 
-// Compute final prediction
-function analyzeAndPredict(arr){
-  logConsole('Start analysis (modules running)...');
-  // Run each module
-  const results = modules.map(m=>{
-    const out = m.fn(arr);
-    // clamp score
-    const score = Math.max(0, Math.min(1, out.score || 0));
-    return {name: m.fn.name, score, note: out.note || '', weight: m.weight};
-  });
-
-  // Weighted aggregation toward B or S:
-  // For modules that indicate skew/tendency we need direction — derive direction heuristics
-  // We'll compute directional vote from some modules:
-  let voteB=0, voteS=0;
-  // From frequency:
-  const bcount = arr.filter(x=>x==='B').length;
-  const scount = arr.length - bcount;
-  if(bcount > scount) { voteB += (Math.abs(bcount-scount)/arr.length) * 1.2; }
-  else if(scount > bcount) { voteS += (Math.abs(bcount-scount)/arr.length) * 1.2; }
-
-  // From momentum: if lastAvg > firstAvg -> B momentum
-  const mom = moduleMomentum(arr);
-  if(mom.score>0){
-    const vals = arr.map(x=> x==='B' ? 1 : 0);
-    const w = mom.score;
-    const firstAvg = vals.slice(0,Math.min(6,vals.length)).reduce((a,b)=>a+b,0)/Math.min(6,vals.length);
-    const lastAvg = vals.slice(-Math.min(6,vals.length)).reduce((a,b)=>a+b,0)/Math.min(6,vals.length);
-    if(lastAvg > firstAvg) voteB += w*0.9; else voteS += w*0.9;
-  }
-
-  // From entropy: low entropy => strengthen majority (if majority exists)
-  const ent = moduleEntropy(arr);
-  if(ent.score > 0.15){
-    if(bcount>scount) voteB += ent.score*0.6; else if(scount> bcount) voteS += ent.score*0.6;
-  }
-
-  // From pattern match: try to detect direction from pattern note (quick heuristic)
-  const pm = modulePatternMatch(arr);
-  if(pm.note && pm.note.includes('zig')) { // zig-zag -> ambiguous, prefer skip tendency
-    voteB += 0.1; voteS += 0.1; // keep small votes both sides
-  }
-  if(pm.note && pm.note.includes('Long run')){
-    // if last element equals the run value, extend run
-    const last = arr[arr.length-1];
-    if(last === 'B') voteB += 0.9 * pm.score; else voteS += 0.9 * pm.score;
-  }
-  if(pm.note && pm.note.includes('repeating')){
-    // attempt to continue pattern: look at last block and inverse next block
-    const last = arr[arr.length-1];
-    (last==='B' ? voteB : voteS) += 0.6 * pm.score;
-  }
-
-  // Psychology: majority -> opposite voting (we prefer minority as per your strategy)
-  const psy = modulePsychology(arr);
-  if(psy.score > 0.1){
-    const majority = bcount>scount ? 'B' : (scount>bcount ? 'S' : 'tie');
-    if(majority==='B') voteS += psy.score*0.9; else if(majority==='S') voteB += psy.score*0.9;
-  }
-
-  // Runs: if a very long recent run of same value, continue or reverse? We'll slightly favor continuation if run strong.
-  const run = moduleRuns(arr);
-  if(run.score > 0.6){
-    const last = arr[arr.length-1];
-    (last==='B' ? voteB : voteS) += run.score*0.8;
-  }
-
-  // Alternation big -> vote small both sides but favor reversal probability
-  const alt = moduleAlternation(arr);
-  if(alt.score > 0.6){
-    // Alternation implies next likely opposite of previous
-    const last = arr[arr.length-1];
-    (last==='B' ? voteS : voteB) += alt.score*0.8;
-  }
-
-  // Now compute module weighted confidence (aggregate absolute module strengths)
-  let weightedSum = 0, weightTotal = 0;
-  results.forEach(r => { weightedSum += r.score * r.weight; weightTotal += r.weight; });
-  const moduleConfidence = weightTotal ? (weightedSum / weightTotal) : 0;
-
-  // Combine vote strengths into a directional index
-  const totalVote = voteB + voteS + 1e-6;
-  const probB = voteB / totalVote;
-  const probS = voteS / totalVote;
-
-  // Final confidence: combine module confidence with vote margin and entropy inverse
-  const voteMargin = Math.abs(probB - probS); // 0..1
-  const finalConfidence = Math.round( Math.min(99, Math.max(20, (moduleConfidence * 0.7 + voteMargin * 0.3) * 100)) );
-
-  // Decision: if finalConfidence >= threshold and (probX sufficiently > probOther) choose that, else SKIP
-  const threshold = parseInt(confThresholdEl.value || '70',10);
-  let decision = 'SKIP';
-  let chosen = null;
-  if(finalConfidence >= threshold){
-    chosen = probB > probS ? 'BIG' : 'SMALL';
-    decision = chosen;
-  } else {
-    // fallback rule: if a very strong momentum or run suggests continuation then choose that even if slightly below threshold
-    if(run.score > 0.9){
-      chosen = arr[arr.length-1] === 'B' ? 'BIG' : 'SMALL';
-      decision = chosen;
-    }
-  }
-
-  // Prepare module explanations list
-  const modularExplain = results.map(r=>`• ${r.name}: score ${(r.score*100).toFixed(0)}% — ${r.note}`).join('<br>');
-  modulesList.innerHTML = modularExplain;
-
-  // Top insight summary
-  const summary = [
-    `Aggregated module confidence ${(moduleConfidence*100).toFixed(0)}%`,
-    `Vote margin ${(voteMargin*100).toFixed(1)}% (B:${(probB*100).toFixed(1)}% S:${(probS*100).toFixed(1)}%)`,
-    `Final computed confidence: ${finalConfidence}%`,
-    `Threshold: ${threshold}%`,
-    `Decision: ${decision}`
-  ].join('<br>');
-
-  topInsight.innerHTML = summary;
-  logConsole('Modules finished. Preparing prediction...');
-
-  return {
-    decision,
-    chosen,
-    confidence: finalConfidence,
-    moduleConfidence,
-    votes:{probB,probS, voteB, voteS},
-    moduleResults: results
-  };
+function saveHistory(){
+  localStorage.setItem('pa_last_results', JSON.stringify(history.slice(-50)));
+  renderHistory();
+  renderSavedList();
 }
 
-/* UI actions */
-startBtn.addEventListener('click', async ()=>{
-  const raw = normalizeList(lastResultsEl.value);
-  if(raw.length < 6){ alert('Enter at least some past results (recommended minimum 10).'); return; }
-  const period = (periodEl.value||'').trim();
-  if(!period){ alert('Enter current period number.'); return; }
+function renderHistory(){
+  const box = el('historyBox');
+  box.innerHTML = '';
+  if(history.length===0){
+    box.innerHTML = '<div class="muted">No results yet</div>'; el('histCount').innerText = '0'; return;
+  }
+  history.forEach((v,i)=>{
+    const d = document.createElement('div');
+    d.className = 'chip ' + (v==='B'?'big':'small');
+    d.innerText = v;
+    box.appendChild(d);
+  });
+  el('histCount').innerText = history.length;
+}
 
-  // Update chart
-  const bcount = raw.filter(x=>x==='B').length;
-  const scount = raw.length - bcount;
-  freqChart.data.datasets[0].data = [bcount, scount];
-  freqChart.update();
+function renderSavedList(){
+  const saved = JSON.parse(localStorage.getItem('pa_saved')||'[]');
+  const div = el('savedList'); div.innerHTML = '';
+  if(!saved.length){ div.innerHTML = '<div class="muted">No saved sessions</div>'; return;}
+  saved.slice().reverse().forEach(s=>{
+    const row = document.createElement('div');
+    row.style.padding='6px 8px';
+    row.style.borderBottom='1px solid rgba(255,255,255,0.03)';
+    row.innerHTML = `<div><strong>${s.period||'session'}</strong> • ${s.results.join(',')}<div style="font-size:12px;color:#bbb">${new Date(s.ts).toLocaleString()}</div></div>`;
+    div.appendChild(row);
+  });
+}
 
-  // Clear pred area and animate logs
-  predResultEl.textContent = '--'; predConfEl.textContent = '--'; predPeriodEl.textContent = `Period: ${period}`;
-  modulesList.innerHTML = 'Running modules...';
-  topInsight.innerHTML = '<em>Running in-depth analysis (approx. 10-15s)...</em>';
-  consoleEl.innerHTML = ''; logConsole('Starting multi-module analysis...');
+// UI init
+renderHistory();
+renderSavedList();
+const ctx = el('freqChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type:'bar',
+  data:{labels:['BIG','SMALL'], datasets:[{label:'Frequency',data:[0,0],backgroundColor:['#7fe8a7','#ffb66b']}]},
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+});
 
-  // Progressive log simulation & module runs (to show "deep" work)
-  const steps = [
-    'Loading pattern engines...',
-    'Computing frequency & entropy...',
-    'Detecting runs / streaks...',
-    'Scanning alternation & zigzag patterns...',
-    'Checking repeating blocks & momentum...',
-    'Evaluating human psychology heuristic...',
-    'Matching advanced signatures (dragon, double, triple)...',
-    'Aggregating module scores & computing confidence...',
-    'Composing final insight report...'
-  ];
+// utils
+function countFreq(arr){ const c={B:0,S:0}; arr.forEach(x=>{ if(x==='B') c.B++; if(x==='S') c.S++; }); return c; }
+function runLengths(arr){
+  // returns longest run for B and S
+  let maxB=0,maxS=0,cur=1;
+  for(let i=1;i<arr.length;i++){
+    if(arr[i]===arr[i-1]) cur++; else { if(arr[i-1]==='B') maxB=Math.max(maxB,cur); else maxS=Math.max(maxS,cur); cur=1;}
+  }
+  // last run
+  if(arr.length){
+    if(arr[arr.length-1]==='B') maxB=Math.max(maxB,cur); else maxS=Math.max(maxS,cur);
+  }
+  return {maxB,maxS};
+}
 
-  for(let i=0;i<steps.length;i++){
-    await sleep(700 + Math.random()*300);
-    logConsole(steps[i]);
+function entropy(arr){
+  const c=countFreq(arr); const total = c.B + c.S;
+  if(total===0) return 0;
+  const pB = c.B/total, pS = c.S/total;
+  let e=0;
+  if(pB>0) e -= pB*Math.log2(pB);
+  if(pS>0) e -= pS*Math.log2(pS);
+  return e; // 0..1
+}
+
+function weightedMovingBias(arr, window=5){
+  // more weight to recent entries
+  let score=0, totalWeight=0;
+  const n = Math.min(window, arr.length);
+  for(let i=0;i<n;i++){
+    const val = arr[arr.length-1 - i];
+    const w = (n - i); // descending weight
+    if(val==='B') score += w;
+    else if(val==='S') score -= w;
+    totalWeight += w;
+  }
+  return score/Math.max(1,totalWeight); // -1 .. 1
+}
+
+// main analysis - returns {pred:'B'|'S'|'SKIP', conf:0..100, breakdown:[]}
+async function analyzeAndPredict(){
+  if(history.length < 10){
+    log('Need at least 10 last results to analyze (enter or fill sample).'); return null;
+  }
+  el('modulesList').innerHTML = '';
+  const t0 = performance.now();
+  const breakDown = [];
+  let scoreB = 0, scoreS = 0;
+
+  // Module 1: Frequency Analysis (weight 1.6)
+  {
+    const c = countFreq(history);
+    const total = c.B + c.S;
+    const pB = total? (c.B/total):0.5; const pS = total? (c.S/total):0.5;
+    // higher frequency favors that side; but we use psychology: if many bet on side, opposite more likely -> so invert partially
+    const invertFactor = 0.28;
+    const sB = pB*(1-invertFactor) + (1-pB)*(-invertFactor);
+    const sS = pS*(1-invertFactor) + (1-pS)*(-invertFactor);
+    scoreB += sB * 1.6;
+    scoreS += sS * 1.6;
+    breakDown.push(['Frequency', Math.round((pB*100)) + '% B / ' + Math.round((pS*100)) + '% S']);
   }
 
-  // Now real analysis
-  const out = analyzeAndPredict(raw);
+  // Module 2: Run-Length Analysis (weight 1.4)
+  {
+    const rl = runLengths(history);
+    // long run of B -> likely correction -> favour S
+    const adjB = - (rl.maxB / (history.length||1));
+    const adjS = - (rl.maxS / (history.length||1));
+    scoreB += adjB * 1.4;
+    scoreS += adjS * 1.4;
+    breakDown.push(['Run-Length', `maxB:${rl.maxB} maxS:${rl.maxS}`]);
+  }
 
-  // show prediction with small animation
-  await sleep(500);
-  if(out.decision === 'SKIP'){
-    predResultEl.textContent = 'SKIP';
-    predResultEl.style.color = '#ffd54a';
+  // Module 3: Recent Bias (weight 1.8)
+  {
+    const recent = history.slice(-7);
+    const c = countFreq(recent);
+    const pB = (c.B/(c.B+c.S||1));
+    const pS = (c.S/(c.B+c.S||1));
+    // recent bias slightly inverted (psychology): if recent heavily B, many may keep betting B -> house may flip -> favour S
+    const invert = 0.22;
+    scoreB += (pB*(1-invert) - pS*invert) * 1.8;
+    scoreS += (pS*(1-invert) - pB*invert) * 1.8;
+    breakDown.push(['Recent Bias', `last7: ${Math.round(pB*100)}% B`]);
+  }
+
+  // Module 4: Momentum Trend (weight 1.2)
+  {
+    // compute simple trend: moving average sign
+    const wmb = weightedMovingBias(history, Math.min(9, history.length));
+    // positive -> bias toward B, but invert small amount
+    scoreB += (wmb*0.9) * 1.2;
+    scoreS += (-wmb*0.9) * 1.2;
+    breakDown.push(['Momentum', `wmBias:${wmb.toFixed(2)}`]);
+  }
+
+  // Module 5: Entropy (diversity) (weight 1.0)
+  {
+    const e = entropy(history);
+    // low entropy -> clear pattern -> follow pattern slightly (no invert)
+    scoreB += ((countFreq(history).B/(history.length||1)) - 0.5) * (1.0*(1.2 - e));
+    scoreS += ((countFreq(history).S/(history.length||1)) - 0.5) * (1.0*(1.2 - e));
+    breakDown.push(['Entropy', `e:${e.toFixed(2)}`]);
+  }
+
+  // Module 6: Streak Correction (weight 1.3)
+  {
+    const last = history[history.length-1];
+    // if last is B and there was a streak, slightly favour opposite
+    let streak=1;
+    for(let i=history.length-2;i>=0;i--){
+      if(history[i]===last) streak++; else break;
+    }
+    const corr = Math.min(3, streak) * 0.12;
+    if(last==='B'){ scoreB -= corr*1.3; scoreS += corr*1.3; }
+    else { scoreS -= corr*1.3; scoreB += corr*1.3; }
+    breakDown.push(['StreakCorr', `last:${last} streak:${streak}`]);
+  }
+
+  // Module 7: Opposite-Psychology (weight 1.6)
+  {
+    // estimate "where most people will bet" by recent concentration and streaks; then favour opposite
+    const c = countFreq(history);
+    const total = c.B + c.S;
+    const pB = total? c.B/total : 0.5;
+    const weightOpp = (Math.abs(pB - 0.5))*1.2; // stronger when skewed
+    scoreB += (0.5 - pB) * weightOpp * 1.6;
+    scoreS += (pB - 0.5) * weightOpp * 1.6;
+    breakDown.push(['OppositePsych', `conc:${Math.round(pB*100)}% B`]);
+  }
+
+  // Module 8: Weighted Moving Bias (weight 1.2)
+  {
+    const wmb = weightedMovingBias(history, Math.min(11, history.length));
+    scoreB += (wmb*0.7) * 1.2;
+    scoreS += (-wmb*0.7) * 1.2;
+    breakDown.push(['WMovBias', `wm:${wmb.toFixed(2)}`]);
+  }
+
+  // Module 9: Time-based Drift (weight 0.8)
+  {
+    // simulate small drift randomness over time to avoid fixed cycles
+    const drift = (Math.sin(Date.now()/60000) ) * 0.05;
+    scoreB += drift * 0.8;
+    scoreS -= drift * 0.8;
+    breakDown.push(['TimeDrift', `drift:${drift.toFixed(2)}`]);
+  }
+
+  // Module 10: Randomized Tie-break (weight 0.5)
+  {
+    const rnd = (Math.random()-0.5) * 0.4;
+    scoreB += rnd * 0.5;
+    scoreS -= rnd * 0.5;
+    breakDown.push(['RandomTie', `rnd:${rnd.toFixed(2)}`]);
+  }
+
+  // final scoring normalization
+  const rawB = scoreB, rawS = scoreS;
+  const expB = Math.exp(rawB);
+  const expS = Math.exp(rawS);
+  const pB = expB/(expB+expS);
+  const pS = expS/(expB+expS);
+  const conf = Math.round(Math.max(pB,pS)*100);
+  const pred = pB>pS ? 'B' : 'S';
+
+  // assemble module outputs to UI gradually to mimic analysis time
+  const start = performance.now();
+  el('modulesList').innerHTML = '';
+  for(let i=0;i<breakDown.length;i++){
+    ((i)=>{
+      setTimeout(()=>{
+        const m = document.createElement('div');
+        m.className = 'muted';
+        m.style.marginTop='6px';
+        m.innerText = `${i+1}. ${breakDown[i][0]} — ${breakDown[i][1]}`;
+        el('modulesList').appendChild(m);
+      }, i*400);
+    })(i);
+  }
+
+  // simulate wait time 8-14s depending on array length
+  const simTime = 8000 + Math.min(8000, history.length*250);
+  await new Promise(r=>setTimeout(r, simTime));
+
+  const t1 = performance.now();
+  const timeSec = ((t1 - t0)/1000).toFixed(1);
+  el('analysisTime').innerText = timeSec + 's';
+  el('predictionBox').innerText = pred === 'B' ? 'BIG' : 'SMALL';
+  el('confText').innerText = conf;
+  el('betSuggest').innerText = suggestBetAmounts();
+  el('suggestionText').innerText = `Top modules indicate: ${breakDown[0][1]}`;
+  log(`Analysis finished in ${timeSec}s — Pred: ${pred} Conf: ${conf}%`);
+
+  // update chart
+  const cf = countFreq(history);
+  chart.data.datasets[0].data = [cf.B, cf.S];
+  chart.update();
+
+  return {pred, conf, pB, pS, rawB, rawS};
+}
+
+function suggestBetAmounts(){
+  const bal = Number(el('balanceInput').value) || 0;
+  const a = Math.max(1, Math.round(bal * 0.15));
+  const b = Math.max(1, Math.round(bal * 0.30));
+  const c = Math.max(1, Math.round(bal * 0.55));
+  return `${a} / ${b} / ${c}`;
+}
+
+function log(msg){
+  const box = el('logBox');
+  const row = document.createElement('div');
+  row.style.padding='6px 0';
+  row.style.borderBottom='1px dashed rgba(255,255,255,0.03)';
+  row.innerText = `${new Date().toLocaleTimeString()} — ${msg}`;
+  box.prepend(row);
+}
+
+// UI bindings
+el('addResultBtn').addEventListener('click', ()=>{
+  const v = (el('manualResultInput').value||'').trim().toUpperCase();
+  if(!v || !['B','S'].includes(v)){ alert('Enter B or S'); return; }
+  history.push(v);
+  if(history.length>50) history.shift();
+  el('manualResultInput').value='';
+  saveHistory();
+  log('Added result ' + v);
+});
+el('clearBtn').addEventListener('click', ()=>{ if(!confirm('Clear history?')) return; history=[]; saveHistory(); log('History cleared'); });
+
+el('fillDemoBtn').addEventListener('click', ()=>{ history = ['B','S','B','B','S','B','S','B','S','B']; saveHistory(); log('Filled demo last-10'); });
+
+el('analyzeBtn').addEventListener('click', async ()=>{
+  const thr = Number(el('confThresh').value)||60;
+  el('predictionBox').innerText = '...';
+  el('confText').innerText = '--';
+  el('modulesList').innerHTML = '';
+  el('suggestionText').innerText = 'Analyzing...';
+  const res = await analyzeAndPredict();
+  if(!res) return;
+  if(res.conf >= thr){
+    el('predictionBox').innerText = (res.pred==='B' ? 'BIG' : 'SMALL');
+    el('confText').innerText = res.conf;
+    // save to saved sessions store
+    const saved = JSON.parse(localStorage.getItem('pa_saved')||'[]');
+    saved.push({ts:Date.now(),period:el('periodInput').value||'',results:history.slice(-20),pred:res.pred,conf:res.conf});
+    localStorage.setItem('pa_saved', JSON.stringify(saved.slice(-200)));
+    renderSavedList();
+    // show brief log
+    log(`Predicted ${(res.pred==='B'?'BIG':'SMALL')} at ${res.conf}%`);
   } else {
-    predResultEl.textContent = out.chosen;
-    predResultEl.style.color = out.chosen === 'BIG' ? 'var(--accent)' : 'var(--accent2)';
-  }
-  predConfEl.textContent = out.confidence + ' %';
-  modulesList.innerHTML = out.moduleResults.map(r=>`• ${r.name}: ${(r.score*100).toFixed(0)}% — ${r.note}`).join('<br>');
-
-  // Save predicted entry to history as pending (result unknown)
-  const nextPeriod = incrementPeriod(period);
-  predPeriodEl.textContent = `Period: ${period} → next ${nextPeriod}`;
-  saveHistoryEntry({period, pred: out.chosen||'SKIP', conf: out.confidence, timestamp: Date.now(), result: null});
-
-  logConsole('Prediction ready: ' + (out.chosen || 'SKIP') + ' (' + out.confidence + '%)');
-
-  // auto update chart with fresh counts if user wants (already updated)
-});
-
-/* Mark result (Win/Loss) */
-markWinBtn.addEventListener('click', ()=>{
-  // Mark last saved history entry as 'win' (interactive)
-  if(!history.length){ alert('No prediction in history to mark.'); return; }
-  const last = history[0];
-  if(confirm(`Mark period ${last.period} result as WIN?`)){
-    last.result = 'WIN';
-    saveHistoryEntry(last); // re-save (add again to front)
-    // keep only unique by period: ensure no duplicates
-    // (simple approach: remove further occurrences)
-    history = history.filter((h,i)=>i===0 || h.period !== last.period);
-    localStorage.setItem('dp_history', JSON.stringify(history));
-    renderHistory();
-    logConsole(`Marked ${last.period} as WIN.`);
+    el('suggestionText').innerText = 'Low confidence — suggestion: SKIP (or collect more data)';
+    el('predictionBox').innerText = 'SKIP';
+    el('confText').innerText = res.conf;
+    log(`Low confidence (${res.conf}%) — SKIP`);
   }
 });
 
-/* Helpers */
-function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
-resetBtn.addEventListener('click', ()=>{ lastResultsEl.value=''; periodEl.value=''; consoleEl.innerHTML=''; modulesList.innerHTML=''; topInsight.innerHTML=''; predResultEl.textContent='--'; predConfEl.textContent='--'; predPeriodEl.textContent='Period: --'; });
+// export/import
+el('exportBtn').addEventListener('click', ()=>{
+  const payload = {history, saved: JSON.parse(localStorage.getItem('pa_saved')||'[]')};
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'pa_export.json'; a.click();
+  URL.revokeObjectURL(url);
+});
 
-/* Period increment helper: increment trailing digits by 1 (keeps prefix stable) */
-function incrementPeriod(period){
-  // find last run of digits and increment by 1, keep leading zeros if any
-  const m = period.match(/(.*?)(\d+)$/);
-  if(!m) return period + '1';
+el('importBtn').addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange = e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(obj.history) history = obj.history.slice(-50);
+        if(obj.saved) localStorage.setItem('pa_saved', JSON.stringify(obj.saved));
+        saveHistory(); renderSavedList();
+        alert('Imported');
+      }catch(er){ alert('Invalid file'); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+});
+
+// auto-next period: increments numeric suffix by 1
+el('nextPeriodBtn').addEventListener('click', ()=>{
+  const v = el('periodInput').value.trim();
+  if(!v){ alert('Enter current period first'); return; }
+  const next = incrementPeriodString(v);
+  el('periodInput').value = next;
+  log('Auto-next -> ' + next);
+});
+
+function incrementPeriodString(str){
+  // find trailing digits chunk and increment by 1 preserving leading zeros
+  const m = str.match(/(.*?)(\d+)$/);
+  if(!m) return str + '1';
   const prefix = m[1], digits = m[2];
   const num = BigInt(digits) + 1n;
-  const newDigits = num.toString().padStart(digits.length,'0');
-  return prefix + newDigits;
+  const s = num.toString().padStart(digits.length, '0');
+  return prefix + s;
 }
 
-/* Auto update chart on input change */
-lastResultsEl.addEventListener('input', ()=>{
-  const arr = normalizeList(lastResultsEl.value);
-  freqChart.data.datasets[0].data = [arr.filter(x=>x==='B').length, arr.filter(x=>x==='S').length];
-  freqChart.update();
-});
-
-/* Initialize sample filler (optional) */
-lastResultsEl.value = 'B,S,B,B,S,S,B,B,S,B';
-periodEl.value = '20250914100011151';
-lastResultsEl.dispatchEvent(new Event('input'));
-
-/* render modules list once */
-modulesList.innerHTML = 'Awaiting analysis...';
+// load saved history on start
+(function init(){
+  try{ history = JSON.parse(localStorage.getItem('pa_last_results')||'[]'); }catch(e){ history = []; }
+  renderHistory();
+  renderSavedList();
+  const cf = countFreq(history);
+  chart.data.datasets[0].data = [cf.B, cf.S];
+  chart.update();
+  log('Ready — loaded history length ' + history.length);
+})();
 
 </script>
 </body>
-</html>
+</html>   
+  
