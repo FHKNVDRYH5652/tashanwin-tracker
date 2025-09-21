@@ -1,517 +1,513 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AI Predictor — Target Bets (Demo)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Prediction AI — Wingo / Big-Small (Heuristic AI)</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   :root{
-    --bg:#071022; --card:#0f1724; --muted:#9fb0d6; --accent1:#00d2a8; --accent2:#00a6ff;
-    --glass: rgba(255,255,255,0.02);
+    --bg:#071022; --card:#0f1724; --muted:#9fb0d6;
+    --accent1:#00d2a8; --accent2:#00a6ff; --glass: rgba(255,255,255,0.02);
   }
-  *{box-sizing:border-box; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  body{margin:0;background:linear-gradient(180deg,#061021,#07142a);color:#eaf6ff;padding:18px}
-  .wrap{max-width:980px;margin:10px auto}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 40px rgba(0,0,0,0.6)}
-  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
-  header h1{font-size:18px;margin:0}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .plans{display:flex;gap:8px;flex-wrap:wrap}
-  .planBtn{padding:8px 12px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;border:1px solid rgba(255,255,255,0.04)}
-  .planBtn.active{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#012;font-weight:800}
-  .small{color:var(--muted);font-size:13px}
-  input[type=text]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  .bigBtn{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#012;font-weight:800;cursor:pointer}
+  body{margin:0;font-family:Inter,Segoe UI,Arial;background:linear-gradient(180deg,#061021,#07142a);color:#eaf6ff}
+  .wrap{max-width:980px;margin:18px auto;padding:18px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03)}
+  h1{font-size:1.1rem;margin:0 0 12px 0}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  input,select,button{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  .btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:#012;font-weight:800;cursor:pointer}
   .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .resultCell{padding:10px;border-radius:8px;background:var(--glass);text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
-  .resultCell.active{box-shadow:0 8px 20px rgba(0,0,0,0.5);transform:translateY(-4px);border-color:var(--accent1)}
-  .predictionBox{margin-top:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02)}
-  .stat{font-weight:700}
-  .historyList{max-height:160px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.12);margin-top:8px}
-  .flex{display:flex;gap:8px;align-items:center}
-  .right{margin-left:auto}
-  .note{color:#ffdca8;font-weight:700;margin-top:8px}
-  footer{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
-  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:999;visibility:hidden;opacity:0;transition:.15s}
-  .overlay.show{visibility:visible;opacity:1}
-  .modalCard{background:#071326;padding:18px;border-radius:12px;min-width:320px}
-  .smallMuted{color:var(--muted);font-size:13px}
+  .small{color:var(--muted);font-size:0.95rem}
+  .history{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+  .chip.big{background:linear-gradient(90deg,#1a6fff,#00a6ff);color:#001}
+  .chip.small{background:linear-gradient(90deg,#ffb66b,#ff7a7a);color:#001}
+  .predictionBox{margin-top:12px;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+  .predLabel{font-weight:900;font-size:1.1rem}
+  .conf{font-weight:800;margin-top:6px}
+  .controls{margin-top:12px;display:flex;gap:8px}
+  .balance{font-weight:800;font-size:1.2rem}
+  .log{margin-top:12px;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;max-height:180px;overflow:auto;font-family:monospace;font-size:13px}
+  canvas{background:transparent;border-radius:8px}
+  .footer{margin-top:12px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>AI Betting Advisor — Predict & Strategy Demo</h1>
-      <div class="small">Minimal demo — local only</div>
-    </header>
+<div class="wrap">
+  <div class="card">
+    <h1>Prediction AI (Heuristic ensemble) — Big / Small</h1>
+    <div class="small">Enter last results (B for Big, S for Small) OR paste comma-separated list. System uses last <strong id="Nval">10</strong> items for analysis. After you press <em>Generate Prediction</em> AI runs a deep heuristic analysis (15s simulated) and returns a prediction + confidence + suggested bet.</div>
 
-    <!-- Step 1: Plan choose -->
-    <section class="card" id="step-plan">
-      <h3>Step 1 — Choose Target Range (Plan)</h3>
-      <div class="small">Pick a target (we'll suggest bets to reach target from your balance)</div>
-      <div class="plans" id="plansRow" style="margin-top:12px">
-        <!-- JS generates plan buttons -->
+    <div style="margin-top:12px" class="row">
+      <label class="small">Period (current):</label>
+      <input id="periodInput" type="text" placeholder="20250914100011151" style="width:260px" />
+      <label class="small">Use last</label>
+      <select id="lastN">
+        <option>5</option><option selected>10</option><option>15</option><option>20</option>
+      </select>
+      <button class="btn" id="loadSample">Load sample</button>
+    </div>
+
+    <div style="margin-top:12px">
+      <label class="small">Last results (left = oldest → right = newest). Use B / S (comma or space separated):</label>
+      <input id="historyInput" type="text" placeholder="B,S,B,B,S,B,S,B,S,B" style="width:100%"/>
+      <div class="small" style="margin-top:6px">Enter at least as many as selected above. You can also use the Win/Loss buttons after each prediction to append the true latest result.</div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <div class="small">Balance</div>
+        <div class="balance" id="balance">₹1000</div>
       </div>
 
-      <div style="margin-top:12px" class="row">
-        <div>
-          <div class="small">Your starting balance (wallet):</div>
-          <input type="text" id="inputBalance" value="100" style="width:120px" />
-        </div>
-        <div>
-          <div class="small">Min bet per suggestion:</div>
-          <input type="text" id="inputMinBet" value="10" style="width:120px" />
-        </div>
-        <div class="right">
-          <button class="bigBtn" id="btnToAI">Next: Give last 10 results</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Step 2: enter last 10 -->
-    <section class="card" id="step-history" style="margin-top:12px;display:none">
-      <h3>Step 2 — Enter last results (manual)</h3>
-      <div class="small">Click each cell to set Big / Small. Provide last 10 rounds (oldest -> newest from left to right)</div>
-
-      <div class="grid3" id="historyGrid" style="margin-top:12px">
-        <!-- 10 cells -->
+      <div>
+        <div class="small">Level / LossStreak</div>
+        <div id="levelInfo">L1 • streak 0</div>
       </div>
 
-      <div style="margin-top:12px" class="row">
-        <div class="smallMuted">Quick fill: <button class="planBtn ghost" id="fillRandom">Fill random</button></div>
-        <div class="right">
-          <button class="bigBtn" id="btnAnalyze">Analyze & Ask AI</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI analysis & prediction -->
-    <section class="card" id="step-ai" style="margin-top:12px;display:none">
-      <h3>AI Analysis & Strategy</h3>
-      <div class="small">AI will analyze pattern, trend and suggest action (Bet or Skip) with recommended amount and reason.</div>
-
-      <div class="predictionBox" id="aiBox">
-        <div id="aiSpinner" style="display:none">Thinking... (simulated)</div>
-        <div id="aiResult" style="display:none">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div>
-              <div class="small">AI Suggestion</div>
-              <div class="stat" id="aiSuggestion">—</div>
-            </div>
-            <div>
-              <div class="small">Amount</div>
-              <div class="stat" id="aiAmount">—</div>
-            </div>
-            <div>
-              <div class="small">Confidence</div>
-              <div class="stat" id="aiConfidence">—</div>
-            </div>
-            <div class="right">
-              <button class="bigBtn" id="btnGeneratePrediction">Generate Prediction</button>
-            </div>
-          </div>
-          <div style="margin-top:10px" class="smallMuted" id="aiReason">Reason...</div>
-        </div>
+      <div>
+        <div class="small">Confidence threshold</div>
+        <input id="confThreshold" type="number" min="50" max="95" value="80" /> <span class="small">% (min required to give prediction)</span>
       </div>
 
-      <div style="margin-top:12px" class="row">
-        <div>
-          <button class="planBtn ghost" id="btnSkip">Skip this Round</button>
+      <div style="margin-left:auto">
+        <button class="btn" id="genBtn">Generate Prediction</button>
+        <button class="ghost" id="resetBtn">Reset History</button>
+      </div>
+    </div>
+
+    <div class="predictionBox" id="predictionArea" style="display:none">
+      <div class="predLabel" id="predText">Prediction: —</div>
+      <div class="conf" id="confText">Confidence: —</div>
+      <div style="margin-top:6px" id="betSuggestion">Bet suggestion: —</div>
+      <div style="margin-top:10px">
+        <button class="btn" id="winBtn">WIN</button>
+        <button class="btn" id="lossBtn">LOSS</button>
+        <button class="ghost" id="forceSkip">Mark Skip (no change)</button>
+      </div>
+      <div style="margin-top:10px">
+        <div class="small">Analysis summary (ensemble weights & scores):</div>
+        <div id="analysisSummary" class="log"></div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="flex:1">
+          <canvas id="freqChart" height="120"></canvas>
         </div>
-        <div class="right">
-          <div class="smallMuted">Balance: ₹<span id="wallet">0</span></div>
+        <div style="width:260px">
+          <div class="small">Recent history (latest right)</div>
+          <div class="history" id="chips"></div>
+          <div class="small" style="margin-top:8px">Last saved results (local)</div>
+          <div id="savedList" class="small"></div>
         </div>
       </div>
+    </div>
 
-      <!-- Generated prediction -->
-      <div id="predictionArea" style="margin-top:12px;display:none">
-        <h4>Prediction</h4>
-        <div class="small">Period: <span id="periodLabel">—</span></div>
-        <div style="margin-top:6px">
-          <div class="stat" id="predText">—</div>
-          <div class="smallMuted" style="margin-top:6px">Use the buttons to inform the AI whether the prediction resulted in Win or Loss.</div>
-        </div>
-
-        <div style="margin-top:10px" class="row">
-          <button class="bigBtn" id="btnWin">Win</button>
-          <button class="planBtn ghost" id="btnLoss">Loss</button>
-          <div class="right">
-            <button class="planBtn ghost" id="btnBackToAnalyze">Back to Analyze</button>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <div class="smallMuted">Recent decisions & stats</div>
-        <div class="historyList" id="recentDecisions"></div>
-      </div>
-    </section>
-
-    <footer>Demo AI advisor — last results manual. All data stored locally.</footer>
-  </div>
-
-  <!-- modal -->
-  <div class="overlay" id="modalOverlay">
-    <div class="modalCard">
-      <div id="modalTitle" style="font-weight:700;color:var(--accent1)"></div>
-      <div id="modalSub" class="smallMuted" style="margin-top:8px"></div>
-      <div style="margin-top:12px;text-align:right"><button class="planBtn ghost" onclick="closeModal()">OK</button></div>
+    <div class="footer">
+      Period auto-increment will happen after a WIN or LOSS is recorded (prediction accepted). You can change period format in code if your system differs.
     </div>
   </div>
+</div>
 
 <script>
-/*
-  AI Predictor demo
-  - Plans: target ranges
-  - Last 10 results input (manual)
-  - AI analyze to suggest Bet/Skip + amount, with reasoning
-  - Win/Loss reporting updates history & wallet
-  - LocalStorage keys:
-      ai_demo_wallet  : number
-      ai_demo_history : array of last results (objects)
-      ai_demo_decisions: array of last decisions (max 50)
-*/
+/* ---------- Core configuration ---------- */
+const DEFAULT_BALANCE = 1000;
+let balance = DEFAULT_BALANCE;
+let level = 1;         // 1 => 15%, 2 => 30%, 3 => 55%
+let lossStreak = 0;
+let lastResults = [];  // oldest -> newest, values: 'B' or 'S'
+let savedHistory = loadSavedHistory(); // persisted across sessions
+let chart = null;
 
-const PLANS = [
-  { label: 'Target 100 → 250', targetMin:100, targetMax:250 },
-  { label: 'Target 250 → 500', targetMin:250, targetMax:500 },
-  { label: 'Target 500 → 1000', targetMin:500, targetMax:1000 },
-  { label: 'Target 1000 → 2500', targetMin:1000, targetMax:2500 }
-];
-
-let selectedPlan = PLANS[0];
-let wallet = 100;
-let minBet = 10;
-let last10 = new Array(10).fill(null); // each is 'BIG' or 'SMALL'
-let currentSuggestion = null; // {action:'bet'|'skip', side:'BIG'|'SMALL', amount: number, confidence: 0-1, reason: string}
-let currentPrediction = null; // {period, side, amount}
-const MAX_DECISIONS = 50;
-
-// DOM refs
-const plansRow = document.getElementById('plansRow');
-const inputBalance = document.getElementById('inputBalance');
-const inputMinBet = document.getElementById('inputMinBet');
-const btnToAI = document.getElementById('btnToAI');
-const stepPlan = document.getElementById('step-plan');
-const stepHistory = document.getElementById('step-history');
-const historyGrid = document.getElementById('historyGrid');
-const fillRandom = document.getElementById('fillRandom');
-const btnAnalyze = document.getElementById('btnAnalyze');
-const stepAI = document.getElementById('step-ai');
-const aiSpinner = document.getElementById('aiSpinner');
-const aiResult = document.getElementById('aiResult');
-const aiSuggestion = document.getElementById('aiSuggestion');
-const aiAmount = document.getElementById('aiAmount');
-const aiConfidence = document.getElementById('aiConfidence');
-const aiReason = document.getElementById('aiReason');
-const btnGeneratePrediction = document.getElementById('btnGeneratePrediction');
-const btnSkip = document.getElementById('btnSkip');
-const walletEl = document.getElementById('wallet');
-const predictionArea = document.getElementById('predictionArea');
+/* ---------- UI refs ---------- */
+const historyInput = document.getElementById('historyInput');
+const periodInput = document.getElementById('periodInput');
+const lastNSelect = document.getElementById('lastN');
+const genBtn = document.getElementById('genBtn');
+const predArea = document.getElementById('predictionArea');
 const predText = document.getElementById('predText');
-const periodLabel = document.getElementById('periodLabel');
-const btnWin = document.getElementById('btnWin');
-const btnLoss = document.getElementById('btnLoss');
-const recentDecisions = document.getElementById('recentDecisions');
-const btnBackToAnalyze = document.getElementById('btnBackToAnalyze');
-const modalOverlay = document.getElementById('modalOverlay');
-const modalTitle = document.getElementById('modalTitle');
-const modalSub = document.getElementById('modalSub');
+const confText = document.getElementById('confText');
+const betSuggestion = document.getElementById('betSuggestion');
+const analysisSummary = document.getElementById('analysisSummary');
+const chips = document.getElementById('chips');
+const balanceEl = document.getElementById('balance');
+const levelInfo = document.getElementById('levelInfo');
+const savedList = document.getElementById('savedList');
+const confThresholdInput = document.getElementById('confThreshold');
+const winBtn = document.getElementById('winBtn');
+const lossBtn = document.getElementById('lossBtn');
+const forceSkipBtn = document.getElementById('forceSkip');
+const resetBtn = document.getElementById('resetBtn');
+const loadSampleBtn = document.getElementById('loadSample');
 
-// init UI
-function renderPlans(){
-  plansRow.innerHTML = '';
-  PLANS.forEach((p,idx)=>{
-    const b = document.createElement('button');
-    b.className = 'planBtn' + (idx===0 ? ' active' : '');
-    b.innerText = p.label;
-    b.onclick = ()=> {
-      document.querySelectorAll('.planBtn').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      selectedPlan = p;
-    };
-    plansRow.appendChild(b);
+/* ---------- utility ---------- */
+function saveLocalHistory() {
+  localStorage.setItem('ps_history', JSON.stringify(savedHistory));
+}
+function loadSavedHistory(){
+  try{ return JSON.parse(localStorage.getItem('ps_history') || '[]') } catch(e){ return [] }
+}
+function persistLastResultsToSaved(){
+  savedHistory = savedHistory.concat(lastResults.slice(-5)); // keep appending recent
+  if(savedHistory.length > 500) savedHistory = savedHistory.slice(-500);
+  saveLocalHistory();
+  refreshSavedList();
+}
+
+/* ---------- display helpers ---------- */
+function refreshUI(){
+  balanceEl.textContent = '₹' + balance;
+  levelInfo.textContent = `L${level} • streak ${lossStreak}`;
+  renderChips();
+  refreshSavedList();
+  updateChart();
+}
+
+function renderChips(){
+  chips.innerHTML = '';
+  lastResults.slice(-50).forEach(r=>{
+    const d = document.createElement('div');
+    d.className = 'chip ' + (r === 'B' ? 'big' : 'small');
+    d.textContent = r;
+    chips.appendChild(d);
   });
 }
-function renderHistoryGrid(){
-  historyGrid.innerHTML = '';
-  for(let i=0;i<10;i++){
-    const cell = document.createElement('div');
-    cell.className = 'resultCell' + (last10[i] ? ' active' : '');
-    cell.dataset.index = i;
-    cell.innerHTML = `<div style="font-weight:700">${i+1}</div><div style="margin-top:6px">${last10[i]||'—'}</div>`;
-    cell.onclick = ()=> {
-      // toggle: null -> BIG -> SMALL -> null
-      const cur = last10[i];
-      const next = cur === null ? 'BIG' : (cur === 'BIG' ? 'SMALL' : null);
-      last10[i] = next;
-      renderHistoryGrid();
-    };
-    historyGrid.appendChild(cell);
-  }
-}
-function loadState(){
-  const w = parseFloat(localStorage.getItem('ai_demo_wallet'));
-  if(!isNaN(w)) wallet = w;
-  const saved = JSON.parse(localStorage.getItem('ai_demo_history')||'null');
-  if(Array.isArray(saved) && saved.length) last10 = saved.slice(0,10).concat(new Array(10-saved.length).fill(null)).slice(0,10);
-  refreshWallet();
-  renderHistoryGrid();
-  renderDecisions();
-}
-function saveHistory(){
-  localStorage.setItem('ai_demo_history', JSON.stringify(last10.filter(x=>x!==null)));
-}
-function saveWallet(){ localStorage.setItem('ai_demo_wallet', String(wallet)); }
-function pushDecision(dec){
-  const arr = JSON.parse(localStorage.getItem('ai_demo_decisions')||'[]');
-  arr.unshift(dec);
-  while(arr.length>MAX_DECISIONS) arr.pop();
-  localStorage.setItem('ai_demo_decisions', JSON.stringify(arr));
-  renderDecisions();
-}
-function renderDecisions(){
-  const arr = JSON.parse(localStorage.getItem('ai_demo_decisions')||'[]');
-  recentDecisions.innerHTML = arr.map(d=>{
-    return `<div style="padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.03)"><strong>${d.action.toUpperCase()}</strong> ${d.side?'on '+d.side:''} • ₹${d.amount||0} • ${new Date(d.ts).toLocaleTimeString()} <div style="font-size:12px;color:${d.result?'#bfe':'#f6b6b6'}">${d.result?('Result: '+d.result):''}</div><div style="font-size:12px;color:#bfbfbf">${d.note||''}</div></div>`;
-  }).join('') || '<div class="smallMuted">No decisions yet</div>';
-}
-function refreshWallet(){ walletEl.innerText = wallet.toFixed(2); saveWallet(); }
 
-/* ------- navigation -------- */
-btnToAI.onclick = ()=>{
-  const b = parseFloat(inputBalance.value||'0');
-  const mb = parseFloat(inputMinBet.value||'0');
-  if(isNaN(b) || b<=0){ alert('Enter valid starting balance'); return; }
-  if(isNaN(mb) || mb<=0){ alert('Enter valid min bet'); return; }
-  wallet = b; minBet = mb;
-  refreshWallet();
-  stepPlan.style.display = 'none';
-  stepHistory.style.display = 'block';
-  stepAI.style.display = 'none';
-  saveWallet(); saveHistory();
-};
-
-/* history grid actions */
-fillRandom.onclick = ()=>{
-  for(let i=0;i<10;i++) last10[i] = Math.random()<0.5?'BIG':'SMALL';
-  renderHistoryGrid();
-};
-
-/* analyze -> run AI heuristics */
-btnAnalyze.onclick = ()=>{
-  // validate history: need at least 5 entries (or require exactly 10)
-  const filled = last10.filter(x=>x!==null);
-  if(filled.length < 5){ if(!confirm('Less than 5 entries filled. Continue analysis?')) return; }
-  stepAI.style.display = 'block';
-  aiResult.style.display = 'none';
-  aiSpinner.style.display = 'block';
-  predictionArea.style.display = 'none';
-  // simulate thinking 1.2-2s
-  setTimeout(()=>{
-    currentSuggestion = aiAnalyze(last10, wallet, minBet);
-    showAISuggestion(currentSuggestion);
-    aiSpinner.style.display = 'none';
-    aiResult.style.display = 'block';
-  }, 1200 + Math.random()*800);
-};
-
-/* AI core: heuristics + strategy builder */
-function aiAnalyze(historyArr, balance, minBet){
-  // historyArr is array of 10 items (some may be null) oldest->newest
-  const hist = historyArr.filter(x=>x!==null);
-  const n = hist.length;
-  const counts = { BIG:0, SMALL:0 };
-  hist.forEach(h=>counts[h]++);
-  const freqBig = counts.BIG / Math.max(1,n);
-  const freqSmall = counts.SMALL / Math.max(1,n);
-  // streak detection (ending streak)
-  let last = hist[hist.length-1] || null;
-  let streak = 0;
-  for(let i=hist.length-1;i>=0;i--){
-    if(hist[i]===last) streak++; else break;
-  }
-  // pattern detection: frequent double / triple patterns (simple)
-  let pattern = null;
-  if(n>=6){
-    // check if last 3 equal to previous 3 etc
-    const last3 = hist.slice(-3).join(',');
-    const prev3 = hist.slice(-6,-3).join(',');
-    if(last3 === prev3) pattern = 'repeat3';
-  }
-
-  // Basic scoring for side preference
-  let preferred = freqBig > freqSmall ? 'BIG' : 'SMALL';
-  let confidence = Math.abs(freqBig - freqSmall); // 0..1
-  // adjust confidence with streaks and pattern
-  confidence += Math.min(0.25, Math.max(0, (streak - 1) * 0.08));
-  if(pattern==='repeat3') confidence += 0.12;
-  confidence = Math.min(0.98, confidence);
-
-  // strategy: decide bet or skip
-  // If distribution strongly favors one side (>=0.65) -> bet that side
-  // If confidence small (<0.18) -> skip
-  // If balance low relative to minBet -> skip
-  // Bet amount: base = max(minBet, round(balance * 0.05)) ; if streak length>2 and same side -> increase 1.5x
-  let action = 'bet';
-  if(confidence < 0.18 || n < 4) action = 'skip';
-  if(balance < minBet * 1) action = 'skip';
-
-  let base = Math.max(minBet, Math.round(balance * 0.05));
-  let amount = base;
-  if(streak >= 3) amount = Math.round(base * 1.5);
-  if(confidence > 0.6) amount = Math.round(base * 1.6);
-  if(amount < minBet) amount = minBet;
-  if(amount > balance) amount = Math.max(minBet, Math.round(balance * 0.5));
-
-  // If close counts (freq difference small) -> suggest skip
-  const noteParts = [];
-  noteParts.push(`History: BIG ${counts.BIG}, SMALL ${counts.SMALL} (${n} entries)`);
-  if(streak>1) noteParts.push(`Recent streak: ${last} x${streak}`);
-  if(pattern) noteParts.push(`Pattern detected: ${pattern}`);
-  if(action==='skip') noteParts.push('AI suggests SKIP due low confidence or insufficient trend.');
-
-  return {
-    action,
-    side: preferred,
-    amount,
-    confidence: Math.round(confidence*100),
-    note: noteParts.join(' • ')
-  };
+function refreshSavedList(){
+  savedList.innerHTML = savedHistory.slice(-20).reverse().join(', ') || '(none)';
 }
 
-function showAISuggestion(s){
-  aiSuggestion.innerText = s.action === 'bet' ? `Bet on ${s.side}` : 'SKIP this round';
-  aiAmount.innerText = '₹' + s.amount;
-  aiConfidence.innerText = s.confidence + '%';
-  aiReason.innerText = s.note;
+/* ---------- chart ---------- */
+function initChart(){
+  const ctx = document.getElementById('freqChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: ['Big','Small'], datasets: [{ label:'Frequency', data:[0,0], backgroundColor:['#1a6fff','#ffb66b'] }]},
+    options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+  });
+}
+function updateChart(){
+  if(!chart) return;
+  const counts = countFreq(lastResults);
+  chart.data.datasets[0].data = [counts.B, counts.S];
+  chart.update();
 }
 
-/* Generate Prediction (user asks AI to produce one now) */
-btnGeneratePrediction.onclick = ()=>{
-  if(!currentSuggestion) return alert('Run analysis first.');
-  if(currentSuggestion.action === 'skip'){
-    showModal('AI Suggestion: SKIP','AI suggests skipping this round. You can still generate a prediction if you want.');
-  }
-  // create prediction object
-  const nowPeriod = generateAutoPeriod();
-  // pick side per suggestion (if skip and user forces generate, still pick preferred)
-  const side = currentSuggestion.side;
-  const amount = currentSuggestion.amount;
-  currentPrediction = { period: nowPeriod, side, amount, ts: Date.now() };
-  // show
-  periodLabel.innerText = nowPeriod;
-  predText.innerText = `${side} • ₹${amount}`;
-  predictionArea.style.display = 'block';
-  // log decision (pending result)
-  pushDecision({ action: currentSuggestion.action, side, amount, ts: Date.now(), note: currentSuggestion.note });
-};
-
-/* Skip handling */
-btnSkip.onclick = ()=>{
-  // mark decision skip with note
-  pushDecision({ action:'skip', side:null, amount:0, ts: Date.now(), note:'User followed AI skip' });
-  showModal('Round Skipped','AI instructed to skip. After next round, please return and enter the actual result (Big/Small) so AI can learn.');
-};
-
-/* Win/Loss handling -> update wallet & history */
-btnWin.onclick = ()=>{
-  if(!currentPrediction) return showModal('No prediction','Generate a prediction first.');
-  const amt = currentPrediction.amount;
-  // define payout: simple assume win pays 1:1 (for demo). So wallet += amt
-  wallet += amt;
-  refreshWallet();
-  // save result in history (push newest)
-  shiftHistory(currentPrediction.side);
-  // record decision with result
-  pushDecision({ action:'bet', side: currentPrediction.side, amount: amt, ts: Date.now(), result:'WIN', note:'User reported WIN' });
-  currentPrediction = null;
-  predictionArea.style.display = 'none';
-  saveHistory();
-  showModal('Result recorded','WIN recorded. Wallet updated.');
-  checkTargetComplete();
-};
-
-btnLoss.onclick = ()=>{
-  if(!currentPrediction) return showModal('No prediction','Generate a prediction first.');
-  const amt = currentPrediction.amount;
-  // lose amount
-  wallet -= amt;
-  if(wallet < 0) wallet = 0;
-  refreshWallet();
-  shiftHistory(oppositeSide(currentPrediction.side));
-  pushDecision({ action:'bet', side: currentPrediction.side, amount: amt, ts: Date.now(), result:'LOSS', note:'User reported LOSS' });
-  currentPrediction = null;
-  predictionArea.style.display = 'none';
-  saveHistory();
-  showModal('Result recorded','LOSS recorded. Wallet updated.');
-};
-
-/* helper: flip side */
-function oppositeSide(s){ return s === 'BIG' ? 'SMALL' : 'BIG'; }
-
-/* update history: maintain last10 as oldest->newest. When push new result, drop oldest and add */
-function shiftHistory(resultSide){
-  // shift left and append result at end
-  last10.shift();
-  last10.push(resultSide);
-  renderHistoryGrid();
-  saveHistory();
+/* ---------- counting ---------- */
+function countFreq(arr){
+  const c = {B:0,S:0};
+  arr.forEach(x=>{ if(x==='B') c.B++; else if(x==='S') c.S++; });
+  return c;
 }
 
-/* generate pseudo live period according to current datetime
-   Format example from user: 20250914100011151 and increments every minute.
-   We'll generate: YYYYMMDD + '1000' + sequence. For demo: use timestamp minutes since epoch modulo large number.
+/* ---------- parse input ---------- */
+function parseHistoryInput(){
+  const v = historyInput.value.trim();
+  if(!v) return [];
+  // accept commas, spaces
+  const tokens = v.split(/[\s,;]+/).map(t=>t.trim().toUpperCase()).filter(Boolean);
+  // keep only B or S
+  const filtered = tokens.map(t => (t[0] === 'B' ? 'B' : (t[0] === 'S' ? 'S' : null))).filter(Boolean);
+  return filtered;
+}
+
+/* ---------- increment period suffix ----------
+   Format assumed: prefix + numeric suffix. We'll increment last numeric suffix by 1.
+   Example: 20250914100011151 -> 20250914100011152
 */
-function generateAutoPeriod(){
-  // take current date and minute, build unique increasing number per minute
-  const d = new Date();
-  const YYYY = d.getFullYear().toString().padStart(4,'0');
-  const MM = (d.getMonth()+1).toString().padStart(2,'0');
-  const DD = d.getDate().toString().padStart(2,'0');
-  const hh = d.getHours().toString().padStart(2,'0');
-  const mm = d.getMinutes().toString().padStart(2,'0');
-  // sequence part: use seconds of day / minute to get numeric tail
-  const seq = String(Math.floor(d.getTime()/60000)).slice(-6); // last 6 digits of minute-timestamp
-  return `${YYYY}${MM}${DD}1000${seq}`;
+function nextPeriod(curr){
+  if(!curr || !/^\d+$/.test(curr)) return curr;
+  // if the period is fully numeric: increment by 1
+  try{
+    // Big numbers: use BigInt to be safe
+    const n = BigInt(curr);
+    return (n + 1n).toString();
+  }catch(e){
+    // fallback: find last consecutive digits and increment
+    const m = curr.match(/(.*?)(\d+)$/);
+    if(!m) return curr;
+    const prefix = m[1]; const num = m[2];
+    const newNum = (BigInt(num) + 1n).toString().padStart(num.length,'0');
+    return prefix + newNum;
+  }
 }
 
-/* Back to analyze */
-btnBackToAnalyze.onclick = ()=>{
-  predictionArea.style.display = 'none';
-};
+/* ---------- ensemble analysis functions ----------
+   Each function returns a score in [0..1] for P(BIG). We'll combine with weights.
+*/
 
-/* modal util */
-function showModal(title, sub=''){ modalOverlay.classList.add('show'); modalTitle.innerText = title; modalSub.innerText = sub; }
-function closeModal(){ modalOverlay.classList.remove('show'); }
+/* Frequency model: P = (#B / total) with recency weighting.
+   Use exponential decay weight: recent items count more.
+*/
+function frequencyModel(arr, window){
+  if(!arr.length) return 0.5;
+  const wdecay = 0.85; // recency weight base
+  let totalWeight = 0, bigWeight = 0;
+  const start = Math.max(0, arr.length - window);
+  for(let i=start;i<arr.length;i++){
+    const age = arr.length-1 - i; // 0 = most recent
+    const weight = Math.pow(wdecay, age);
+    totalWeight += weight;
+    if(arr[i] === 'B') bigWeight += weight;
+  }
+  return (totalWeight === 0) ? 0.5 : (bigWeight / totalWeight);
+}
 
-/* persist decisions & history upon unload */
-window.addEventListener('beforeunload', ()=>{
-  saveHistory();
-  saveWallet();
+/* Markov model: compute transitions P(next=B | last = X) based on pairs */
+function markovModel(arr){
+  if(arr.length < 2) return 0.5;
+  const trans = {B:{B:0,S:0}, S:{B:0,S:0}};
+  for(let i=0;i<arr.length-1;i++){
+    const a = arr[i], b = arr[i+1];
+    if(a && b) trans[a][b]++;
+  }
+  // use last observed state
+  const last = arr[arr.length-1];
+  const counts = trans[last];
+  const total = counts.B + counts.S;
+  if(total === 0) return 0.5;
+  return counts.B / total;
+}
+
+/* Run-length model: if many repeats recently, chance to break increases.
+   We compute probability of switch: if last run length is long, P(switch) higher.
+*/
+function runLengthModel(arr){
+  if(!arr.length) return 0.5;
+  // compute last run length
+  let last = arr[arr.length-1], run = 1;
+  for(let i=arr.length-2;i>=0;i--){
+    if(arr[i] !== last) break;
+    run++;
+  }
+  // empirical mapping: run 1 -> 0.5, run 2 -> 0.55, run3->0.6, run4->0.7, run5->0.8, run>=6 ->0.88
+  const map = {1:0.5,2:0.55,3:0.6,4:0.7,5:0.8};
+  const pSwitch = run >= 6 ? 0.88 : (map[run] || 0.5);
+  // pSwitch is chance that next is same as last; we want P(B)
+  const p_same = pSwitch;
+  // If last was B then P(B) = p_same else P(B) = 1 - p_same
+  return last === 'B' ? p_same : (1 - p_same);
+}
+
+/* Psychology model: assume majority betting side loses.
+   We approximate "majority" with frequency over last window; boost opposite.
+*/
+function psychologyModel(arr, window){
+  const counts = countFreq(arr.slice(-window));
+  const total = counts.B + counts.S;
+  if(total === 0) return 0.5;
+  const fracB = counts.B / total;
+  // majorityBias = how strongly majority exists
+  const majorityBias = Math.abs(fracB - 0.5) * 2; // 0..1
+  // If B majority, probability of B reduces; we invert
+  const pB = 0.5 + (0.5 - fracB) * majorityBias * 0.9; // scale
+  return Math.max(0.05, Math.min(0.95, pB));
+}
+
+/* Frequency-of-patterns: detect short patterns e.g. (B,S,B) -> check next historically
+   We'll search for last K-length suffix in the array earlier and compute what followed.
+*/
+function patternModel(arr, suffixLen=3){
+  if(arr.length <= suffixLen) return 0.5;
+  const suffix = arr.slice(-suffixLen).join(',');
+  let countNextB = 0, countNextTotal = 0;
+  for(let i=0;i+suffixLen < arr.length;i++){
+    const seq = arr.slice(i, i+suffixLen).join(',');
+    if(seq === suffix){
+      const next = arr[i+suffixLen];
+      if(next) { countNextTotal++; if(next==='B') countNextB++; }
+    }
+  }
+  if(countNextTotal === 0) return 0.5;
+  return (countNextB / countNextTotal);
+}
+
+/* Combine models with weights */
+function ensembleProbability(arr, window){
+  // compute models
+  const freq = frequencyModel(arr, window);
+  const markov = markovModel(arr);
+  const runlen = runLengthModel(arr);
+  const psych = psychologyModel(arr, window);
+  const pattern = patternModel(arr, Math.min(3, Math.floor(window/2)));
+
+  // weights - tuned heuristics. You can adjust to favor certain models.
+  const weights = {freq:0.25, markov:0.20, runlen:0.20, psych:0.20, pattern:0.15};
+  // normalize
+  const totalW = Object.values(weights).reduce((a,b)=>a+b,0);
+  const p = (freq*weights.freq + markov*weights.markov + runlen*weights.runlen + psych*weights.psych + pattern*weights.pattern) / totalW;
+  return {pB:p, breakdown:{freq,markov,runlen,psych,pattern,weights}};
+}
+
+/* ---------- bet sizing (3-level) ---------- */
+function suggestedBetAmount(currBalance){
+  // 15%, 30%, 55% of current balance depending on level
+  if(level === 1) return Math.max(1, Math.round(currBalance * 0.15));
+  if(level === 2) return Math.max(1, Math.round(currBalance * 0.30));
+  return Math.max(1, Math.round(currBalance * 0.55));
+}
+
+/* ---------- main generate routine ---------- */
+async function generatePrediction(){
+  // parse last results
+  const arrInput = parseHistoryInput();
+  const N = parseInt(lastNSelect.value,10);
+  if(arrInput.length < N){
+    alert(`Enter at least ${N} last results (oldest→newest).`);
+    return;
+  }
+  // set lastResults as the parsed array (we keep full)
+  lastResults = arrInput;
+  refreshUI();
+
+  predArea.style.display = 'block';
+  predText.textContent = 'Prediction: ANALYZING...';
+  confText.textContent = 'Confidence: running analysis';
+  analysisSummary.textContent = 'Running ensemble analyses (this simulates a deeper analysis) ...';
+
+  // simulate longer analysis time (10-15s) with step updates to UI
+  const steps = 5;
+  for(let s=0;s<steps;s++){
+    analysisSummary.textContent = `Step ${s+1}/${steps}: running sub-models... (${Math.round((s+1)/steps*100)}%)`;
+    await new Promise(r=>setTimeout(r, 800 + Math.random()*500)); // pseudo processing time
+  }
+
+  // compute ensemble
+  const ensemble = ensembleProbability(lastResults, N);
+  const pB = ensemble.pB;
+  const pS = 1 - pB;
+  // map to percent confidence (distance from 0.5)
+  const confidence = Math.round(Math.abs(pB - 0.5) * 200); // 0..100
+  const favored = (pB > pS) ? 'BIG' : 'SMALL';
+  const confPercent = Math.round(Math.max(pB,pS) * 100);
+
+  // decide to give a prediction only if above threshold
+  const threshold = parseInt(confThresholdInput.value,10)/100 || 0.80;
+  const willPredict = Math.max(pB,pS) >= threshold;
+
+  if(!willPredict){
+    predText.textContent = 'PREDICTION: SKIP (low confidence)';
+    confText.textContent = `Confidence best side: ${confPercent}% (below threshold ${Math.round(threshold*100)}%)`;
+    betSuggestion.textContent = 'Suggestion: SKIP this period (no bet)';
+    analysisSummary.innerHTML = describeBreakdown(ensemble);
+    return;
+  }
+
+  // suggest bet
+  const betAmt = suggestedBetAmount(balance);
+  predText.textContent = `PREDICTION: ${favored} → suggest Bet ₹${betAmt}`;
+  confText.textContent = `Confidence: ${confPercent}%`;
+  betSuggestion.textContent = `Use Level ${level} sizing (${level===1?'15%':level===2?'30%':'55%'} of balance). Suggested bet: ₹${betAmt}.`;
+  analysisSummary.innerHTML = describeBreakdown(ensemble);
+
+  // show to user
+}
+
+function describeBreakdown(ens){
+  const b = ens.breakdown;
+  const w = ens.weights;
+  return `
+    Models:
+    Frequency: ${(b.freq*100).toFixed(1)}% (w=${w.freq})
+    Markov: ${(b.markov*100).toFixed(1)}% (w=${w.markov})
+    Run-length: ${(b.runlen*100).toFixed(1)}% (w=${w.runlen})
+    Psychology: ${(b.psych*100).toFixed(1)}% (w=${w.psych})
+    Pattern: ${(b.pattern*100).toFixed(1)}% (w=${w.pattern})
+    <br><br>
+    Ensemble P(BIG) = ${(ens.pB*100).toFixed(2)}%
+  `;
+}
+
+/* ---------- user marks result ---------- */
+function recordResult(result){ // result = 'B' or 'S' from real outcome
+  // append to lastResults
+  lastResults.push(result);
+  // persist to savedHistory
+  persistLastResultsToSaved();
+  // update loss streak / level / balance
+  // check if prediction existed and matched: we consider the last predicted side as lastPred
+  const lastPredElem = predText.textContent || '';
+  const predMatch = lastPredElem.includes('BIG') ? 'B' : (lastPredElem.includes('SMALL') ? 'S' : null);
+
+  if(predMatch && predMatch === result){
+    // win
+    lossStreak = 0;
+    level = 1;
+    // update balance: add suggested bet * profit rate (we assume small house cut)
+    const bet = suggestedBetAmount(balance);
+    // assume payout equals bet (i.e., you win bet amount, so balance += bet)
+    balance += bet;
+  } else if(predMatch && predMatch !== result){
+    // loss
+    lossStreak++;
+    level = Math.min(3, level + 1);
+    const bet = suggestedBetAmount(balance);
+    balance = Math.max(0, balance - bet);
+  } else {
+    // skip (no change)
+  }
+
+  // advance period auto
+  const currPeriod = (periodInput.value || '').trim();
+  if(currPeriod) periodInput.value = nextPeriod(currPeriod);
+
+  // UI updates
+  refreshUI();
+  // update prediction area
+  predArea.style.display = 'none';
+  // persist lastResults to input field (so user can continue)
+  historyInput.value = lastResults.join(',');
+  updateChart();
+}
+
+/* ---------- helpers for buttons ---------- */
+genBtn.addEventListener('click', generatePrediction);
+winBtn.addEventListener('click', ()=>{ recordResult('B'); });
+lossBtn.addEventListener('click', ()=>{ recordResult('S'); });
+forceSkipBtn.addEventListener('click', ()=>{
+  // mark skip => do not change balance but append actual real result expected input
+  alert('Mark Skip: please when real result is known, press WIN (B) or LOSS (S) to record actual outcome.');
+  predArea.style.display = 'none';
+});
+resetBtn.addEventListener('click', ()=>{
+  if(!confirm('Clear local history & reset balance?')) return;
+  lastResults = [];
+  savedHistory = [];
+  balance = DEFAULT_BALANCE; level = 1; lossStreak = 0;
+  historyInput.value = '';
+  saveLocalHistory();
+  refreshUI();
+  updateChart();
 });
 
-// initial render
-renderPlans();
-renderHistoryGrid();
-loadState();
-renderDecisions();
+loadSampleBtn.addEventListener('click', ()=>{
+  // provide a plausible sample last-10
+  const sample = ['B','S','B','B','S','B','S','B','S','B'];
+  historyInput.value = sample.join(',');
+  lastResults = sample.slice();
+  refreshUI();
+  updateChart();
+});
 
-// check target completion
-function checkTargetComplete(){
-  // if wallet falls within selected plan target range (>= targetMin and >= targetMax?), interpret as complete when wallet >= targetMax
-  if(wallet >= (selectedPlan.targetMax || 999999)){
-    showModal('🎉 Target Complete', `Your wallet reached ₹${wallet}. Target ${selectedPlan.label} complete!`);
-    // reset to step 1 after short delay
-    setTimeout(()=> {
-      stepPlan.style.display = 'block';
-      stepHistory.style.display = 'none';
-      stepAI.style.display = 'none';
-    }, 800);
-  }
-}
+/* ---------- initial setup ---------- */
+initChart();
+refreshUI();
+updateChart();
+
+/* ---------- small utility: show debug logs in analysisSummary (already used) ---------- */
+
+/* ---------- Optional: Firebase sync placeholders ----------
+   If you want history & approvals via Firebase Realtime DB or Firestore,
+   include Firebase SDK and implement push/pull functions here.
+*/
+
+/* End of script */
 </script>
 </body>
 </html>
