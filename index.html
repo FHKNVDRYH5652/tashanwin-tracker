@@ -1,594 +1,714 @@
 <!doctype html>
+
 <html lang="hi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Wingo Predictor — Deep Analyzer</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  :root{
-    --bg:#071021;
-    --panel:#0f1724;
-    --accent:#00d2a8;
-    --accent2:#00a6ff;
-    --muted:#9fb0d6;
-    --danger:#ff6b6b;
-  }
-  *{box-sizing:border-box;font-family:'Inter',system-ui,Segoe UI,Roboto,Arial;}
-  body{margin:0;background:linear-gradient(180deg,#05101a,#071827);color:#e6f3ff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .app{width:1100px;max-width:98%;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.6)}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#012}
-  h1{margin:0;font-size:18px}
-  .top-row{display:flex;gap:12px}
-  .left, .right{background:var(--panel);padding:12px;border-radius:10px;flex:1}
-  .right{width:420px;flex:0 0 420px}
-  label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
-  .last-list{display:flex;flex-wrap:wrap;gap:6px}
-  .chip{padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer;user-select:none}
-  .chip.big{background:linear-gradient(90deg,#063,#06a);color:#021}
-  .chip.small{background:linear-gradient(90deg,#ffd54a,#ffb66b);color:#071}
-  .controls{display:flex;gap:8px;align-items:center;margin-top:8px}
-  input[type=text]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-  button{padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#012;font-weight:700;cursor:pointer}
-  .muted{color:var(--muted);font-size:13px}
-  .panel-box{background:rgba(255,255,255,0.01);padding:12px;border-radius:10px;margin-top:12px}
-  .analysis-area{margin-top:12px}
-  .big-stat{font-size:24px;font-weight:800}
-  .conf{font-weight:800;padding:6px 10px;border-radius:8px;display:inline-block}
-  .conf.high{background:linear-gradient(90deg,#7fe8a7,#bff7dc);color:#012}
-  .conf.mid{background:linear-gradient(90deg,#ffd54a,#ffb66b);color:#012}
-  .conf.low{background:linear-gradient(90deg,#ff9a9a,#ff6b6b);color:#012}
-  .analysis-logs{font-family:monospace;background:rgba(0,0,0,0.18);padding:10px;border-radius:8px;margin-top:8px;max-height:220px;overflow:auto}
-  .chart-wrap{height:180px;margin-top:12px}
-  footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
-  .hint{font-size:12px;color:#c9d7e9}
-  .server-status{float:right;font-size:13px;color:#9ff}
-  .skip-box{display:inline-block;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
-  .result-row{display:flex;gap:8px;align-items:center;margin-top:8px}
-  .green{color:#8fffb2}
-  .red{color:#ff9a9a}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Loss Recovery - FINAL (Updated)</title>
+  <style>
+    body{margin:0;font-family:Arial, sans-serif;background:#0f1720;color:#fff;text-align:center;background-size:cover;background-position:center;min-height:100vh}
+    .container{padding:20px;max-width:980px;margin:0 auto}
+    .page{display:none;padding:18px}
+    .active{display:block}
+    .btn{padding:10px 18px;margin:8px;border:none;border-radius:8px;cursor:pointer;background:#ff6b6b;color:#fff;font-weight:700}
+    .plans{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
+    .plan{background:rgba(255,255,255,0.03);padding:14px;border-radius:10px;cursor:pointer;min-width:140px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .selected{outline:3px solid rgba(255,107,107,0.6)}
+    img.qr{width:200px;height:200px;margin-top:15px;object-fit:cover}
+    #adminPanel{display:none;background:rgba(0,0,0,0.95);padding:16px;text-align:left;border-radius:8px;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:600px;max-height:80vh;overflow-y:auto;z-index:999;color:#eee}
+    #cross{position:fixed;top:12px;right:12px;cursor:pointer;font-size:24px;z-index:1000;color:#fff;background:rgba(255,0,0,0.08);padding:6px 10px;border-radius:50%}
+    input[type=text], input[type=number]{padding:10px;border-radius:6px;border:none;outline:none;width:80%;max-width:420px;margin:8px 0;background:rgba(255,255,255,0.03);color:#fff}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border:1px solid rgba(255,255,255,0.06);font-size:14px;text-align:center}
+    .small{font-size:13px;color:#cbd5e1}
+    .hint{opacity:0.85;font-size:13px}
+    .chip{display:inline-block;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;margin:6px}
+  </style>
 </head>
-<body>
-  <div class="app" role="application">
-    <header>
-      <div class="logo">W</div>
-      <div>
-        <h1>Wingo — Deep Predictor</h1>
-        <div class="muted">Last-20 analysis • Psychology-opposite heuristic • Beast-mode recovery</div>
-      </div>
-      <div class="server-status" id="serverStatus">Server: Local</div>
-    </header>
+<body id="body">
+  <div class="container">
+    <div id="welcome" class="page active">
+      <h1>Welcome to Loss Recovery</h1>
+      <p class="small">Aapka suagat hai — start recovery journey</p>
+      <button class="btn" onclick="goLoss()">Next</button>
+    </div><div id="loss" class="page">
+  <h2>Enter your Loss Amount</h2>
+  <input type="number" id="lossAmount" placeholder="Enter loss amount (₹)" />
+  <div>
+    <button class="btn" onclick="confirmLoss()">Confirm</button>
+    <button class="btn" onclick="showPage('welcome')">Back</button>
+  </div>
+  <p class="hint">Example: 1000</p>
+</div>
 
-    <div class="top-row">
-      <div class="left">
-        <label>Period (enter current period number)</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="periodInput" type="text" placeholder="e.g. 20250914100011162" style="flex:1"/>
-          <button id="incPeriod">+1</button>
-        </div>
+<div id="plan" class="page">
+  <h2>Choose a Plan</h2>
+  <div class="plans" id="plans"></div>
+  <div>
+    <button class="btn" onclick="goPayment()">Proceed to Payment</button>
+    <button class="btn" onclick="showPage('loss')">Back</button>
+  </div>
+</div>
 
-        <div class="panel-box">
-          <label>Last results (click to toggle Big / Small). Enter up to 20 (latest at right):</label>
-          <div id="lastList" class="last-list" aria-live="polite"></div>
-          <div class="controls">
-            <button id="addBig">Add BIG</button>
-            <button id="addSmall">Add SMALL</button>
-            <button id="clearLast">Clear</button>
-            <div style="flex:1"></div>
-            <div class="muted">Stored locally</div>
-          </div>
-        </div>
+<div id="payment" class="page">
+  <h2 id="planName"></h2>
+  <p>Amount to Pay: ₹<span id="planPrice"></span></p>
+  <img src="qr.png" class="qr" alt="QR Code"/>
+  <p class="hint">Scan & pay using QR. Enter UTR below and submit for admin approval.</p>
+  <input type="text" id="utr" placeholder="Enter UTR / Transaction ID" />
+  <div>
+    <button class="btn" onclick="submitUTR()">Submit for Approval</button>
+    <button class="btn" onclick="showPage('plan')">Back</button>
+  </div>
+</div>
 
-        <div class="panel-box">
-          <label>Analysis controls</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="generateBtn">Generate Prediction (Deep Analyze)</button>
-            <div class="hint">Takes ~10-15s to simulate deep analysis</div>
-          </div>
+<div id="strategy" class="page">
+  <h2>Recovery Strategy</h2>
+  <div id="strategyContent"></div>
+  <div id="strategyButtons"></div>
+  <p class="small">Note: Strategy is locked until admin approves your payment. Admin will approve using the admin panel.</p>
+</div>
 
-          <div class="analysis-area" id="analysisArea" style="display:none">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div>
-                <div class="muted">Prediction</div>
-                <div class="big-stat" id="predictionLabel">--</div>
-              </div>
-              <div style="text-align:right">
-                <div class="muted">Confidence</div>
-                <div id="confLabel" class="conf">--</div>
-              </div>
-            </div>
-
-            <div class="result-row">
-              <div class="skip-box" id="suggestionBox">Suggestion: --</div>
-              <div style="flex:1"></div>
-              <div class="muted">Beast Mode: <span id="beastMode">OFF</span></div>
-            </div>
-
-            <div class="chart-wrap">
-              <canvas id="freqChart"></canvas>
-            </div>
-
-            <div class="analysis-logs" id="logBox" aria-live="polite"></div>
-
-            <div style="margin-top:10px;display:flex;gap:8px">
-              <button id="markWin" style="background:linear-gradient(90deg,#7fe8a7,#bff7dc);color:#012">Mark WIN</button>
-              <button id="markLoss" style="background:linear-gradient(90deg,#ff9a9a,#ff6b6b);color:#012">Mark LOSS</button>
-              <div style="flex:1"></div>
-              <button id="exportBtn" class="muted">Export history</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="right">
-        <label>Summary & stats</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="flex:1">
-            <div class="muted">Total stored rounds</div>
-            <div id="totalRounds" style="font-weight:800">0</div>
-          </div>
-          <div style="flex:1">
-            <div class="muted">Consecutive losses</div>
-            <div id="consecLoss" style="font-weight:800">0</div>
-          </div>
-        </div>
-
-        <div class="panel-box">
-          <label>Quick heuristics (visible)</label>
-          <div id="heuristics" class="muted" style="font-size:13px;line-height:1.5"></div>
-        </div>
-
-        <div class="panel-box">
-          <label>Last results list (most recent at top)</label>
-          <div id="historyBox" style="max-height:220px;overflow:auto;font-family:monospace;font-size:13px"></div>
-        </div>
-
-        <div class="panel-box">
-          <label>Settings</label>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div><label class="muted">Confidence threshold for auto-skip</label>
-              <input id="threshold" type="text" value="0.75" placeholder="0.7" />
-            </div>
-            <div><label class="muted">Enable beast-mode recovery?</label>
-              <select id="beastToggle"><option value="1">Yes</option><option value="0">No</option></select>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="muted">Note: This tool provides analysis & suggestions. It does NOT guarantee outcomes. Use responsibly.</div>
-      </div>
-    </div>
-
-    <footer>Built for analysis • Deep heuristics • Last results persisted locally</footer>
+<div id="predict" class="page">
+  <h2>AI Prediction (WINGO 1-min)</h2>
+  <p class="small">Enter last 3-digit period number and last results sequence (Small/Big)</p>
+  <input type="text" id="period" placeholder="Period (e.g., 123)" />
+  <div class="hint">Example last 10: Small Big Small Big Big Big Small Big Small Big</div>
+  <input type="text" id="last10" placeholder="Enter last results separated by space" />
+  <div>
+    <button class="btn" onclick="genPrediction()">Generate AI Prediction</button>
+    <button class="btn" onclick="autoFillExample()">Fill Example</button>
   </div>
 
-<script>
-/*
-  Wingo Predictor — single-file
-  - lastResults stored in localStorage (array of 'BIG' or 'SMALL', latest at end)
-  - generatePrediction() runs multiple heuristic scorers, weights them, produces P(BIG) and P(SMALL)
-  - prediction = argmax, confidence = maxP
-  - if confidence < threshold => Suggest SKIP
-  - Mark WIN/LOSS to add real outcome and update history
-  - Chart shows frequency and moving trend
-*/
+  <div id="predictionResult"></div>
 
-const MAX_HISTORY = 200;
-const MAX_INPUT = 20;
+  <div style="margin-top:12px">
+    <button class="btn" onclick="handleRecord('win')">Win</button>
+    <button class="btn" onclick="handleRecord('loss')">Loss</button>
+    <button class="btn" onclick="showPage('strategy')">Back</button>
+  </div>
+  <div class="hint" style="margin-top:10px">AI remembers feedback locally to improve future suggestions.</div>
+</div>
 
-const lastKey = 'wingo_last_results_v1';
-const lossKey = 'wingo_consec_loss_v1';
+  </div>  <!-- Admin -->  <div id="adminPanel">
+    <h2>Admin Panel (Firebase)</h2>
+    <div id="adminRequests" class="small">Loading requests...</div>
+    <div style="text-align:right;margin-top:10px"><button class="btn" onclick="closeAdmin()">Close</button></div>
+  </div>
+  <div id="cross" onclick="openAdmin()">×</div><script type="module">
+/* =======================
+   Firebase & App Setup
+   ======================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-function readLast(){
-  try { return JSON.parse(localStorage.getItem(lastKey) || '[]'); } catch(e){ return []; }
+const firebaseConfig = {
+  apiKey: "AIzaSyBs7eQyMrcN8kJWMHl2ac2UZHlYQ6DypD8",
+  authDomain: "terminal-xxrr.firebaseapp.com",
+  databaseURL: "https://terminal-xxrr-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "terminal-xxrr",
+  storageBucket: "terminal-xxrr.firebasestorage.app",
+  messagingSenderId: "722753278120",
+  appId: "1:722753278120:web:bfa37aab39635a4e57f29d",
+  measurementId: "G-E3MZH3E1K5"
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+function saveUTRtoFirebase(utr, amount, deviceId, planDays, planLabel, loss){
+  const utrRef = ref(db, 'utrRequests');
+  const newRef = push(utrRef);
+  set(newRef, {
+    utr: utr,
+    amount: amount,
+    status: 'pending',
+    deviceId: deviceId,
+    planDays: planDays,
+    planLabel: planLabel,
+    loss: loss,
+    time: Date.now()
+  });
 }
-function writeLast(arr){
-  localStorage.setItem(lastKey, JSON.stringify(arr.slice(-MAX_HISTORY)));
+
+/* =======================
+   Utility & UI helpers
+   ======================= */
+function speak(t){ try{ let u=new SpeechSynthesisUtterance(t); u.lang='hi-IN'; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const bg={'welcome':'anime1.png','loss':'anime2.png','plan':'anime3.png','payment':'anime4.png','strategy':'anime5.png','predict':'anime4.png'};
+  document.body.style.backgroundImage = "url('"+(bg[id]||'anime1.png')+"')";
 }
-function readLoss(){ return parseInt(localStorage.getItem(lossKey) || '0',10); }
-function writeLoss(n){ localStorage.setItem(lossKey, String(n)); }
 
-const lastListEl = document.getElementById('lastList');
-const historyBox = document.getElementById('historyBox');
-const totalRounds = document.getElementById('totalRounds');
-const consecLoss = document.getElementById('consecLoss');
-const heuristics = document.getElementById('heuristics');
+/* =======================
+   App State (local)
+   ======================= */
+let loss = parseFloat(localStorage.getItem('lossAmount') || '0');
+let selectedPlan = null;
+let planPrice = 0;
+let baseBet = parseInt(localStorage.getItem('baseBet')||'0',10) || 0;
+let martingaleCurrent = parseInt(localStorage.getItem('martingaleCurrent')||'0',10) || 0;
+let deviceId = localStorage.getItem('deviceId') || (Math.random().toString(36).slice(2));
+localStorage.setItem('deviceId', deviceId);
 
-const analysisArea = document.getElementById('analysisArea');
-const predictionLabel = document.getElementById('predictionLabel');
-const confLabel = document.getElementById('confLabel');
-const suggestionBox = document.getElementById('suggestionBox');
-const logBox = document.getElementById('logBox');
-const beastModeLabel = document.getElementById('beastMode');
+// plan options
+const plans = [
+  {label:'3 Month',pct:7,days:90},
+  {label:'1 Month',pct:12.5,days:30},
+  {label:'1 Week',pct:15,days:7},
+  {label:'3 Days',pct:20,days:3},
+  {label:'1 Day',pct:25,days:1}
+];
 
-const periodInput = document.getElementById('periodInput');
-const thresholdInput = document.getElementById('threshold');
-const beastToggle = document.getElementById('beastToggle');
-
-let chart = null;
-let isAnalyzing = false;
-let lastResults = readLast();
-let consecutiveLosses = readLoss();
-
-function renderLastList(){
-  lastListEl.innerHTML = '';
-  // show up to MAX_INPUT most recent, latest at right (user wanted latest to right)
-  const arr = lastResults.slice(-MAX_INPUT);
-  arr.forEach((v, i) => {
-    const btn = document.createElement('div');
-    btn.className = 'chip ' + (v === 'BIG' ? 'big' : 'small');
-    btn.title = 'Click to toggle or remove';
-    btn.textContent = v === 'BIG' ? 'BIG' : 'SMALL';
-    btn.onclick = ()=> {
-      // toggle if clicked
-      const idx = lastResults.indexOf(arr[i], lastResults.length - arr.length);
-      if(idx >= 0){
-        lastResults[idx] = (lastResults[idx] === 'BIG' ? 'SMALL' : 'BIG');
-      }
-      writeLast(lastResults);
-      renderAll();
+/* =======================
+   Build Plans UI
+   ======================= */
+function buildPlans(){
+  const box = document.getElementById('plans'); box.innerHTML='';
+  plans.forEach(p=>{
+    const price = (loss * p.pct / 100).toFixed(2);
+    const div = document.createElement('div');
+    div.className = 'plan';
+    div.innerHTML = `<b>${p.label}</b><div class="small">Price: ₹${price}</div><div class="small">Duration: ${p.days} days</div>`;
+    div.onclick = ()=>{
+      document.querySelectorAll('.plan').forEach(x=>x.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedPlan = p;
+      planPrice = price;
+      // store selected plan locally so it persists if user navigates
+      localStorage.setItem('selectedPlanLabel', p.label);
+      localStorage.setItem('selectedPlanDays', String(p.days));
+      localStorage.setItem('selectedPlanPrice', String(price));
+      speak('Apne '+p.label+' plan chuna. Price '+price+' rupaye');
     };
-    btn.oncontextmenu = (ev) => { ev.preventDefault(); // right click remove this one
-      const idx = lastResults.indexOf(arr[i], lastResults.length - arr.length);
-      if(idx >= 0){ lastResults.splice(idx,1); writeLast(lastResults); renderAll(); }
-    };
-    lastListEl.appendChild(btn);
+    box.appendChild(div);
   });
-  totalRounds.textContent = lastResults.length;
 }
 
-function renderHistory(){
-  historyBox.innerHTML = '';
-  const arr = lastResults.slice().reverse(); // recent first
-  arr.forEach((v, i) => {
-    const d = document.createElement('div');
-    d.textContent = `${lastResults.length - i}: ${v}`;
-    historyBox.appendChild(d);
-  });
-  consecLoss.textContent = consecutiveLosses;
+/* =======================
+   User Flow: Loss -> Plan -> Payment -> UTR submit
+   ======================= */
+function goLoss(){ showPage('loss'); speak('Apna loss amount darj karein'); }
+function confirmLoss(){
+  const v = parseFloat(document.getElementById('lossAmount').value);
+  document.getElementById('lossAmount').value = v; // ensure displayed correctly
+  if(!v || v <= 0){ alert('Enter valid loss amount'); return; }
+  loss = v;
+  localStorage.setItem('lossAmount', String(loss));
+  baseBet = Math.max(1, Math.round(loss * 0.05)); // base 5%
+  martingaleCurrent = baseBet;
+  localStorage.setItem('baseBet', String(baseBet));
+  localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+  buildPlans();
+  showPage('plan');
+  speak('Apko apna loss kitne dino mai cover karna hai. Plan choose karein');
 }
-
-function log(msg){
-  const line = document.createElement('div');
-  const t = new Date().toLocaleTimeString();
-  line.textContent = `[${t}] ${msg}`;
-  logBox.prepend(line);
-  // trim logs
-  while(logBox.children.length > 200) logBox.removeChild(logBox.lastChild);
-}
-
-function addResult(side){
-  if(side !== 'BIG' && side !== 'SMALL') return;
-  lastResults.push(side);
-  if(lastResults.length > MAX_HISTORY) lastResults.shift();
-  writeLast(lastResults);
-  renderAll();
-}
-
-document.getElementById('addBig').onclick = ()=> addResult('BIG');
-document.getElementById('addSmall').onclick = ()=> addResult('SMALL');
-document.getElementById('clearLast').onclick = ()=>{
-  if(!confirm('Clear last results?')) return;
-  lastResults = [];
-  writeLast(lastResults);
-  consecutiveLosses = 0;
-  writeLoss(consecutiveLosses);
-  renderAll();
-};
-
-document.getElementById('incPeriod').onclick = ()=>{
-  const p = periodInput.value.trim();
-  if(!p) { alert('Enter period first'); return; }
-  // naive increment last digit (works unless format differs) — do numeric add
-  const n = BigInt(p) + 1n;
-  periodInput.value = String(n);
-};
-
-function patternAnalysis(arr){
-  // returns object of heuristic outputs, each returns score pair [scoreBig, scoreSmall] (higher positive favors that side)
-  const heur = {};
-  const N = arr.length;
-  const counts = {BIG:0, SMALL:0};
-  arr.forEach(x => counts[x] = (counts[x]||0) + 1);
-
-  // 1) Frequency (recent count)
-  heur.freq = [counts.BIG / Math.max(1,N), counts.SMALL / Math.max(1,N)];
-
-  // 2) Recency bias (last 6)
-  const last6 = arr.slice(-6);
-  const rec = {BIG:0,SMALL:0};
-  last6.forEach(x=> rec[x]++);
-  heur.recency = [rec.BIG/6, rec.SMALL/6];
-
-  // 3) Run-length (long runs -> crowd expects opposite)
-  let maxRun = 0, curRun = 1, curVal = arr[0];
-  for(let i=1;i<arr.length;i++){
-    if(arr[i]===arr[i-1]) curRun++; else { if(curRun>maxRun) maxRun=curRun; curRun=1; }
-  }
-  if(curRun>maxRun) maxRun = curRun;
-  // if there is a very long run of BIG, then opposite might be likely
-  const runScore = Math.min(1, maxRun/6); // normalized
-  // assign to favor opposite of last value
-  const last = arr[arr.length-1];
-  heur.run = last === 'BIG' ? [ -runScore, runScore ] : [ runScore, -runScore ];
-
-  // 4) Zig-zag detection (alternating): if alternating, next likely alternate
-  let zig = 0; for(let i=2;i<arr.length;i++) if(arr[i]!==arr[i-1] && arr[i-1]!==arr[i-2]) zig++;
-  const zigScore = Math.min(1, zig / Math.max(1, arr.length/2));
-  // if last two were alternating, prefer opposite of last
-  heur.zig = last6.length>=2 && last6[last6.length-1]!==last6[last6.length-2] ? (last==='BIG' ? [ -zigScore, zigScore ] : [ zigScore, -zigScore ]) : [0,0];
-
-  // 5) Momentum (if frequency strongly biased)
-  const diff = (counts.BIG - counts.SMALL) / Math.max(1,N);
-  heur.momentum = diff > 0 ? [ Math.min(1, diff), -Math.min(1, diff) ] : [ -Math.min(1, -diff), Math.min(1, -diff) ];
-
-  // 6) Psychological crowd-opposite heuristic: assume crowd follows recent frequency; we go opposite of majority
-  const majority = counts.BIG > counts.SMALL ? 'BIG' : (counts.SMALL > counts.BIG ? 'SMALL' : 'NONE');
-  const majStrength = Math.abs(counts.BIG - counts.SMALL) / Math.max(1,N);
-  heur.psych = majority === 'BIG' ? [ -majStrength, majStrength ] : (majority === 'SMALL' ? [ majStrength, -majStrength ] : [0,0]);
-
-  // 7) Pattern library (simple patterns like double, triple)
-  // detect sequences of two or three at end
-  const end2 = arr.slice(-2).join(',');
-  const end3 = arr.slice(-3).join(',');
-  let pattScoreB = 0, pattScoreS = 0;
-  if(end3 === 'BIG,BIG,BIG') { pattScoreB = 0.2; pattScoreS = -0.2; }
-  if(end3 === 'SMALL,SMALL,SMALL') { pattScoreS = 0.2; pattScoreB = -0.2; }
-  if(end2 === 'BIG,BIG') { pattScoreB = -0.1; pattScoreS = 0.1; } // often will flip
-  if(end2 === 'SMALL,SMALL') { pattScoreS = -0.1; pattScoreB = 0.1; }
-  heur.pattern = [pattScoreB, pattScoreS];
-
-  // 8) Frequency trend (moving average difference)
-  const mid = Math.max(1, Math.floor(arr.length/2));
-  const firstHalf = arr.slice(0, mid), secondHalf = arr.slice(mid);
-  const fh = {BIG:0,SMALL:0}, sh={BIG:0,SMALL:0};
-  firstHalf.forEach(x=>fh[x]++);
-  secondHalf.forEach(x=>sh[x]++);
-  const trendB = (sh.BIG/Math.max(1,secondHalf.length)) - (fh.BIG/Math.max(1,firstHalf.length));
-  const trendS = (sh.SMALL/Math.max(1,secondHalf.length)) - (fh.SMALL/Math.max(1,firstHalf.length));
-  heur.trend = [trendB, trendS];
-
-  // 9) Frequency normalized
-  heur.freqNorm = [counts.BIG / Math.max(1,N), counts.SMALL / Math.max(1,N)];
-
-  // 10) Randomness detector — if too random, encourage skip
-  const entropy = calcEntropy(arr);
-  heur.randomness = entropy; // 0..1
-
-  return heur;
-}
-
-function calcEntropy(arr){
-  if(arr.length===0) return 0;
-  const c = {BIG:0,SMALL:0};
-  arr.forEach(x=>c[x]++);
-  const p1 = c.BIG/arr.length, p2 = c.SMALL/arr.length;
-  // binary entropy normalized to 1
-  const h = -( (p1>0? p1*Math.log2(p1):0) + (p2>0? p2*Math.log2(p2):0) );
-  const hmax = 1; // for 2 symbols max entropy =1
-  return h / hmax;
-}
-
-function combineHeuristics(heur){
-  // define weights for each heuristic (tuneable)
-  const weights = {
-    freq: 0.9,
-    recency: 0.9,
-    run: 0.8,
-    zig: 0.6,
-    momentum: 0.7,
-    psych: 1.0,
-    pattern: 0.7,
-    trend: 0.6,
-    freqNorm: 0.9,
-    randomness: -0.8 // negative weight: higher randomness reduces confidence and pushes skip
-  };
-  const keys = Object.keys(heur);
-  let scoreB = 0, scoreS = 0, totalW = 0;
-  keys.forEach(k=>{
-    const val = heur[k];
-    if(k === 'randomness'){
-      // randomness is scalar 0..1; we use to reduce confidence not to add to absolute scores
-      return;
+function goPayment(){
+  // ensure we have latest selectedPlan from localStorage if page reloaded
+  if(!selectedPlan){
+    const label = localStorage.getItem('selectedPlanLabel');
+    const days = parseInt(localStorage.getItem('selectedPlanDays')||'0',10);
+    const price = localStorage.getItem('selectedPlanPrice');
+    if(label && days){
+      selectedPlan = {label:label,pct:0,days:days}; // pct not needed here
+      planPrice = price || '0';
     }
-    const w = weights[k] || 0.5;
-    scoreB += (val[0] || 0) * w;
-    scoreS += (val[1] || 0) * w;
-    totalW += Math.abs(w);
-  });
-  // incorporate randomness to damp scores
-  const rand = heur.randomness;
-  const damp = 1 - Math.min(0.85, rand*weights.randomness*-1); // randomness reduces effective score
-  scoreB *= damp;
-  scoreS *= damp;
-
-  // normalize into probabilities with softmax
-  const expB = Math.exp(scoreB);
-  const expS = Math.exp(scoreS);
-  const pB = expB / (expB + expS);
-  const pS = expS / (expB + expS);
-  return {pB, pS, raw: [scoreB, scoreS], damp, scoreB, scoreS};
-}
-
-function simulateDeepAnalysis(){
-  // simulate 10-15s of analysis with logs populating
-  logBox.innerHTML = '';
-  analysisArea.style.display = 'block';
-  predictionLabel.textContent = '--';
-  confLabel.textContent = '--';
-  suggestionBox.textContent = 'Analyzing...';
-  suggestionBox.style.opacity = 0.9;
-  isAnalyzing = true;
-  const steps = 10 + Math.floor(Math.random()*6);
-  let step = 0;
-
-  const timer = setInterval(()=>{
-    step++;
-    // create a fake sub-heuristic message
-    const msgs = [
-      'Scanning frequency & recency...',
-      'Detecting run-lengths & streaks...',
-      'Analyzing zig-zag and pattern library...',
-      'Estimating crowd psychology & bias...',
-      'Projecting momentum & trend...',
-      'Computing confidence surface...',
-      'Performing Monte-Carlo style checks...',
-      'Normalizing scores, applying dampening...',
-      'Final aggregation & calibration...',
-      'Preparing suggestion & risk control...'
-    ];
-    log(msgs[step % msgs.length]);
-    if(step >= steps){
-      clearInterval(timer);
-      isAnalyzing = false;
-      finalizePrediction();
-    }
-  }, 1000 + Math.floor(Math.random()*400));
-}
-
-function finalizePrediction(){
-  const arr = lastResults.slice(-MAX_INPUT);
-  if(arr.length === 0){
-    alert('Enter at least one last result (ideally 10-20) before generating.');
-    suggestionBox.textContent = 'No data';
-    return;
   }
-  const heur = patternAnalysis(arr);
-  const comb = combineHeuristics(heur);
+  if(!selectedPlan){ alert('Select a plan'); return; }
+  document.getElementById('planName').innerText = selectedPlan.label;
+  document.getElementById('planPrice').innerText = planPrice;
+  showPage('payment');
+  speak('QR scan karke '+planPrice+' rupaye ka payment karein.');
+}
+function submitUTR(){
+  const utr = document.getElementById('utr').value.trim();
+  if(!utr){ alert('Enter UTR'); return; }
+  // ensure we have selected plan details
+  const planDays = selectedPlan ? selectedPlan.days : parseInt(localStorage.getItem('selectedPlanDays')||'0',10);
+  const planLabel = selectedPlan ? selectedPlan.label : localStorage.getItem('selectedPlanLabel') || 'Plan';
+  // push to firebase with deviceId
+  saveUTRtoFirebase(utr, planPrice, deviceId, planDays, planLabel, loss);
+  alert('Payment submitted for approval. Admin will approve soon.');
+  showPage('strategy');
+  renderStrategyLocked(); // locked until approved
+}
 
-  // beast mode: boost opposite if consecutiveLosses>=1 and setting enabled
-  const beastEnabled = (beastToggle.value === '1');
-  if(beastEnabled && consecutiveLosses >= 1){
-    // increase opposite weight
-    const last = arr[arr.length-1];
-    if(last === 'BIG'){ comb.pS += 0.07; comb.pB -= 0.07; }
-    else { comb.pB += 0.07; comb.pS -= 0.07; }
-    // renormalize
-    const sum = comb.pB + comb.pS;
-    comb.pB /= sum; comb.pS /= sum;
-    beastModeLabel.textContent = 'ON';
-  } else {
-    beastModeLabel.textContent = 'OFF';
+/* =======================
+   Firebase: Admin side & User listen for approval
+   ======================= */
+// Admin panel will listen to all requests and show approve/reject buttons
+const requestsRef = ref(db, 'utrRequests');
+onValue(requestsRef, (snap)=>{
+  const el = document.getElementById('adminRequests');
+  if(!snap.exists()){ el.innerHTML = '<div class="small">No requests</div>'; checkUserApproval(null); return; }
+  const data = snap.val();
+  // build admin list with approve/reject
+  let adminHtml = '<table><thead><tr><th>Key</th><th>UTR</th><th>Amt</th><th>DeviceId</th><th>Plan</th><th>Days</th><th>Status</th><th>Time</th><th>Action</th></tr></thead><tbody>';
+  for(const k in data){
+    const r = data[k];
+    // show all requests (pending or not) so admin can see status
+    adminHtml += `<tr>
+      <td style="font-size:12px">${k}</td>
+      <td>${r.utr || ''}</td>
+      <td>₹${r.amount || ''}</td>
+      <td style="font-size:12px">${r.deviceId || ''}</td>
+      <td>${r.planLabel || ''}</td>
+      <td>${r.planDays || ''}</td>
+      <td>${r.status || ''}</td>
+      <td style="font-size:12px">${r.time ? new Date(r.time).toLocaleString() : ''}</td>
+      <td>
+        ${r.status !== 'approved' ? `<button class="btn" onclick="adminApprove('${k}')">Approve</button>` : ''}
+        ${r.status !== 'rejected' ? `<button class="btn" onclick="adminReject('${k}')">Reject</button>` : ''}
+      </td>
+    </tr>`;
   }
+  adminHtml += '</tbody></table>';
 
-  const pred = comb.pB > comb.pS ? 'BIG' : 'SMALL';
-  const confidence = Math.max(comb.pB, comb.pS); // 0..1
-  predictionLabel.textContent = pred;
-  const confNum = Math.round(confidence*100);
-  confLabel.textContent = confNum + '%';
-  confLabel.className = 'conf ' + (confidence >= 0.85 ? 'high' : (confidence >= 0.7 ? 'mid' : 'low'));
+  const infoHtml = `<div style='margin-top:15px;text-align:left;font-size:14px;line-height:1.5'>
+    <b>📌 Step-by-Step Recovery Guide (Admin view):</b><br>
+    1️⃣ हर दिन system आपके लिए target calculate करेगा.<br>
+    2️⃣ आज का deposit amount और target ऊपर table में देखें.<br>
+    3️⃣ Prediction page पर जाएं → Last 10 results डालें → "Generate AI Prediction" पर click करें.<br>
+    4️⃣ हर bet के बाद "Win" या "Loss" button दबाकर result update करें.<br>
+    5️⃣ जब आज का target पूरा हो जाए → status "Completed" दिखेगा और अगला दिन unlock होगा.<br>
+    6️⃣ Plan पूरा होने पर आपका पूरा loss recover हो जाएगा ✅.<br>
+  </div>`;
 
-  // suggestion logic
-  const threshold = parseFloat(thresholdInput.value) || 0.75;
-  let suggestion = '';
-  if(confidence < threshold){
-    suggestion = 'SKIP (low confidence)';
-  } else {
-    suggestion = `BET ${pred} (confidence ${confNum}%)`;
-  }
-  suggestionBox.textContent = 'Suggestion: ' + suggestion;
+  el.innerHTML = adminHtml + infoHtml;
 
-  // produce readable heuristic report
-  heuristics.innerHTML = '';
-  heuristics.innerHTML += `Frequency BIG:${Math.round(heur.freqNorm[0]*100)}% SMALL:${Math.round(heur.freqNorm[1]*100)}%<br/>`;
-  heuristics.innerHTML += `Recency last6 BIG:${Math.round(heur.recency[0]*100)}% SMALL:${Math.round(heur.recency[1]*100)}%<br/>`;
-  heuristics.innerHTML += `Run influence:${Math.round(heur.run[0]*100)/100},${Math.round(heur.run[1]*100)/100}<br/>`;
-  heuristics.innerHTML += `ZigScore:${Math.round(heur.zig[0]*100)/100},${Math.round(heur.zig[1]*100)/100}<br/>`;
-  heuristics.innerHTML += `Entropy (randomness): ${Math.round(heur.randomness*100)/100}<br/>`;
-  heuristics.innerHTML += `Momentum:${Math.round(heur.momentum[0]*100)/100},${Math.round(heur.momentum[1]*100)/100}<br/>`;
-
-  log(`P(BIG)=${(comb.pB*100).toFixed(1)}%  P(SMALL)=${(comb.pS*100).toFixed(1)}%  => ${pred} @ ${confNum}%`);
-  renderChart();
-}
-
-document.getElementById('generateBtn').onclick = ()=>{
-  if(isAnalyzing) return alert('Analysis already running...');
-  log('Start deep analysis...');
-  simulateDeepAnalysis();
-};
-
-document.getElementById('markWin').onclick = ()=>{
-  // mark the last prediction as win: the predicted side happened
-  const pred = predictionLabel.textContent;
-  if(!pred || pred === '--') { alert('No prediction to mark. Generate first.'); return; }
-  // push this actual result to history
-  addResult(pred);
-  consecutiveLosses = 0;
-  writeLoss(consecutiveLosses);
-  renderAll();
-  log(`Marked WIN for ${pred}`);
-};
-
-document.getElementById('markLoss').onclick = ()=>{
-  // mark loss for last prediction — actual was opposite
-  const pred = predictionLabel.textContent;
-  if(!pred || pred === '--') { alert('No prediction to mark. Generate first.'); return; }
-  const actual = (pred === 'BIG') ? 'SMALL' : 'BIG';
-  addResult(actual);
-  consecutiveLosses = readLoss() + 1;
-  writeLoss(consecutiveLosses);
-  renderAll();
-  log(`Marked LOSS (actual ${actual}) — consecutiveLosses=${consecutiveLosses}`);
-  // if consecutiveLosses >=2 and beast enabled -> next prediction will be adjusted
-};
-
-document.getElementById('exportBtn').onclick = ()=>{
-  const data = {lastResults, timestamp: Date.now()};
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'wingo_history.json'; a.click();
-  URL.revokeObjectURL(url);
-};
-
-// chart
-function renderChart(){
-  const freqBig = lastResults.filter(x=>x==='BIG').length;
-  const freqSmall = lastResults.filter(x=>x==='SMALL').length;
-  const labels = ['BIG','SMALL'];
-  const data = [freqBig, freqSmall];
-  const ctx = document.getElementById('freqChart').getContext('2d');
-  if(chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Frequency',
-        data,
-        backgroundColor: ['rgba(0,210,168,0.85)', 'rgba(255,181,105,0.95)'],
-        borderRadius: 8
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true, ticks:{color:'#9fb0d6'}}, x:{ticks:{color:'#9fb0d6'}}}
-    }
-  });
-}
-
-// initialize elements and events
-function renderAll(){
-  lastResults = readLast();
-  renderLastList();
-  renderHistory();
-  renderChart();
-}
-renderAll();
-
-// allow clicking chips to remove/ toggle above handled
-document.getElementById('periodInput').addEventListener('keypress', (e)=>{ if(e.key === 'Enter') { /* nothing */ } });
-
-// persist threshold changes
-thresholdInput.addEventListener('change', ()=> {
-  let v = parseFloat(thresholdInput.value);
-  if(isNaN(v) || v<=0 || v>=1) { thresholdInput.value = '0.75'; alert('Enter threshold between 0.5 and 0.95'); }
+  // Also check if user's request changed (for current device)
+  const myReqKey = findMyRequestKey(data);
+  if(myReqKey) checkUserApproval({key: myReqKey, data: data[myReqKey]});
+  else checkUserApproval(null);
 });
 
-</script>
-</body>
+function adminApprove(key){
+  console.log('Approving request', key);
+  if(!confirm('Approve this request?')) return;
+  const node = ref(db, 'utrRequests/' + key);
+  // Update only status and approvedAt. Do not fabricate other fields here.
+  update(node, { status: 'approved', approvedAt: Date.now() }).then(()=>{
+    alert('Request marked approved. User will see strategy on their device.');
+    // Do not call checkUserApproval here with synthetic local data. The onValue listener will pick up the change and call checkUserApproval using real DB data.
+  }).catch((e)=>{ alert('Approve failed: '+e.message); });
+}
+function adminReject(key){
+  if(!confirm('Reject this request?')) return;
+  const node = ref(db, 'utrRequests/' + key);
+  update(node, { status: 'rejected', rejectedAt: Date.now() });
+}
+
+function findMyRequestKey(allData){
+  if(!allData) return null;
+  for(const k in allData){
+    if(allData[k].deviceId === deviceId) return k;
+  }
+  return null;
+}
+
+/* =======================
+   User: React to approval changes
+   ======================= */
+function checkUserApproval(req){
+  // req = {key, data} or null
+  if(!req){
+    // no request for this device - show locked strategy
+    renderStrategyLocked();
+    return;
+  }
+  const data = req.data || req;
+  if(data.status === 'approved'){
+    // store approved info locally and build progressive targets
+    localStorage.setItem('approvedRequestKey', req.key || '');
+    localStorage.setItem('approved', 'true');
+    // store selectedPlan details from firebase record if available
+    if(data.loss) localStorage.setItem('lossAmount', String(data.loss));
+    if(data.planDays) localStorage.setItem('planDays', String(data.planDays));
+    if(data.planLabel) localStorage.setItem('planLabel', data.planLabel);
+    // update local variables to reflect DB values exactly
+    loss = parseFloat(localStorage.getItem('lossAmount') || '0');
+    // now generate progressive targets and unlock strategy
+    generateAndStoreTargets();
+    renderStrategyUnlocked();
+    return;
+  } else if(data.status === 'rejected'){
+    // show rejection message
+    renderStrategyRejected();
+    return;
+  } else {
+    // pending
+    renderStrategyLocked();
+  }
+}
+
+/* =======================
+   Strategy: Progressive AP targets
+   ======================= */
+function generateAndStoreTargets(){
+  // read loss and days (prefer local selected plan details)
+  const l = parseFloat(localStorage.getItem('lossAmount') || '0');
+  const days = parseInt(localStorage.getItem('planDays') || (selectedPlan ? selectedPlan.days : '0'), 10);
+  if(!l || !days) return;
+  // a = base first day target (safe): use baseBet or 3% of loss
+  let a = Math.max(1, Math.round(l * 0.03)); // start with 3% of loss
+  // Solve for d via AP sum: sum = n/2 * (2a + (n-1)d) = l
+  let d = 0;
+  if(days > 1) d = (2 * l / days - 2 * a) / (days - 1);
+  else d = 0;
+  // build targets and round
+  let targets = [];
+  let sum = 0;
+  for(let i=0;i<days;i++){
+    let t = Math.max(1, Math.round(a + i * d));
+    targets.push(t);
+    sum += t;
+  }
+  // adjust rounding difference
+  const diff = Math.round(l - sum);
+  if(diff !== 0){
+    targets[targets.length - 1] += diff;
+  }
+  // store
+  localStorage.setItem('dayTargets', JSON.stringify(targets));
+  // day statuses
+  const statusArr = Array.from({length: days}, (_,i) => 'Pending');
+  localStorage.setItem('dayStatus', JSON.stringify(statusArr));
+  localStorage.setItem('currentDay', '1');
+  // also store planDays & planLabel if not present
+  if(!localStorage.getItem('planDays') && selectedPlan) localStorage.setItem('planDays', String(selectedPlan.days));
+  if(!localStorage.getItem('planLabel') && selectedPlan) localStorage.setItem('planLabel', selectedPlan.label);
+}
+
+/* Render strategy UI states */
+function renderStrategyLocked(){
+  const el = document.getElementById('strategyContent');
+  el.innerHTML = `<p class="small">Your payment is pending admin approval. Submit UTR on Payment page and wait for admin.</p>`;
+  document.getElementById('strategyButtons').innerHTML = `<div class="small">Pending approval... (Admin will approve in the Admin Panel)</div>`;
+}
+function renderStrategyRejected(){
+  const el = document.getElementById('strategyContent');
+  el.innerHTML = `<p style="color:#ffb4b4"><b>Payment rejected by admin. Contact admin.</b></p><div><button class="btn" onclick="showPage('payment')">Resubmit UTR</button></div>`;
+  document.getElementById('strategyButtons').innerHTML = '';
+}
+function renderStrategyUnlocked(){
+  const el = document.getElementById('strategyContent');
+  const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
+  const dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
+  const currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
+  const storedLoss = parseFloat(localStorage.getItem('lossAmount')||'0');
+  if(!targets.length){ el.innerHTML = '<p class="small">Targets not generated yet.</p>'; return; }
+
+  // prepare header and progress
+  const completedCount = dayStatus.filter(s=>s==='Completed').length;
+  const totalDays = targets.length;
+  const progressPct = Math.round((completedCount/totalDays)*100);
+
+  let html = `<div style='margin:10px 0'>
+    <div style='background:#333;border-radius:8px;overflow:hidden;height:20px;width:100%'>
+      <div style='background:#4ade80;height:100%;width:${progressPct}%;transition:width 0.5s'></div>
+    </div>
+    <p class='small'>Progress: ${completedCount}/${totalDays} days (${progressPct}%)</p>
+  </div>`;
+
+  html += `<p class=\"small\">Plan: ${localStorage.getItem('planLabel')||''} | Total Loss: ₹${storedLoss}</p>`;
+
+  html += `<p class='small'>Your recovery strategy is divided into daily steps. Follow AI prediction each day until target achieved.</p>`;
+  html += '<table><thead><tr><th>Day</th><th>Target (₹)</th><th>Deposit %</th><th>Status</th></tr></thead><tbody>';
+  targets.forEach((t,i)=>{
+    const idx = i+1;
+    const st = (dayStatus[i] || 'Pending');
+    const mark = (st === 'Completed' ? '✅ Completed' : (idx === currentDay ? '➡️ Current' : '⏳ Pending'));
+    let depositPct = (idx===1?10:Math.round((t/Math.max(1,storedLoss))*100));
+    html += `<tr><td>${idx}</td><td>₹${t}</td><td>${depositPct}%</td><td>${mark}</td></tr>`;
+  });
+  html += '</tbody></table>';
+
+  html += `<div style='margin-top:15px;text-align:left;font-size:14px;line-height:1.5'>
+    <b>📌 Step-by-Step Recovery Guide:</b><br>
+    1️⃣ हर दिन system आपके लिए target calculate करेगा.<br>
+    2️⃣ आज का deposit amount और target ऊपर table में देखें. (Day 1 deposit = 10% of loss)<br>
+    3️⃣ Prediction page पर जाएं → Last 10 results डालें → "Generate AI Prediction" पर click करें.<br>
+    4️⃣ हर bet के बाद "Win" या "Loss" button दबाकर result update करें—AI उसी हिसाब से सीखकर अगले prediction ठीक करेगा.<br>
+    5️⃣ जब आज का target पूरा हो जाए → status "Completed" दिखेगा और अगला दिन unlock होगा.<br>
+    6️⃣ Plan पूरा होने पर आपका पूरा loss recover हो जाएगा ✅.<br>
+  </div>`;
+
+  el.innerHTML = html;
+
+  // buttons: start today's prediction or continue
+  document.getElementById('strategyButtons').innerHTML = `<div style="margin-top:12px">
+    <button class="btn" onclick="startTodayPrediction()">Start Today's Prediction (Day ${currentDay})</button>
+    <button class="btn" onclick="resetPlanConfirm()">Cancel/Reset Plan</button>
+  </div>`;
+}
+
+/* =======================
+   Start prediction for current day
+   ======================= */
+function startTodayPrediction(){
+  // ensure approved
+  if(localStorage.getItem('approved') !== 'true'){ alert('Payment not yet approved.'); return; }
+  // go to predict page
+  showPage('predict');
+  const currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
+  speak('Day ' + currentDay + ' prediction start karen.');
+}
+
+/* =======================
+   AI Prediction (pattern logic reused from previous)
+   ======================= */
+function parseSeq(text){
+  if(!text) return [];
+  const parts = text.trim().split(/\s+/).map(s=>{
+    const a = s.toLowerCase();
+    if(a.startsWith('b')) return 'Big';
+    if(a.startsWith('s')) return 'Small';
+    return null;
+  }).filter(Boolean);
+  return parts;
+}
+function computePatternPrediction(seq){
+  const n = seq.length;
+  if(n === 0) return {prediction:'Big', confidence:50, reason:'no-data'};
+  const counts = {Big:0, Small:0};
+  seq.forEach(x=>counts[x] = (counts[x]||0)+1);
+  let last = seq[n-1];
+  let streak = 1;
+  for(let i=n-2;i>=0;i--){ if(seq[i]===last) streak++; else break; }
+  let alternations = 0;
+  for(let i=1;i<n;i++){ if(seq[i] !== seq[i-1]) alternations++; }
+  const alternationRatio = alternations / Math.max(1, n-1);
+  let score = {Big:0, Small:0};
+  if(counts.Big > counts.Small) score.Big += 1;
+  if(counts.Small > counts.Big) score.Small += 1;
+  if(alternationRatio < 0.4) score[last] += 2;
+  else if(alternationRatio > 0.6) score[last] += 1;
+  if(streak >= 4){
+    const other = last === 'Big' ? 'Small' : 'Big';
+    score[other] += 3;
+  } else if(streak >= 2){ score[last] += 1; }
+  if(n >= 4){
+    const last4 = seq.slice(-4).join(' ');
+    if(/^(Big Small Big Small|Small Big Small Big)$/i.test(last4)){
+      const next = last === 'Big' ? 'Small' : 'Big';
+      score[next] += 2;
+    }
+    if(/^(Big Big Small|Small Small Big)$/i.test(last4)){
+      const next = last === 'Big' ? 'Small' : 'Big';
+      score[next] += 1;
+    }
+  }
+  let prediction = 'Big';
+  if(score.Small > score.Big) prediction = 'Small';
+  else if(score.Big > score.Small) prediction = 'Big';
+  else {
+    if(streak >= 3) prediction = (last === 'Big' ? 'Small' : 'Big');
+    else prediction = (counts.Big >= counts.Small ? 'Big' : 'Small');
+  }
+  let confidence = 50;
+  const diff = Math.abs(score.Big - score.Small);
+  confidence += Math.min(30, diff * 10);
+  if(streak >= 4) confidence += 10;
+  if(alternationRatio > 0.7) confidence += 5;
+  confidence += Math.min(10, Math.abs(counts.Big - counts.Small) * 2);
+  confidence = Math.max(50, Math.min(95, Math.round(confidence)));
+  let reason = `counts: B${counts.Big}/S${counts.Small}, streak:${last}x${streak}, alt:${Math.round(alternationRatio*100)}%`;
+  return {prediction, confidence, reason, score};
+}
+function genPrediction(){
+  const last10Text = document.getElementById('last10').value.trim();
+  const seq = parseSeq(last10Text);
+  if(seq.length < 3){ alert('Enter at least 3 recent results (ideally 10).'); return; }
+  const period = document.getElementById('period').value.trim();
+  const res = document.getElementById('predictionResult');
+  res.innerHTML = `<p class="small">AI analyzing trends... (8-12 sec)</p>
+                   <div class="chip">Period: ${period || 'N/A'}</div>`;
+  setTimeout(()=>{
+    const out = computePatternPrediction(seq);
+    // suggested bet = martingaleCurrent or base
+    let suggestedBet = martingaleCurrent || baseBet;
+    const cap = Math.max(1, Math.round(loss * 0.30));
+    if(suggestedBet > cap) suggestedBet = cap;
+    res.innerHTML = `<h3>Prediction: ${out.prediction}</h3>
+                     <p class="small">Confidence: <b>${out.confidence}%</b></p>
+                     <p class="small">Reason: ${out.reason}</p>
+                     <p class="small">Suggested Bet: <b>₹${suggestedBet}</b></p>
+                     <p class="small">Tip: Martingale doubles on loss, resets on win.</p>`;
+    // store prediction history locally
+    const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
+    hist.push({time:Date.now(), period:period||null, seq:seq.slice(-10), pred:out.prediction, conf:out.confidence});
+    if(hist.length > 300) hist.shift();
+    localStorage.setItem('predictionHistory', JSON.stringify(hist));
+    speak('Agla result hone ki sambhavna hai ' + out.prediction + ' confidence ' + out.confidence + ' percent');
+  }, 10000);
+}
+
+/* =======================
+   Record result + day completion logic
+   ======================= */
+function handleRecord(outcome){
+  // outcome = 'win' or 'loss' relative to last prediction
+  const predDiv = document.getElementById('predictionResult');
+  if(!predDiv.innerText || predDiv.innerText.trim()===''){ alert('Pehle AI prediction generate kijiye.'); return; }
+
+  // Ask user for actual result and profit made (daily)
+  const actual = prompt('Enter actual result (Big or Small):');
+  if(!actual){ alert('Actual result required'); return; }
+  const actualNorm = actual.toLowerCase().startsWith('b') ? 'Big' : actual.toLowerCase().startsWith('s') ? 'Small' : null;
+  if(!actualNorm){ alert('Invalid actual. Use Big or Small.'); return; }
+
+  // Ask how much ₹ recovered today (profit used for target)
+  const recoveredStr = prompt('Enter profit/recovery amount you made this session (₹). If none, enter 0:','0');
+  const recovered = Math.max(0, Math.round(parseFloat(recoveredStr) || 0));
+
+  // update martingale
+  if(outcome === 'win'){
+    martingaleCurrent = baseBet;
+    localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}.</p>`;
+  } else {
+    // double martingale but cap to 50% of loss to avoid blowup
+    martingaleCurrent = Math.min(Math.round((martingaleCurrent || baseBet) * 2), Math.max(1, Math.round(loss * 0.5)));
+    localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}.</p>`;
+  }
+
+  // append actual to last10 input
+  const field = document.getElementById('last10');
+  const cur = parseSeq(field.value);
+  cur.push(actualNorm);
+  const newArr = cur.slice(-10);
+  field.value = newArr.join(' ');
+  predDiv.innerHTML += `<p class="small">History updated: ${newArr.join(' ')}</p>`;
+
+  // handle day target progress
+  const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
+  let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
+  let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
+  if(!targets.length){ alert('Targets not configured.'); return; }
+
+  // If recovered >= today's target -> mark completed and progress
+  const todayTarget = targets[currentDay - 1] || 0;
+  if(recovered >= todayTarget){
+    dayStatus[currentDay - 1] = 'Completed';
+    localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
+    predDiv.innerHTML += `<p>🎉 Day ${currentDay} target ₹${todayTarget} achieved. Marked Completed.</p>`;
+    // move to next day
+    const totalDays = targets.length;
+    // find next pending day
+    const nextPending = dayStatus.findIndex(s => s !== 'Completed');
+    if(nextPending === -1){
+      // all completed
+      predDiv.innerHTML += `<p style="color:#b7f5b7"><b>🎊 Congratulations! Your full loss ₹${loss} recovered. Resetting...</b></p>`;
+      setTimeout(() => { resetAll(); }, 3000);
+      return;
+    } else {
+      currentDay = nextPending + 1;
+      localStorage.setItem('currentDay', String(currentDay));
+    }
+    // after marking, go back to strategy to show updated table
+    setTimeout(()=>{ renderStrategyUnlocked(); showPage('strategy'); }, 1200);
+  } else {
+    // not enough recovered today
+    predDiv.innerHTML += `<p style="color:#ffd6d6">⚠️ Recovered ₹${recovered} — less than today's target ₹${todayTarget}. Day remains pending.</p>`;
+  }
+
+  // save a brief local history entry
+  const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
+  const lastEntry = hist.length ? hist[hist.length -1] : null;
+  if(lastEntry){
+    lastEntry.outcome = outcome;
+    lastEntry.actual = actualNorm;
+    lastEntry.recovered = recovered;
+    lastEntry.martingaleAfter = martingaleCurrent;
+    localStorage.setItem('predictionHistory', JSON.stringify(hist));
+  }
+}
+
+/* =======================
+   Reset/Cancel functions
+   ======================= */
+function resetAll(){
+  localStorage.removeItem('dayTargets');
+  localStorage.removeItem('dayStatus');
+  localStorage.removeItem('currentDay');
+  localStorage.removeItem('approved');
+  localStorage.removeItem('approvedRequestKey');
+  localStorage.removeItem('planDays');
+  localStorage.removeItem('planLabel');
+  localStorage.removeItem('lossAmount');
+  localStorage.removeItem('baseBet');
+  localStorage.removeItem('martingaleCurrent');
+  localStorage.removeItem('predictionHistory');
+  localStorage.removeItem('selectedPlanLabel');
+  localStorage.removeItem('selectedPlanDays');
+  localStorage.removeItem('selectedPlanPrice');
+  // redirect to welcome
+  alert('Plan reset. Back to start.');
+  showPage('welcome');
+}
+function resetPlanConfirm(){
+  if(confirm('Are you sure you want to cancel/reset this plan? This will clear local progress.')) resetAll();
+}
+
+/* =======================
+   Admin UI open/close & Approve helpers
+   ======================= */
+function openAdmin(){
+  const pass = prompt('Enter Admin Password to open panel:');
+  if(pass === '456'){
+    document.getElementById('adminPanel').style.display = 'block';
+  } else {
+    alert('Wrong password');
+  }
+}
+function closeAdmin(){ document.getElementById('adminPanel').style.display = 'none'; }
+
+/* =======================
+   Helpers: fill example
+   ======================= */
+function autoFillExample(){
+  document.getElementById('period').value = 'yesterday-123';
+  document.getElementById('last10').value = 'Small Big Small Big Big Big Small Big Small Big';
+  speak('Example filled, ab Generate AI Prediction karo');
+}
+
+/* =======================
+   Init UI on load
+   ======================= */
+(function init(){
+  // if there's an approved request stored, render unlocked strategy; else locked
+  if(localStorage.getItem('approved') === 'true' && localStorage.getItem('dayTargets')){
+    renderStrategyUnlocked();
+  } else {
+    renderStrategyLocked();
+  }
+  // if loss already set, prefill
+  const storedLoss = parseFloat(localStorage.getItem('lossAmount')||'0');
+  if(storedLoss) {
+    loss = storedLoss;
+    // also prefill input on loss page
+    const lossInput = document.getElementById('lossAmount'); if(lossInput) lossInput.value = loss;
+  }
+  // build plans if loss known
+  if(loss) buildPlans();
+})();
+
+/* Expose some functions for inline onclick usage */
+window.goLoss = goLoss;
+window.confirmLoss = confirmLoss;
+window.goPayment = goPayment;
+window.submitUTR = submitUTR;
+window.genPrediction = genPrediction;
+window.handleRecord = handleRecord;
+window.openAdmin = openAdmin;
+window.closeAdmin = closeAdmin;
+window.resetPlanConfirm = resetPlanConfirm;
+window.autoFillExample = autoFillExample;
+window.startTodayPrediction = startTodayPrediction;
+
+</script></body>
 </html>
