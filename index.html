@@ -1462,5 +1462,130 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
+<script>
+let currentDay = parseInt(localStorage.getItem("currentDay")) || 1;
+let completedDay = parseInt(localStorage.getItem("dayCompleted")) || 0;
+let profitSoFar = parseFloat(localStorage.getItem("profitSoFar")) || 0;
+
+// Example dynamic day targets (could be calculated from total loss)
+let dayTargets = {1:500, 2:600, 3:700}; 
+
+function checkDayStatus() {
+  if (completedDay >= currentDay) {
+    document.getElementById("dayStatus").innerHTML = "✅ Day " + completedDay + " Completed";
+    // Auto set to next day if available
+    if (dayTargets[completedDay+1]) {
+      currentDay = completedDay + 1;
+      localStorage.setItem("currentDay", currentDay);
+      document.getElementById("dayStatus").innerHTML += "<br>➡️ Now continue with Day " + currentDay;
+    }
+  } else {
+    document.getElementById("dayStatus").innerHTML = "🎯 Target for Day " + currentDay + " = ₹" + (dayTargets[currentDay]||0);
+  }
+}
+
+function completeDay() {
+  completedDay = currentDay;
+  localStorage.setItem("dayCompleted", completedDay);
+  localStorage.setItem("currentDay", currentDay + 1); // lock next day
+  checkDayStatus();
+}
+
+// Call this when profit >= day target
+function checkTargetCompletion() {
+  let target = dayTargets[currentDay] || 0;
+  if (profitSoFar >= target && target > 0) {
+    alert("🎉 Day " + currentDay + " Target Completed!");
+    completeDay();
+  }
+}
+
+// Update recordResult to track profit & day completion
+const _recordResultDay = window.recordResult;
+window.recordResult = function(outcome, betAmount) {
+  _recordResultDay(outcome, betAmount);
+  if (outcome === "win") profitSoFar += betAmount;
+  else if (outcome === "loss") profitSoFar -= betAmount;
+  localStorage.setItem("profitSoFar", profitSoFar);
+  checkTargetCompletion();
+};
+
+// Initialize UI
+document.addEventListener("DOMContentLoaded", () => {
+  if (!document.getElementById("dayStatus")) {
+    let box = document.createElement("div");
+    box.id = "dayStatus";
+    box.style.marginTop = "20px";
+    box.style.fontSize = "18px";
+    document.body.insertBefore(box, document.getElementById("suggestedBetBox"));
+  }
+  checkDayStatus();
+});
+</script>
+
+
+<script>
+// Load saved state
+let currentDay = parseInt(localStorage.getItem("currentDay")) || 1;
+let completedDay = parseInt(localStorage.getItem("dayCompleted")) || 0;
+let profitSoFar = parseFloat(localStorage.getItem("profitSoFar")) || 0;
+
+// Example dynamic targets (can be set from loss amount later)
+let dayTargets = {1:500,2:600,3:700}; 
+
+function checkDayStatus() {
+  if (profitSoFar >= (dayTargets[currentDay]||0) && (dayTargets[currentDay]||0) > 0) {
+    // Mark current day completed and move to next
+    completeDay();
+  }
+
+  if (completedDay >= currentDay) {
+    // If this day is done, show completed
+    document.getElementById("dayStatus").innerHTML = "✅ Day " + completedDay + " Completed";
+    // If there is a next day target, continue from next day
+    if (dayTargets[completedDay+1]) {
+      currentDay = completedDay + 1;
+      localStorage.setItem("currentDay", currentDay);
+      document.getElementById("dayStatus").innerHTML += "<br>➡️ Continue with Day " + currentDay;
+    }
+  } else {
+    document.getElementById("dayStatus").innerHTML = "🎯 Target for Day " + currentDay + " = ₹" + (dayTargets[currentDay]||0);
+  }
+}
+
+function completeDay() {
+  completedDay = currentDay;
+  localStorage.setItem("dayCompleted", completedDay);
+  if (dayTargets[currentDay+1]) {
+    currentDay = currentDay + 1;
+    localStorage.setItem("currentDay", currentDay);
+  }
+  checkDayStatus();
+}
+
+// Update profit + check completion
+const _recordResultDay = window.recordResult;
+window.recordResult = function(outcome, betAmount) {
+  _recordResultDay(outcome, betAmount);
+  if (outcome === "win") profitSoFar += betAmount;
+  else if (outcome === "loss") profitSoFar -= betAmount;
+  localStorage.setItem("profitSoFar", profitSoFar);
+  checkDayStatus();
+};
+
+// Init UI on page load
+document.addEventListener("DOMContentLoaded", () => {
+  if (!document.getElementById("dayStatus")) {
+    let box = document.createElement("div");
+    box.id = "dayStatus";
+    box.style.marginTop = "20px";
+    box.style.fontSize = "18px";
+    document.body.insertBefore(box, document.getElementById("suggestedBetBox"));
+  }
+  checkDayStatus();
+});
+</script>
+
 </body>
 </html>
