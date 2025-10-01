@@ -154,6 +154,7 @@ let baseBet = parseInt(localStorage.getItem('baseBet')||'0',10) || 0;
 let martingaleCurrent = parseInt(localStorage.getItem('martingaleCurrent')||'0',10) || 0;
 let deviceId = localStorage.getItem('deviceId') || (Math.random().toString(36).slice(2));
 let balance = parseFloat(localStorage.getItem('balance')||'0');
+let lossStreak = parseInt(localStorage.getItem('lossStreak')||'0',10);
 localStorage.setItem('deviceId', deviceId);
 
 // plan options
@@ -536,9 +537,15 @@ function genPrediction(){
   setTimeout(()=>{
     const out = computePatternPrediction(seq);
     // suggested bet = martingaleCurrent or base
-    let suggestedBet = martingaleCurrent || baseBet;
-    const cap = Math.max(1, Math.round(loss * 0.30));
-    if(suggestedBet > cap) suggestedBet = cap;
+    
+
+let suggestedBet = 0;
+if(lossStreak === 0){ suggestedBet = Math.round(balance * 0.15); }
+else if(lossStreak === 1){ suggestedBet = Math.round(balance * 0.30); }
+else { suggestedBet = Math.round(balance * 0.55); }
+if(suggestedBet <= 0) suggestedBet = baseBet;
+
+
     res.innerHTML = `<h3>Prediction: ${out.prediction}</h3>
                      <p class="small">Confidence: <b>${out.confidence}%</b></p>
                      <p class="small">Reason: ${out.reason}</p>
@@ -557,6 +564,8 @@ function genPrediction(){
    Record result + day completion logic
    ======================= */
 
+
+
 function handleRecord(outcome){
   const predDiv = document.getElementById('predictionResult');
   if(!predDiv.innerText || predDiv.innerText.trim()===''){ alert('Pehle AI prediction generate kijiye.'); return; }
@@ -569,13 +578,15 @@ function handleRecord(outcome){
   if(outcome==='win'){
     balance += change;
     martingaleCurrent = baseBet;
+    lossStreak = 0; // reset streak
     predDiv.innerHTML += `<p>✅ Win recorded. Balance +₹${change.toFixed(2)}</p>`;
   } else {
     balance -= change;
-    martingaleCurrent = Math.min(Math.round((martingaleCurrent||baseBet)*2), Math.max(1, Math.round(loss*0.5)));
+    lossStreak++;
     predDiv.innerHTML += `<p>❌ Loss recorded. Balance -₹${change.toFixed(2)}</p>`;
   }
   localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+  localStorage.setItem('lossStreak', String(lossStreak));
   updateBalanceDisplay();
 
   // Update history field
@@ -596,8 +607,13 @@ function handleRecord(outcome){
     if(dayStatus.length) dayStatus[currentDay-1] = 'Completed';
     localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
     localStorage.setItem('currentDay', String(currentDay+1));
+    // redirect back to strategy page
+    renderStrategyUnlocked();
+    showPage('strategy');
   }
 }
+
+
 
 
 /* =======================
