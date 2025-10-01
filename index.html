@@ -6,24 +6,541 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Loss Recovery - FINAL (Updated)</title>
   <style>
-    body{margin:0;font-family:Arial, sans-serif;background:#0f1720;color:#fff;text-align:center;background-size:cover;background-position:center;min-height:100vh}
-    .container{padding:20px;max-width:980px;margin:0 auto}
-    .page{display:none;padding:18px}
-    .active{display:block}
-    .btn{padding:10px 18px;margin:8px;border:none;border-radius:8px;cursor:pointer;background:#ff6b6b;color:#fff;font-weight:700}
-    .plans{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
-    .plan{background:rgba(255,255,255,0.03);padding:14px;border-radius:10px;cursor:pointer;min-width:140px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
-    .selected{outline:3px solid rgba(255,107,107,0.6)}
-    img.qr{width:200px;height:200px;margin-top:15px;object-fit:cover}
-    #adminPanel{display:none;background:rgba(0,0,0,0.95);padding:16px;text-align:left;border-radius:8px;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:90%;max-width:600px;max-height:80vh;overflow-y:auto;z-index:999;color:#eee}
-    #cross{position:fixed;top:12px;right:12px;cursor:pointer;font-size:24px;z-index:1000;color:#fff;background:rgba(255,0,0,0.08);padding:6px 10px;border-radius:50%}
-    input[type=text], input[type=number]{padding:10px;border-radius:6px;border:none;outline:none;width:80%;max-width:420px;margin:8px 0;background:rgba(255,255,255,0.03);color:#fff}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:8px;border:1px solid rgba(255,255,255,0.06);font-size:14px;text-align:center}
-    .small{font-size:13px;color:#cbd5e1}
-    .hint{opacity:0.85;font-size:13px}
-    .chip{display:inline-block;background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;margin:6px}
-  </style>
+
+
+
+
+body {
+  margin:0;
+  font-family:'Segoe UI', Roboto, Arial, sans-serif;
+  background:#000;
+  color:#e5e5e5;
+  text-align:center;
+  min-height:100vh;
+  font-weight:700 !important;
+  overflow-y:auto !important;
+}
+h1,h2,h3,p,td,th,label,div,span {
+  color:#e5e5e5 !important;
+  font-weight:700 !important;
+  letter-spacing:0.5px;
+  text-shadow:none !important; /* removed glow */
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.4); /* lighter so background particles visible */
+  border:1px solid rgba(0,255,128,0.4);
+  border-radius:12px;
+  box-shadow:0 0 8px rgba(0,255,128,0.3);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  box-shadow:0 0 8px rgba(34,197,94,0.5);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  transform:scale(1.05);
+  box-shadow:0 0 12px rgba(34,197,94,0.6);
+}
+.btn:active { transform:scale(0.96); }
+canvas#particles {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+h1,h2,h3,p,td,th,label,div,span {
+  color:#e5e5e5 !important;
+  font-weight:700 !important;
+  letter-spacing:0.5px;
+  text-shadow:0 0 4px rgba(0,255,128,0.5);
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.6);
+  border:1px solid rgba(0,255,128,0.6);
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(0,255,128,0.4);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  box-shadow:0 0 12px rgba(34,197,94,0.6);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(34,197,94,0.8);
+}
+.btn:active { transform:scale(0.96); }
+canvas#particles {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+h1,h2,h3,p,td,th,label,div,span {
+  color:#00ff99 !important;
+  font-weight:900 !important;
+  letter-spacing:1px;
+  text-shadow:0 0 8px #00ff99, 0 0 15px #00ffaa, 0 0 25px #00ffcc;
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.7);
+  border:1px solid #00ffaa;
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(0,255,170,0.7);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#000;
+  font-weight:900;
+  font-size:16px;
+  background:linear-gradient(135deg,#00ffaa,#00ff99,#00cc88);
+  box-shadow:0 0 20px #00ffaa,0 0 35px #00ffcc;
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#00ffcc,#00ffaa);
+  transform:scale(1.08);
+  box-shadow:0 0 30px #00ffaa,0 0 50px #00ffcc;
+}
+.btn:active { transform:scale(0.96); }
+.btn::after {
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  width:0; height:0;
+  background:rgba(255,255,255,0.5);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition:width 0.6s ease,height 0.6s ease,opacity 0.8s ease;
+  opacity:0;
+}
+.btn:active::after {
+  width:200px; height:200px; opacity:0;
+  transition:0s;
+}
+canvas#matrix {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+@keyframes gradientBG {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+h1,h2,h3,p,td,th,label,div,span {
+  font-weight:900 !important;
+  letter-spacing:0.6px;
+  color:#fff !important;
+  text-shadow:0 0 12px rgba(255,255,255,0.9),0 0 22px rgba(0,255,255,0.7);
+}
+canvas#particles {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-1;
+}
+
+@keyframes gradientBG {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+.container {
+  padding:20px;
+  max-width:980px;
+  margin:0 auto;
+}
+.page {
+  display:none;
+  padding:22px;
+  background:rgba(255,255,255,0.05);
+  border-radius:14px;
+  backdrop-filter: blur(8px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+.active {display:block;}
+h1,h2,h3 {
+  color:#38bdf8;
+  text-shadow:0 0 12px rgba(56,189,248,0.8), 0 0 20px rgba(56,189,248,0.5);
+}
+#balanceBox {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+  color:#fff;
+  padding:12px 20px;
+  border-radius:10px;
+  display:inline-block;
+  margin-bottom:15px;
+  font-size:20px;
+  font-weight:700;
+  box-shadow:0 0 15px rgba(34,197,94,0.7), 0 0 25px rgba(34,197,94,0.5);
+}
+input[type=text], input[type=number] {
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  width:80%;
+  max-width:420px;
+  margin:10px 0;
+  background:rgba(255,255,255,0.1);
+  color:#fff; font-weight:bold; text-shadow:0 0 8px rgba(255,255,255,0.6);
+  font-size:15px;
+  box-shadow:inset 0 0 8px rgba(255,255,255,0.15);
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+  background:rgba(255,255,255,0.04);
+  border-radius:10px;
+  overflow:hidden;
+}
+th,td {
+  padding:12px;
+  border:1px solid rgba(255,255,255,0.1);
+  font-size:14px;
+  text-align:center;
+  color:#e2e8f0;
+}
+
+
+.btn {
+  padding: 12px 24px;
+  margin: 8px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3b82f6, #9333ea);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(147,51,234,0.6), 0 0 20px rgba(59,130,246,0.5);
+}
+.btn:hover {
+  background: linear-gradient(135deg, #9333ea, #3b82f6);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 18px rgba(147,51,234,0.8), 0 0 28px rgba(59,130,246,0.7);
+}
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 0 8px rgba(147,51,234,0.6), 0 0 16px rgba(59,130,246,0.5);
+}
+
+.plan {
+  background: rgba(255,255,255,0.05);
+  margin:10px;
+  padding:15px;
+  border-radius:12px;
+  cursor:pointer;
+  transition: all 0.3s ease;
+  font-weight:bold;
+  box-shadow:0 0 8px rgba(255,255,255,0.3);
+}
+.plan:hover {
+  transform: scale(1.05);
+  box-shadow:0 0 15px rgba(255,255,255,0.7);
+}
+.plan.selected {
+  background: linear-gradient(135deg, #facc15, #f97316);
+  color:#000 !important;
+  font-weight:900;
+  box-shadow:0 0 20px rgba(250,204,21,0.9), 0 0 30px rgba(249,115,22,0.8);
+  transform: scale(1.08);
+}
+
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.4);
+  border-radius: 100%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease, opacity 1s ease;
+  opacity: 0;
+  pointer-events:none;
+}
+.btn:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 0;
+  transition: 0s;
+}
+h1,h2,h3 {
+  background: linear-gradient(90deg, #fff, #38bdf8, #9333ea, #facc15, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 300% 300%;
+  animation: shine 6s infinite linear;
+}
+@keyframes shine {
+  0% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+  100% { background-position:0% 50%; }
+}
+
+
+
+
+
+body {
+  margin:0;
+  font-family:'Segoe UI', Roboto, Arial, sans-serif;
+  background:#000;
+  color:#e5e5e5;
+  text-align:center;
+  min-height:100vh;
+  font-weight:700 !important;
+  overflow-y:auto !important;
+}
+h1,h2,h3,p,td,th,label,div,span {
+  color:#e5e5e5 !important;
+  font-weight:700 !important;
+  letter-spacing:0.5px;
+  text-shadow:none !important; /* removed glow */
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.4); /* lighter so background particles visible */
+  border:1px solid rgba(0,255,128,0.4);
+  border-radius:12px;
+  box-shadow:0 0 8px rgba(0,255,128,0.3);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  box-shadow:0 0 8px rgba(34,197,94,0.5);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  transform:scale(1.05);
+  box-shadow:0 0 12px rgba(34,197,94,0.6);
+}
+.btn:active { transform:scale(0.96); }
+canvas#particles {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+h1,h2,h3,p,td,th,label,div,span {
+  color:#e5e5e5 !important;
+  font-weight:700 !important;
+  letter-spacing:0.5px;
+  text-shadow:0 0 4px rgba(0,255,128,0.5);
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.6);
+  border:1px solid rgba(0,255,128,0.6);
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(0,255,128,0.4);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#fff;
+  font-weight:700;
+  font-size:16px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  box-shadow:0 0 12px rgba(34,197,94,0.6);
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(34,197,94,0.8);
+}
+.btn:active { transform:scale(0.96); }
+canvas#particles {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+h1,h2,h3,p,td,th,label,div,span {
+  color:#00ff99 !important;
+  font-weight:900 !important;
+  letter-spacing:1px;
+  text-shadow:0 0 8px #00ff99, 0 0 15px #00ffaa, 0 0 25px #00ffcc;
+}
+.page {
+  max-height:85vh;
+  overflow-y:auto;
+  background:rgba(0,0,0,0.7);
+  border:1px solid #00ffaa;
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(0,255,170,0.7);
+  padding:20px;
+}
+.btn {
+  padding:12px 24px;
+  margin:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:#000;
+  font-weight:900;
+  font-size:16px;
+  background:linear-gradient(135deg,#00ffaa,#00ff99,#00cc88);
+  box-shadow:0 0 20px #00ffaa,0 0 35px #00ffcc;
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.btn:hover {
+  background:linear-gradient(135deg,#00ffcc,#00ffaa);
+  transform:scale(1.08);
+  box-shadow:0 0 30px #00ffaa,0 0 50px #00ffcc;
+}
+.btn:active { transform:scale(0.96); }
+.btn::after {
+  content:'';
+  position:absolute;
+  top:50%; left:50%;
+  width:0; height:0;
+  background:rgba(255,255,255,0.5);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition:width 0.6s ease,height 0.6s ease,opacity 0.8s ease;
+  opacity:0;
+}
+.btn:active::after {
+  width:200px; height:200px; opacity:0;
+  transition:0s;
+}
+canvas#matrix {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  background:#000;
+}
+
+.page {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+
+h1,h2,h3 {
+  font-weight:800 !important;
+  background: linear-gradient(90deg,#3b82f6,#9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#balanceBox {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color:#fff !important;
+  font-size:20px;
+  font-weight:800;
+  border-radius:8px;
+  padding:10px 18px;
+  box-shadow:0 0 15px rgba(34,197,94,0.6);
+}
+.predictionResult {
+  color:#3b82f6 !important; /* blue for prediction result */
+  font-weight:800;
+}
+.confidence {
+  color:#facc15 !important; /* yellow for confidence */
+  font-weight:800;
+}
+.suggestedBet {
+  color:#06b6d4 !important; /* cyan for suggested bet */
+  font-weight:800;
+}
+.tipBox {
+  color:#d1d5db !important; /* grey for tips */
+  font-style:italic;
+}
+.winMsg {
+  color:#22c55e !important; /* green for win */
+  font-weight:800;
+}
+.lossMsg {
+  color:#ef4444 !important; /* red for loss */
+  font-weight:800;
+}
+
+</style>
 </head>
 <body id="body">
   <div class="container">
@@ -91,12 +608,12 @@
 </div>
 
 
-  </div>  <!-- Admin -->  <div id="adminPanel">
+  </div>  <!-- Admin -->  <div id="adminPanel" style="display:none !important;">
     <h2>Admin Panel (Firebase)</h2>
     <div id="adminRequests" class="small">Loading requests...</div>
     <div style="text-align:right;margin-top:10px"><button class="btn" onclick="closeAdmin()">Close</button></div>
   </div>
-  <div id="cross" onclick="openAdmin()">×</div><script type="module">
+  <div id="cross" style="display:none !important;">×</div><script type="module">
 /* =======================
    Firebase & App Setup
    ======================= */
@@ -202,6 +719,8 @@ function confirmLoss(){
   loss = v;
   localStorage.setItem('lossAmount', String(loss));
   baseBet = Math.max(1, Math.round(loss * 0.05)); // base 5%
+  balance = Math.round(loss * 0.10);
+  updateBalanceDisplay();
   martingaleCurrent = baseBet;
   localStorage.setItem('baseBet', String(baseBet));
   localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
@@ -468,6 +987,7 @@ function updateBalanceDisplay(){ const el=document.getElementById('balanceBox');
 /* =======================
    AI Prediction (pattern logic reused from previous)
    ======================= */
+let lastSuggestedBet = 0;
 function parseSeq(text){
   if(!text) return [];
   const parts = text.trim().split(/\s+/).map(s=>{
@@ -539,18 +1059,20 @@ function genPrediction(){
     // suggested bet = martingaleCurrent or base
     
 
-let suggestedBet = 0;
+lastSuggestedBet = 0;
+    let suggestedBet = 0;
 if(lossStreak === 0){ suggestedBet = Math.round(balance * 0.15); }
 else if(lossStreak === 1){ suggestedBet = Math.round(balance * 0.30); }
 else { suggestedBet = Math.round(balance * 0.55); }
 if(suggestedBet <= 0) suggestedBet = baseBet;
+    lastSuggestedBet = suggestedBet;
 
 
-    res.innerHTML = `<h3>Prediction: ${out.prediction}</h3>
-                     <p class="small">Confidence: <b>${out.confidence}%</b></p>
+    res.innerHTML = `<h3><span class='predictionResult'>Prediction:</span> ${out.prediction}</h3>
+                     <p class="small"><span class='confidence'>Confidence:</span> <b>${out.confidence}%</b></p>
                      <p class="small">Reason: ${out.reason}</p>
-                     <p class="small">Suggested Bet: <b>₹${suggestedBet}</b></p>
-                     <p class="small">Tip: Martingale doubles on loss, resets on win.</p>`;
+                     <p class="small"><span class='suggestedBet'>Suggested Bet:</span> <b>₹${suggestedBet}</b></p>
+                     <p class="small"><span class='tipBox'>Tip:</span> Martingale doubles on loss, resets on win.</p>`;
     // store prediction history locally
     const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
     hist.push({time:Date.now(), period:period||null, seq:seq.slice(-10), pred:out.prediction, conf:out.confidence});
@@ -574,16 +1096,16 @@ function handleRecord(outcome){
   const lastEntry = hist.length ? hist[hist.length -1] : null;
   if(!lastEntry){ alert("No prediction found."); return; }
 
-  let change = (loss * 0.10);
+  let change = lastSuggestedBet;
   if(outcome==='win'){
     balance += change;
     martingaleCurrent = baseBet;
     lossStreak = 0; // reset streak
-    predDiv.innerHTML += `<p>✅ Win recorded. Balance +₹${change.toFixed(2)}</p>`;
+    predDiv.innerHTML += `<p>✅ <span class='winMsg'>✅ Win recorded</span>. Balance +₹${change.toFixed(2)}</p>`;
   } else {
     balance -= change;
     lossStreak++;
-    predDiv.innerHTML += `<p>❌ Loss recorded. Balance -₹${change.toFixed(2)}</p>`;
+    predDiv.innerHTML += `<p>❌ <span class='lossMsg'>❌ Loss recorded</span>. Balance -₹${change.toFixed(2)}</p>`;
   }
   localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
   localStorage.setItem('lossStreak', String(lossStreak));
@@ -599,20 +1121,23 @@ function handleRecord(outcome){
   localStorage.setItem('predictionHistory', JSON.stringify(hist));
 
   
-  // Day target popup check (Dynamic system)
+  // ✅ Dynamic target popup check
   let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
   let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
+  let targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
 
-  // Day1 fixed 200, uske baad har din +50
-  let nextTarget = 200 + (currentDay - 1) * 50;
+  if(targets.length && currentDay <= targets.length){
+    let nextTarget = targets[currentDay-1];
 
-  if(balance >= nextTarget){
-    alert(`🎉 Day ${currentDay} Target Completed! (Target = ₹${nextTarget})`);
-    if(dayStatus.length) dayStatus[currentDay-1] = 'Completed';
-    localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
-    localStorage.setItem('currentDay', String(currentDay+1));
-    renderStrategyUnlocked();
-    showPage('strategy');
+    if(balance >= nextTarget){
+      alert(`🎉 Day ${currentDay} Target Completed! (Target = ₹${nextTarget})`);
+      showPage('strategy');
+      if(dayStatus.length) dayStatus[currentDay-1] = 'Completed';
+      localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
+      localStorage.setItem('currentDay', String(currentDay+1));
+      renderStrategyUnlocked();
+      showPage('strategy');
+    }
   }
 
 }
@@ -674,6 +1199,7 @@ function autoFillExample(){
 (function init(){
   // if there's an approved request stored, render unlocked strategy; else locked
   if(localStorage.getItem('approved') === 'true' && localStorage.getItem('dayTargets')){
+    showPage('strategy');
     renderStrategyUnlocked();
   } else {
     renderStrategyLocked();
@@ -703,5 +1229,238 @@ window.resetPlanConfirm = resetPlanConfirm;
 window.autoFillExample = autoFillExample;
 window.startTodayPrediction = startTodayPrediction;
 
-</script></body>
+</script>
+<canvas id="particles"></canvas>
+<script>
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let w,h,particles=[];
+function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize);resize();
+class Particle{
+  constructor(){this.reset();}
+  reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-0.5)*0.6;this.vy=(Math.random()-0.5)*0.6;this.size=Math.random()*2+1;this.alpha=Math.random()*0.6+0.4;}
+  update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset();}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+this.alpha+')';ctx.fill();}
+}
+for(let i=0;i<120;i++)particles.push(new Particle());
+function animate(){ctx.clearRect(0,0,w,h);particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(animate);}animate();
+</script>
+
+
+<audio id="clickSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+<audio id="winSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+<audio id="lossSound" src="https://actions.google.com/sounds/v1/cartoon/clang.ogg" preload="auto"></audio>
+
+<script>
+function playClick(){document.getElementById('clickSound').play();}
+function playWin(){document.getElementById('winSound').play();}
+function playLoss(){document.getElementById('lossSound').play();}
+
+// Attach click sound to all buttons
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', playClick);
+  });
+});
+
+// Override handleRecord to include sounds
+const _handleRecord = window.handleRecord;
+window.handleRecord = function(outcome){
+  _handleRecord(outcome);
+  if(outcome==='win'){ playWin(); }
+  else if(outcome==='loss'){ playLoss(); }
+}
+</script>
+
+
+<canvas id="matrix"></canvas>
+<script>
+const canvas=document.getElementById('matrix');
+const ctx=canvas.getContext('2d');
+canvas.height=window.innerHeight;
+canvas.width=window.innerWidth;
+const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+const fontSize=14;
+const columns=canvas.width/fontSize;
+const drops=[];
+for(let x=0;x<columns;x++) drops[x]=1;
+function draw(){
+  ctx.fillStyle='rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ff99';
+  ctx.font=fontSize+'px monospace';
+  for(let i=0;i<drops.length;i++){
+    const text=letters.charAt(Math.floor(Math.random()*letters.length));
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+    if(drops[i]*fontSize>canvas.height&&Math.random()>0.975) drops[i]=0;
+    drops[i]++;
+  }
+}
+setInterval(draw,35);
+window.addEventListener('resize',()=>{canvas.height=window.innerHeight;canvas.width=window.innerWidth;});
+</script>
+
+
+<canvas id="particles"></canvas>
+<script>
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let w,h,particles=[];
+function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize);resize();
+
+class Particle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*w;
+    this.y=Math.random()*h;
+    this.vx=(Math.random()-0.5)*0.6;
+    this.vy=(Math.random()-0.5)*0.6;
+    this.size=2;
+  }
+  update(){
+    this.x+=this.vx; this.y+=this.vy;
+    if(this.x<0||this.x>w||this.y<0||this.y>h) this.reset();
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle='#22c55e';
+    ctx.fill();
+  }
+}
+function init(){particles=[];for(let i=0;i<80;i++){particles.push(new Particle());}}
+function animate(){
+  ctx.clearRect(0,0,w,h);
+  for(let i=0;i<particles.length;i++){
+    let p=particles[i]; p.update(); p.draw();
+    for(let j=i+1;j<particles.length;j++){
+      let p2=particles[j];
+      let dx=p.x-p2.x, dy=p.y-p2.y;
+      let dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        ctx.beginPath();
+        ctx.moveTo(p.x,p.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.strokeStyle='rgba(34,197,94,'+(1-dist/120)+')';
+        ctx.lineWidth=1;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+}
+init();animate();
+</script>
+
+
+<div id="suggestedBetBox" style="margin-top:20px; font-size:18px;"></div>
+<div id="historyBox" style="margin-top:20px; font-size:16px;"></div>
+
+<script>
+let profitSoFar = 0;
+let lastBet = 0;
+let lastResult = null;
+let dayTarget = 500; // default target, can be set dynamically
+
+function calculateBet(balance, target, profitSoFar, lastBet, lastResult) {
+  let remainingTarget = target - profitSoFar;
+
+  // Target already done
+  if (profitSoFar >= target) {
+    return { bet: 0, message: "🎯 Target achieved ✅" };
+  }
+
+  // If last bet was loss → martingale double but safe capped at remaining target
+  if (lastResult === "loss" && lastBet > 0) {
+    let bet = Math.min(lastBet * 2, remainingTarget);
+    return { bet: bet, message: "Martingale recovery bet" };
+  }
+
+  // Normal safe bet = 10% of remaining target
+  let safeBet = Math.ceil(remainingTarget * 0.1);
+  safeBet = Math.min(safeBet, remainingTarget);
+
+  return { bet: safeBet, message: "Safe calculated bet" };
+}
+
+// Example integration after prediction is generated
+function suggestBet(balance) {
+  let result = calculateBet(balance, dayTarget, profitSoFar, lastBet, lastResult);
+  document.getElementById("suggestedBetBox").innerHTML =
+    "<span class='suggestedBet'>Suggested Bet: ₹" + result.bet + "</span><br>" +
+    "<span class='tipBox'>" + result.message + "</span>";
+  lastBet = result.bet;
+}
+
+// Call this when user records win/loss
+function recordResult(outcome, betAmount) {
+  lastResult = outcome;
+  if(outcome === "win"){
+    profitSoFar += betAmount;
+    document.getElementById("historyBox").innerHTML += "<div class='winMsg'>Win +₹" + betAmount + "</div>";
+  } else if(outcome === "loss"){
+    profitSoFar -= betAmount;
+    document.getElementById("historyBox").innerHTML += "<div class='lossMsg'>Loss -₹" + betAmount + "</div>";
+  }
+}
+</script>
+
+
+<script>
+let currentDay = parseInt(localStorage.getItem("currentDay")) || 1;
+let completedDay = parseInt(localStorage.getItem("dayCompleted")) || 0;
+
+// Example day targets (can be dynamic per plan)
+let dayTargets = {1:500,2:600,3:700}; 
+let profitSoFar = 0;
+
+function checkDayStatus() {
+  if (completedDay >= currentDay) {
+    document.getElementById("dayStatus").innerHTML = "✅ Day " + currentDay + " Completed";
+    // Move to next day
+    currentDay++;
+    localStorage.setItem("currentDay", currentDay);
+  } else {
+    document.getElementById("dayStatus").innerHTML = "🎯 Target for Day " + currentDay + " = ₹" + (dayTargets[currentDay]||0);
+  }
+}
+
+function completeDay() {
+  completedDay = currentDay;
+  localStorage.setItem("dayCompleted", completedDay);
+  checkDayStatus();
+}
+
+// Call this when profit >= day target
+function checkTargetCompletion() {
+  let target = dayTargets[currentDay] || 0;
+  if (profitSoFar >= target && target > 0) {
+    alert("🎉 Day " + currentDay + " Target Completed!");
+    completeDay();
+  }
+}
+
+// Modify recordResult to check day completion
+const _recordResultDay = window.recordResult;
+window.recordResult = function(outcome, betAmount) {
+  _recordResultDay(outcome, betAmount);
+  checkTargetCompletion();
+};
+
+// Initialize UI
+document.addEventListener("DOMContentLoaded", () => {
+  if (!document.getElementById("dayStatus")) {
+    let box = document.createElement("div");
+    box.id = "dayStatus";
+    box.style.marginTop = "20px";
+    box.style.fontSize = "18px";
+    document.body.insertBefore(box, document.getElementById("suggestedBetBox"));
+  }
+  checkDayStatus();
+});
+</script>
+
+</body>
 </html>
