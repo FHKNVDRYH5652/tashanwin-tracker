@@ -69,8 +69,10 @@
   <p class="small">Note: Strategy is locked until admin approves your payment. Admin will approve using the admin panel.</p>
 </div>
 
+
 <div id="predict" class="page">
   <h2>AI Prediction (WINGO 1-min)</h2>
+  <p id="balanceBox" style="font-size:16px;font-weight:bold;color:#4ade80;">Balance: ₹0</p>
   <p class="small">Enter last 3-digit period number and last results sequence (Small/Big)</p>
   <input type="text" id="period" placeholder="Period (e.g., 123)" />
   <div class="hint">Example last 10: Small Big Small Big Big Big Small Big Small Big</div>
@@ -79,12 +81,7 @@
     <button class="btn" onclick="genPrediction()">Generate AI Prediction</button>
     <button class="btn" onclick="autoFillExample()">Fill Example</button>
   </div>
-
   <div id="predictionResult"></div>
-
-  <!-- 🔹 Balance Display -->
-  <div style="margin-top:15px;font-weight:bold">Balance: ₹<span id="balance">0</span></div>
-
   <div style="margin-top:12px">
     <button class="btn" onclick="handleRecord('win')">Win</button>
     <button class="btn" onclick="handleRecord('loss')">Loss</button>
@@ -92,6 +89,7 @@
   </div>
   <div class="hint" style="margin-top:10px">AI remembers feedback locally to improve future suggestions.</div>
 </div>
+
 
   </div>  <!-- Admin -->  <div id="adminPanel">
     <h2>Admin Panel (Firebase)</h2>
@@ -155,6 +153,7 @@ let planPrice = 0;
 let baseBet = parseInt(localStorage.getItem('baseBet')||'0',10) || 0;
 let martingaleCurrent = parseInt(localStorage.getItem('martingaleCurrent')||'0',10) || 0;
 let deviceId = localStorage.getItem('deviceId') || (Math.random().toString(36).slice(2));
+let balance = parseFloat(localStorage.getItem('balance')||'0');
 localStorage.setItem('deviceId', deviceId);
 
 // plan options
@@ -461,6 +460,11 @@ function startTodayPrediction(){
 }
 
 /* =======================
+   Balance Helpers
+   ======================= */
+function updateBalanceDisplay(){ const el=document.getElementById('balanceBox'); if(el) el.innerText='Balance: ₹'+balance.toFixed(2); localStorage.setItem('balance',balance.toFixed(2)); }
+
+/* =======================
    AI Prediction (pattern logic reused from previous)
    ======================= */
 function parseSeq(text){
@@ -552,67 +556,49 @@ function genPrediction(){
 /* =======================
    Record result + day completion logic
    ======================= */
+
 function handleRecord(outcome){
   const predDiv = document.getElementById('predictionResult');
-  if(!predDiv.innerText || predDiv.innerText.trim()===''){ 
-    alert('Pehle AI prediction generate kijiye.'); 
-    return; 
-  }
+  if(!predDiv.innerText || predDiv.innerText.trim()===''){ alert('Pehle AI prediction generate kijiye.'); return; }
 
   const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
   const lastEntry = hist.length ? hist[hist.length -1] : null;
   if(!lastEntry){ alert("No prediction found."); return; }
 
-  // Balance init
-  if(!window.balance){
-    balance = parseFloat(localStorage.getItem('balance') || '0');
-    if(!balance && loss){ 
-      balance = Math.round(loss * 0.10); 
-      localStorage.setItem('balance', balance);
-    }
-  }
-
-  let actualNorm;
-  if(outcome === 'win'){
-    actualNorm = lastEntry.pred;
+  let change = (loss * 0.10);
+  if(outcome==='win'){
+    balance += change;
     martingaleCurrent = baseBet;
-    balance += baseBet; // Win → add
-    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}. Balance +₹${baseBet}</p>`;
+    predDiv.innerHTML += `<p>✅ Win recorded. Balance +₹${change.toFixed(2)}</p>`;
   } else {
-    actualNorm = (lastEntry.pred === 'Big') ? 'Small' : 'Big';
-    martingaleCurrent = Math.min(Math.round((martingaleCurrent || baseBet) * 2), Math.max(1, Math.round(loss * 0.5)));
-    balance -= baseBet; // Loss → subtract
-    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}. Balance -₹${baseBet}</p>`;
+    balance -= change;
+    martingaleCurrent = Math.min(Math.round((martingaleCurrent||baseBet)*2), Math.max(1, Math.round(loss*0.5)));
+    predDiv.innerHTML += `<p>❌ Loss recorded. Balance -₹${change.toFixed(2)}</p>`;
   }
   localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
-  localStorage.setItem('balance', balance);
-  document.getElementById("balance").innerText = balance;
+  updateBalanceDisplay();
 
-  // Update last10 field
+  // Update history field
   const field = document.getElementById('last10');
   const cur = parseSeq(field.value);
-  cur.push(actualNorm);
-  const newArr = cur.slice(-10);
-  field.value = newArr.join(' ');
-  predDiv.innerHTML += `<p class="small">History updated: ${newArr.join(' ')}</p>`;
+  cur.push(outcome==='win'? lastEntry.pred : (lastEntry.pred==='Big'?'Small':'Big'));
+  field.value = cur.slice(-10).join(' ');
+  predDiv.innerHTML += `<p class="small">History updated: ${field.value}</p>`;
+  lastEntry.outcome = outcome;
+  localStorage.setItem('predictionHistory', JSON.stringify(hist));
 
-  if(lastEntry){
-    lastEntry.outcome = outcome;
-    lastEntry.actual = actualNorm;
-    localStorage.setItem('predictionHistory', JSON.stringify(hist));
-  }
-
-  // 🎯 Check day target
+  // Day target popup check
   const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
-  let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
   let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
-  const todayTarget = targets[currentDay - 1] || 0;
-  if(balance >= todayTarget && dayStatus[currentDay-1] !== 'Completed'){
-    dayStatus[currentDay - 1] = 'Completed';
+  let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
+  if(targets.length && balance >= targets[currentDay-1]){
+    alert(`🎉 Day ${currentDay} Target Completed!`);
+    if(dayStatus.length) dayStatus[currentDay-1] = 'Completed';
     localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
-    alert("🎉 Day " + currentDay + " Target Completed!");
+    localStorage.setItem('currentDay', String(currentDay+1));
   }
 }
+
 
 /* =======================
    Reset/Cancel functions
@@ -679,14 +665,7 @@ function autoFillExample(){
     // also prefill input on loss page
     const lossInput = document.getElementById('lossAmount'); if(lossInput) lossInput.value = loss;
   }
-  // init balance display
-  balance = parseFloat(localStorage.getItem('balance') || '0');
-  if(!balance && loss){ 
-    balance = Math.round(loss * 0.10); 
-    localStorage.setItem('balance', balance);
-  }
-  const balEl = document.getElementById('balance'); if(balEl) balEl.innerText = balance;
-
+  updateBalanceDisplay();
   // build plans if loss known
   if(loss) buildPlans();
 })();
