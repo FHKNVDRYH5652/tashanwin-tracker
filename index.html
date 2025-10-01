@@ -82,6 +82,9 @@
 
   <div id="predictionResult"></div>
 
+  <!-- 🔹 Balance Display -->
+  <div style="margin-top:15px;font-weight:bold">Balance: ₹<span id="balance">0</span></div>
+
   <div style="margin-top:12px">
     <button class="btn" onclick="handleRecord('win')">Win</button>
     <button class="btn" onclick="handleRecord('loss')">Loss</button>
@@ -560,18 +563,32 @@ function handleRecord(outcome){
   const lastEntry = hist.length ? hist[hist.length -1] : null;
   if(!lastEntry){ alert("No prediction found."); return; }
 
+  // Balance init
+  if(!window.balance){
+    balance = parseFloat(localStorage.getItem('balance') || '0');
+    if(!balance && loss){ 
+      balance = Math.round(loss * 0.10); 
+      localStorage.setItem('balance', balance);
+    }
+  }
+
   let actualNorm;
   if(outcome === 'win'){
-    actualNorm = lastEntry.pred; // prediction sahi
+    actualNorm = lastEntry.pred;
     martingaleCurrent = baseBet;
-    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}.</p>`;
+    balance += baseBet; // Win → add
+    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}. Balance +₹${baseBet}</p>`;
   } else {
-    actualNorm = (lastEntry.pred === 'Big') ? 'Small' : 'Big'; // opposite
+    actualNorm = (lastEntry.pred === 'Big') ? 'Small' : 'Big';
     martingaleCurrent = Math.min(Math.round((martingaleCurrent || baseBet) * 2), Math.max(1, Math.round(loss * 0.5)));
-    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}.</p>`;
+    balance -= baseBet; // Loss → subtract
+    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}. Balance -₹${baseBet}</p>`;
   }
   localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+  localStorage.setItem('balance', balance);
+  document.getElementById("balance").innerText = balance;
 
+  // Update last10 field
   const field = document.getElementById('last10');
   const cur = parseSeq(field.value);
   cur.push(actualNorm);
@@ -583,6 +600,17 @@ function handleRecord(outcome){
     lastEntry.outcome = outcome;
     lastEntry.actual = actualNorm;
     localStorage.setItem('predictionHistory', JSON.stringify(hist));
+  }
+
+  // 🎯 Check day target
+  const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
+  let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
+  let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
+  const todayTarget = targets[currentDay - 1] || 0;
+  if(balance >= todayTarget && dayStatus[currentDay-1] !== 'Completed'){
+    dayStatus[currentDay - 1] = 'Completed';
+    localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
+    alert("🎉 Day " + currentDay + " Target Completed!");
   }
 }
 
@@ -651,6 +679,14 @@ function autoFillExample(){
     // also prefill input on loss page
     const lossInput = document.getElementById('lossAmount'); if(lossInput) lossInput.value = loss;
   }
+  // init balance display
+  balance = parseFloat(localStorage.getItem('balance') || '0');
+  if(!balance && loss){ 
+    balance = Math.round(loss * 0.10); 
+    localStorage.setItem('balance', balance);
+  }
+  const balEl = document.getElementById('balance'); if(balEl) balEl.innerText = balance;
+
   // build plans if loss known
   if(loss) buildPlans();
 })();
