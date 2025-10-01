@@ -550,33 +550,28 @@ function genPrediction(){
    Record result + day completion logic
    ======================= */
 function handleRecord(outcome){
-  // outcome = 'win' or 'loss' relative to last prediction
   const predDiv = document.getElementById('predictionResult');
-  if(!predDiv.innerText || predDiv.innerText.trim()===''){ alert('Pehle AI prediction generate kijiye.'); return; }
-
-  // Ask user for actual result and profit made (daily)
-  const actual = prompt('Enter actual result (Big or Small):');
-  if(!actual){ alert('Actual result required'); return; }
-  const actualNorm = actual.toLowerCase().startsWith('b') ? 'Big' : actual.toLowerCase().startsWith('s') ? 'Small' : null;
-  if(!actualNorm){ alert('Invalid actual. Use Big or Small.'); return; }
-
-  // Ask how much ₹ recovered today (profit used for target)
-  const recoveredStr = prompt('Enter profit/recovery amount you made this session (₹). If none, enter 0:','0');
-  const recovered = Math.max(0, Math.round(parseFloat(recoveredStr) || 0));
-
-  // update martingale
-  if(outcome === 'win'){
-    martingaleCurrent = baseBet;
-    localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
-    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}.</p>`;
-  } else {
-    // double martingale but cap to 50% of loss to avoid blowup
-    martingaleCurrent = Math.min(Math.round((martingaleCurrent || baseBet) * 2), Math.max(1, Math.round(loss * 0.5)));
-    localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
-    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}.</p>`;
+  if(!predDiv.innerText || predDiv.innerText.trim()===''){ 
+    alert('Pehle AI prediction generate kijiye.'); 
+    return; 
   }
 
-  // append actual to last10 input
+  const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
+  const lastEntry = hist.length ? hist[hist.length -1] : null;
+  if(!lastEntry){ alert("No prediction found."); return; }
+
+  let actualNorm;
+  if(outcome === 'win'){
+    actualNorm = lastEntry.pred; // prediction sahi
+    martingaleCurrent = baseBet;
+    predDiv.innerHTML += `<p>✅ Win recorded. Martingale reset to ₹${martingaleCurrent}.</p>`;
+  } else {
+    actualNorm = (lastEntry.pred === 'Big') ? 'Small' : 'Big'; // opposite
+    martingaleCurrent = Math.min(Math.round((martingaleCurrent || baseBet) * 2), Math.max(1, Math.round(loss * 0.5)));
+    predDiv.innerHTML += `<p>❌ Loss recorded. Martingale increased to ₹${martingaleCurrent}.</p>`;
+  }
+  localStorage.setItem('martingaleCurrent', String(martingaleCurrent));
+
   const field = document.getElementById('last10');
   const cur = parseSeq(field.value);
   cur.push(actualNorm);
@@ -584,46 +579,9 @@ function handleRecord(outcome){
   field.value = newArr.join(' ');
   predDiv.innerHTML += `<p class="small">History updated: ${newArr.join(' ')}</p>`;
 
-  // handle day target progress
-  const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
-  let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
-  let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
-  if(!targets.length){ alert('Targets not configured.'); return; }
-
-  // If recovered >= today's target -> mark completed and progress
-  const todayTarget = targets[currentDay - 1] || 0;
-  if(recovered >= todayTarget){
-    dayStatus[currentDay - 1] = 'Completed';
-    localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
-    predDiv.innerHTML += `<p>🎉 Day ${currentDay} target ₹${todayTarget} achieved. Marked Completed.</p>`;
-    // move to next day
-    const totalDays = targets.length;
-    // find next pending day
-    const nextPending = dayStatus.findIndex(s => s !== 'Completed');
-    if(nextPending === -1){
-      // all completed
-      predDiv.innerHTML += `<p style="color:#b7f5b7"><b>🎊 Congratulations! Your full loss ₹${loss} recovered. Resetting...</b></p>`;
-      setTimeout(() => { resetAll(); }, 3000);
-      return;
-    } else {
-      currentDay = nextPending + 1;
-      localStorage.setItem('currentDay', String(currentDay));
-    }
-    // after marking, go back to strategy to show updated table
-    setTimeout(()=>{ renderStrategyUnlocked(); showPage('strategy'); }, 1200);
-  } else {
-    // not enough recovered today
-    predDiv.innerHTML += `<p style="color:#ffd6d6">⚠️ Recovered ₹${recovered} — less than today's target ₹${todayTarget}. Day remains pending.</p>`;
-  }
-
-  // save a brief local history entry
-  const hist = JSON.parse(localStorage.getItem('predictionHistory')||'[]');
-  const lastEntry = hist.length ? hist[hist.length -1] : null;
   if(lastEntry){
     lastEntry.outcome = outcome;
     lastEntry.actual = actualNorm;
-    lastEntry.recovered = recovered;
-    lastEntry.martingaleAfter = martingaleCurrent;
     localStorage.setItem('predictionHistory', JSON.stringify(hist));
   }
 }
