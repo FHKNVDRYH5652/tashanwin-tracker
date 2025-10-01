@@ -598,19 +598,23 @@ function handleRecord(outcome){
   lastEntry.outcome = outcome;
   localStorage.setItem('predictionHistory', JSON.stringify(hist));
 
-  // Day target popup check
-  const targets = JSON.parse(localStorage.getItem('dayTargets')||'[]');
+  
+  // Day target popup check (Dynamic system)
   let currentDay = parseInt(localStorage.getItem('currentDay')||'1',10);
   let dayStatus = JSON.parse(localStorage.getItem('dayStatus')||'[]');
-  if(targets.length && balance >= targets[currentDay-1]){
-    alert(`🎉 Day ${currentDay} Target Completed!`);
+
+  // Day1 fixed 200, uske baad har din +50
+  let nextTarget = 200 + (currentDay - 1) * 50;
+
+  if(balance >= nextTarget){
+    alert(`🎉 Day ${currentDay} Target Completed! (Target = ₹${nextTarget})`);
     if(dayStatus.length) dayStatus[currentDay-1] = 'Completed';
     localStorage.setItem('dayStatus', JSON.stringify(dayStatus));
     localStorage.setItem('currentDay', String(currentDay+1));
-    // redirect back to strategy page
     renderStrategyUnlocked();
     showPage('strategy');
   }
+
 }
 
 
